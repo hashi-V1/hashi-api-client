@@ -1,8 +1,11 @@
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { Contract, Signer } from "ethers";
 import lockerAbi from "../abi/ethereum/Locker.json";
+import wrapperAbi from "../abi/ethereum/Wrapper.json";
 import { ChainConfig } from "../config";
 import { Chain } from "../types/chain";
-import { Token } from "../types/token";
+import { Signature, UnsignedMessageType } from "../types/proof";
+import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
 
 /**
  * Abi represeting the approve function in ERC721 tokens.
@@ -26,16 +29,16 @@ export function setChainSignerEthereum(chain: Chain, signer: Signer) {
  * Approves and locks at the same time a token on an Ethereum network.
  * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
- * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param destinationAddress The addres on the target chain that will be receiving the token
- * @returns
+ * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @returns a promise with the token's lock timestamp
  */
 export function approveAndLockEthereum(
     chain: Chain,
     token: Token,
-    signer: Signer,
-    destinationAddress: string
-) {
+    destinationAddress: string,
+    signer: Signer
+): Promise<number> {
     const lockerContract = new Contract(
         ChainConfig[chain].lockerContract,
         lockerAbi.abi,
@@ -43,20 +46,96 @@ export function approveAndLockEthereum(
     );
     const tokenContract = new Contract(token.tokenContract, tokenAbi, signer);
 
-    return tokenContract
-        .approve(ChainConfig[chain].lockerContract, token.tokenId)
-        .then((tx: any) => tx.wait())
-        .then(() =>
-            lockerContract.lock(
-                token.tokenContract,
-                token.tokenId,
-                destinationAddress
-            )
+    return (
+        tokenContract.approve(
+            ChainConfig[chain].lockerContract,
+            token.tokenId
+        ) as Promise<TransactionResponse>
+    )
+        .then((tx) => tx.wait())
+        .then(
+            () =>
+                lockerContract.lock(
+                    token.tokenContract,
+                    token.tokenId,
+                    destinationAddress
+                ) as Promise<TransactionResponse>
         )
-        .then((tx: any) => tx.wait())
-        .then((confirm: any) =>
+        .then((tx) => tx.wait())
+        .then((confirm) =>
             signer
                 .provider!.getBlock(confirm.blockNumber)
                 .then((block) => block.timestamp)
         );
+}
+
+/**
+ * Wraps a token on a specific chain with proofs from the federation.
+ * TODO: Get the wrapped token id from storage
+ * @param chain The wrapping chain
+ * @param message The unsigned message returned by the nodes
+ * @param signatures The signature of the message
+ * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @returns a wrapped token
+ */
+export function wrapTokenEthereum(
+    chain: Chain,
+    message: UnsignedMessageType,
+    signatures: Signature[],
+    signer: Signer
+): Promise<WrappedTokenType> {
+    const wrapperContract = new Contract(
+        ChainConfig[chain].wrapperContract,
+        wrapperAbi.abi,
+        signer
+    );
+
+    return (
+        wrapperContract.wrap(
+            message.tokenContract,
+            message.tokenId,
+            message.timestamp,
+            message.metadata,
+            [],
+            []
+        ) as Promise<TransactionResponse>
+    )
+        .then((tx) => tx.wait())
+        .then(() => ({
+            tokenContract: wrapperContract.address,
+            tokenId: 5,
+            chain: chain,
+        }));
+}
+
+/**
+ * Burn a wrapped token to transfer it to another chain
+ * @param chain The chain where the token is currently wrapped
+ * @param token The wrapped token to burn
+ * @param destinationAddress The address on the target chain that will receive the token
+ * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @returns an empty promise
+ */
+export function burnEthereum(
+    chain: Chain,
+    token: LockedTokenType,
+    destinationAddress: string,
+    signer: Signer
+): Promise<void> {
+    const wrapperContract = new Contract(
+        ChainConfig[chain].wrapperContract,
+        wrapperAbi.abi,
+        signer
+    );
+
+    return (
+        wrapperContract.burn(
+            token.tokenContract,
+            token.tokenId,
+            token.timestamp,
+            destinationAddress
+        ) as Promise<TransactionResponse>
+    )
+        .then((tx) => tx.wait())
+        .then(() => {});
 }

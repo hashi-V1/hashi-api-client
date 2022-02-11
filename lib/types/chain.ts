@@ -13,7 +13,6 @@ export enum Chain {
 export type ChainConstantsType = {
     name: string;
     symbol: string;
-    abbrev: string;
 };
 
 /**
@@ -28,15 +27,13 @@ export type ChainPairType = {
 /**
  * Lists constants (ChainConstantsType) of all chains defined in Chain.
  */
-export const ChainConstants: { [key in Chain]: ChainConstantsType } = {
+export const chainConstants: { [key in Chain]: ChainConstantsType } = {
     [Chain.Tezos]: {
-        name: "Tezos",
+        name: Chain.Tezos,
         symbol: "XTZ",
-        abbrev: "tez",
     },
     [Chain.Ethereum]: {
-        name: "Ethereum",
+        name: Chain.Ethereum,
         symbol: "ETH",
-        abbrev: "eth",
     },
 };

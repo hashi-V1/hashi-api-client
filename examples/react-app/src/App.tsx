@@ -1,7 +1,7 @@
 import { NetworkType } from "@airgap/beacon-sdk";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { ethers } from "ethers";
-import { Chain, HashiBridge, tokenFromAddressAndId } from "hashi-api-client";
+import { Chain, HashiBridge } from "hashi-api-client";
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { hasOwnProperty } from "./utils";
@@ -63,7 +63,7 @@ function App() {
 
     const bridgeToChain = useCallback(
         (source: Chain, target: Chain) => {
-            hashi
+            /*hashi
                 .approveAndLock(
                     source,
                     tokenFromAddressAndId(tokenAddress, tokenId, source),
@@ -72,7 +72,46 @@ function App() {
                 .then((ok) => alert(ok))
                 .catch((reason) => {
                     console.log(reason);
-                });
+                });*/
+            /*hashi
+                .wrapToken(
+                    target,
+                    {
+                        status: Status.Locked,
+                        destination: "",
+                        metadata: "",
+                        tokenContract: "345675f432",
+                        tokenId: 44,
+                        timestamp: 3456345,
+                    },
+                    []
+                )
+                .then(console.log)
+                .catch(console.log);*/
+            /*hashi
+                .proveTokenStatus(
+                    Chain.Tezos,
+                    Chain.Ethereum,
+                    {
+                        tokenId: 2,
+                        tokenContract: "GRYHYGERGDSFGEZ",
+                        timestamp: 345678543,
+                    },
+                    Status.Locked
+                )
+                .then(console.log);*/
+            /*hashi
+                .burnToken(
+                    source,
+                    {
+                        tokenContract: "345675432",
+                        tokenId: 44,
+                        timestamp: 3456345,
+                    },
+                    "4567685432"
+                )
+                .then(() => console.log("done"))
+                .catch(console.log);*/
         },
         [tokenAddress, tokenId, destinationAddress]
     );

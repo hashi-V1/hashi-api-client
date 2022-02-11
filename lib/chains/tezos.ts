@@ -1,7 +1,13 @@
-import { Signer, TezosToolkit, WalletProvider } from "@taquito/taquito";
+import {
+    MichelsonMap,
+    Signer,
+    TezosToolkit,
+    WalletProvider,
+} from "@taquito/taquito";
 import { ChainConfig } from "../config";
 import { Chain } from "../types/chain";
-import { Token } from "../types/token";
+import { Signature, UnsignedMessageType } from "../types/proof";
+import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -42,15 +48,15 @@ export function setChainSignerTezos(chain: Chain, signer: TezosSigner) {
  * Approves and locks at the same time a token on a Tezos network.
  * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
- * @param Tezos The TezosToolkit instance corresponding to that chain
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param Tezos The TezosToolkit instance corresponding to that chain
  */
 export function approveAndLockTezos(
     chain: Chain,
     token: Token,
-    Tezos: TezosToolkit,
-    destinationAddress: string
-) {
+    destinationAddress: string,
+    Tezos: TezosToolkit
+): Promise<number> {
     const operation = (signerAddress: string) =>
         Tezos.wallet
             .at(ChainConfig[chain].lockerContract)
@@ -81,14 +87,83 @@ export function approveAndLockTezos(
                             .send()
                     )
                     .then((op) => op.confirmation())
-                    .then((confirm) =>
-                        confirm.completed
-                            ? Date.parse(
-                                  confirm.block.header.timestamp.toString()
-                              )
-                            : undefined
-                    )
+                    .then((confirm) => {
+                        if (!confirm.completed) {
+                            return Promise.reject("Transaction not completed");
+                        }
+                        return Date.parse(
+                            confirm.block.header.timestamp.toString()
+                        );
+                    })
             );
 
     return Tezos.wallet.pkh().then(operation);
+}
+
+/**
+ * Wraps a token on a specific chain with proofs from the federation.
+ * TODO: Get the wrapped token id from storage
+ * @param chain The wrapping chain
+ * @param message The unsigned message returned by the nodes
+ * @param signatures The signature of the message
+ * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @returns a wrapped token
+ */
+export function wrapTokenTezos(
+    chain: Chain,
+    message: UnsignedMessageType,
+    signatures: Signature[],
+    Tezos: TezosToolkit
+): Promise<WrappedTokenType> {
+    return Tezos.wallet
+        .at(ChainConfig[chain].wrapperContract)
+        .then((wrapperContract) =>
+            wrapperContract.methodsObject
+                .wrap({
+                    token_contract: message.tokenContract,
+                    token_id: message.tokenId.toString(),
+                    lock_timestamp: message.timestamp.toString(),
+                    metadata: new MichelsonMap(),
+                    signatures: new MichelsonMap(),
+                })
+                .send()
+        )
+        .then((op) => op.confirmation())
+        .then((confirm) => ({
+            tokenContract: ChainConfig[chain].wrapperContract,
+            tokenId: 5,
+            chain: chain,
+        }));
+}
+
+/**
+ * Burn a wrapped token to transfer it to another chain
+ * @param chain The chain where the token is currently wrapped
+ * @param token The wrapped token to burn
+ * @param destinationAddress The address on the target chain that will receive the token
+ * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @returns an empty promise
+ */
+export function burnTezos(
+    chain: Chain,
+    token: LockedTokenType,
+    destinationAddress: string,
+    Tezos: TezosToolkit
+): Promise<void> {
+    return Tezos.wallet
+        .at(ChainConfig[chain].wrapperContract)
+        .then((wrapperContract) =>
+            wrapperContract.methodsObject
+                .burn({
+                    destination_address: destinationAddress,
+                    lock_timestamp: token.timestamp.toString(),
+                    token_contract: token.tokenContract,
+                    token_id: token.tokenId.toString(),
+                })
+                .send()
+        )
+        .then((op) => op.confirmation())
+        .then((confirm) => {
+            if (!confirm.completed) return Promise.reject("could not burn");
+        });
 }
