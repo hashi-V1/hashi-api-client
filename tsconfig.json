@@ -7,7 +7,7 @@
         "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "target": "es6",
+        "target": "es5",
         "strict": true,
         "moduleResolution": "node",
         "sourceMap": true,
