@@ -3,7 +3,7 @@ import {
     setChainSignerEthereum,
 } from "./chains/ethereum";
 import { approveAndLockTezos, setChainSignerTezos } from "./chains/tezos";
-import { Chain, ChainPairType } from "./types/chain";
+import { Chain } from "./types/chain";
 import { Token } from "./types/token";
 
 /**
@@ -11,25 +11,14 @@ import { Token } from "./types/token";
  */
 export class HashiBridge {
     /**
-     * Chain pair that will be used in bridging.
-     */
-    private chains: ChainPairType;
-
-    /**
      * Map containing instances for each chain.
      */
     private chainsInstances: Map<Chain, any>;
 
     /**
-     * @param chains (By default Tezos to Ethereum
+     * Constructor
      */
-    constructor(
-        chains: ChainPairType = {
-            source: Chain.Tezos,
-            target: Chain.Ethereum,
-        }
-    ) {
-        this.chains = chains;
+    constructor() {
         this.chainsInstances = new Map<Chain, any>();
     }
 
