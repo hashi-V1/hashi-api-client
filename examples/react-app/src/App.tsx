@@ -1,17 +1,20 @@
 import { NetworkType } from "@airgap/beacon-sdk";
 import { BeaconWallet } from "@taquito/beacon-wallet";
-import { ethers, Signer } from "ethers";
-import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import { Chain, HashiBridge, tokenFromAddressAndId } from "hashi-api-client";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { hasOwnProperty } from "./utils";
 
+const hashi = new HashiBridge();
+
 function App() {
-    const [error, setError] = useState<string[]>([]);
+    const [errors, setErrors] = useState<string[]>([]);
     const [ethAddress, setEthAddress] = useState("");
     const [tezAddress, setTezAddress] = useState("");
 
     const [tokenAddress, setTokenAddress] = useState("");
-    const [tokenId, setTokenId] = useState("");
+    const [tokenId, setTokenId] = useState(0);
     const [destinationAddress, setDestinationAddress] = useState("");
 
     useEffect(() => {
@@ -21,17 +24,19 @@ function App() {
         };
         const wallet = new BeaconWallet(options);
 
-        if (typeof wallet.client.getActiveAccount() === "undefined") {
-            wallet
-                .requestPermissions({
-                    network: {
-                        type: NetworkType.HANGZHOUNET,
-                    },
-                })
-                .then(() => wallet.getPKH().then(setTezAddress));
-        } else {
-            wallet.getPKH().then(setTezAddress);
-        }
+        (typeof wallet.client.getActiveAccount() === "undefined"
+            ? wallet.requestPermissions({
+                  network: {
+                      type: NetworkType.HANGZHOUNET,
+                  },
+              })
+            : Promise.resolve()
+        )
+            .then(() => wallet.getPKH())
+            .then((pkh) => {
+                setTezAddress(pkh);
+                hashi.setChainSigner(Chain.Tezos, wallet);
+            });
     }, []);
 
     useEffect(() => {
@@ -39,31 +44,45 @@ function App() {
             !hasOwnProperty(window, "ethereum") ||
             !(window.ethereum as ethers.providers.ExternalProvider)
         ) {
-            setError((err) =>
+            setErrors((err) =>
                 err.concat(["Please install the Metamask browser extension"])
             );
             return;
         }
 
-        let signer: Signer;
         const provider = new ethers.providers.Web3Provider(
             window.ethereum as ethers.providers.ExternalProvider
         );
-        provider
-            .send("eth_requestAccounts", [3])
-            .then(() => {
-                signer = provider.getSigner();
-                return signer.getAddress();
-            })
-            .then(setEthAddress);
+        provider.send("eth_requestAccounts", [3]).then(async () => {
+            const signer = provider.getSigner();
+            const address = await signer.getAddress();
+            setEthAddress(address);
+            hashi.setChainSigner(Chain.Ethereum, signer);
+        });
     }, []);
+
+    const bridgeToChain = useCallback(
+        (source: Chain, target: Chain) => {
+            hashi
+                .approveAndLock(
+                    source,
+                    tokenFromAddressAndId(tokenAddress, tokenId, source),
+                    destinationAddress
+                )
+                .then((ok) => alert(ok))
+                .catch((reason) => {
+                    console.log(reason);
+                });
+        },
+        [tokenAddress, tokenId, destinationAddress]
+    );
 
     return (
         <div className="main-div">
-            {error.length > 0 && (
+            {errors.length > 0 && (
                 <div className="errors">
-                    {error.map((err) => (
-                        <p>{error}</p>
+                    {errors.map((err) => (
+                        <p key={err}>{err}</p>
                     ))}
                 </div>
             )}
@@ -98,7 +117,9 @@ function App() {
                         id="token_id"
                         type="number"
                         value={tokenId}
-                        onChange={(event) => setTokenId(event.target.value)}
+                        onChange={(event) =>
+                            setTokenId(parseInt(event.target.value))
+                        }
                     />
                 </label>
                 <label htmlFor="destination_address">
@@ -114,8 +135,16 @@ function App() {
             </div>
 
             <div>
-                <button>Bridge to Tezos</button>
-                <button>Bridge to Ethereum</button>
+                <button
+                    onClick={() => bridgeToChain(Chain.Ethereum, Chain.Tezos)}
+                >
+                    Bridge to Tezos
+                </button>
+                <button
+                    onClick={() => bridgeToChain(Chain.Tezos, Chain.Ethereum)}
+                >
+                    Bridge to Ethereum
+                </button>
             </div>
         </div>
     );

@@ -1,15 +1,10 @@
-const nodes = [
-    "http://51.158.67.166:3030",
-    "http://51.158.116.23:3030",
-    "http://51.158.67.166:3030",
-    "http://51.158.116.23:3030",
-];
+const nodes = ["http://localhost:3030"];
 import axios from "axios";
 import {
     isSignedMessageType,
     TokenKeyType,
     UnsignedMessageType,
-} from "./types";
+} from "./types/proof";
 
 export function proofOfLock(
     token: TokenKeyType,
