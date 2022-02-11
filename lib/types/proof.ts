@@ -41,6 +41,21 @@ export type SignedMessageType = UnsignedMessageType & {
 };
 
 /**
+ * Checks whether the input is of the ProofRequestType
+ * @param input Any input
+ * @returns a boolean and a type predicate.
+ */
+export function isProofRequestType(input: any): input is ProofRequestType {
+    const p = input as ProofRequestType;
+    return (
+        isLockedTokenType(p) &&
+        p.status in Status &&
+        p.sourceChain in Chain &&
+        p.targetChain in Chain
+    );
+}
+
+/**
  * Checks whether the input is of the UnsignedMessageType type.
  * @param input Any input
  * @returns a boolean and a type predicate.
