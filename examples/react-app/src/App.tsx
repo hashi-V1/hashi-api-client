@@ -1,7 +1,7 @@
 import { NetworkType } from "@airgap/beacon-sdk";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { ethers } from "ethers";
-import { Chain, HashiBridge } from "hashi-api-client";
+import { Chain, HashiBridge, Status } from "hashi-api-client";
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { hasOwnProperty } from "./utils";
@@ -112,6 +112,19 @@ function App() {
                 )
                 .then(() => console.log("done"))
                 .catch(console.log);*/
+
+            hashi.withdrawToken(
+                source,
+                {
+                    status: Status.Burned,
+                    destination: "",
+                    metadata: "",
+                    tokenContract: "0x43a31963eb24eF0cF9d35E2bA463589ff6F9EFc4",
+                    tokenId: 10,
+                    timestamp: 1644539782,
+                },
+                []
+            );
         },
         [tokenAddress, tokenId, destinationAddress]
     );

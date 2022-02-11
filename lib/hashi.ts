@@ -1,13 +1,15 @@
 import {
     approveAndLockEthereum,
-    burnEthereum,
+    burnTokenEthereum,
     setChainSignerEthereum,
+    withdrawTokenEthereum,
     wrapTokenEthereum,
 } from "./chains/ethereum";
 import {
     approveAndLockTezos,
-    burnTezos,
+    burnTokenTezos,
     setChainSignerTezos,
+    withdrawTokenTezos,
     wrapTokenTezos,
 } from "./chains/tezos";
 import { proveTokenStatus } from "./prover";
@@ -129,10 +131,10 @@ export class HashiBridge {
 
     /**
      * Bridges (transfers) a token from one chain to another
-     * @param sourceChain The current token's chain
+     * @param sourceChain The token's current chain
      * @param targetChain The chain where the token should be after the bridge
      * @param token The token to tranfer
-     * @param destinationAddress The address on the target chain that will receive to wrapped token
+     * @param destinationAddress The address on the target chain that will receive the wrapped token
      * @returns a promise with the wrapped token
      */
     bridge(
@@ -142,16 +144,44 @@ export class HashiBridge {
         destinationAddress: string
     ): Promise<WrappedTokenType> {
         return this.approveAndLock(sourceChain, token, destinationAddress)
-            .then((lockedtoken) =>
+            .then((lockedToken) =>
                 this.proveTokenStatus(
                     sourceChain,
                     targetChain,
-                    lockedtoken,
+                    lockedToken,
                     Status.Locked
                 )
             )
             .then(({ signatures, message }) =>
                 this.wrapToken(targetChain, message, signatures)
+            );
+    }
+
+    /**
+     * Unbridges a wrapped token (releases the initial token)
+     * @param sourceChain The token's current chain
+     * @param targetChain The token's initial chain
+     * @param token The token to tranfer
+     * @param destinationAddress The address on the target chain that will receive the token
+     * @returns an empty promise
+     */
+    unbridge(
+        sourceChain: Chain,
+        targetChain: Chain,
+        token: LockedTokenType,
+        destinationAddress: string
+    ): Promise<void> {
+        return this.burnToken(sourceChain, token, destinationAddress)
+            .then(() =>
+                this.proveTokenStatus(
+                    sourceChain,
+                    targetChain,
+                    token,
+                    Status.Burned
+                )
+            )
+            .then(({ signatures, message }) =>
+                this.withdrawToken(targetChain, message, signatures)
             );
     }
 
@@ -193,10 +223,59 @@ export class HashiBridge {
 
         switch (chain) {
             case Chain.Tezos:
-                return burnTezos(chain, token, destinationAddress, instance);
+                return burnTokenTezos(
+                    chain,
+                    token,
+                    destinationAddress,
+                    instance
+                );
 
             case Chain.Ethereum:
-                return burnEthereum(chain, token, destinationAddress, instance);
+                return burnTokenEthereum(
+                    chain,
+                    token,
+                    destinationAddress,
+                    instance
+                );
+        }
+    }
+
+    /**
+     * Withdraws a token on a specific chain (sends back the initial token before the lock)
+     * @param chain The initial chain of the token
+     * @param message An unsigned message sent by the nodes
+     * @param signatures signatures returned by the nodes proving the message
+     * @returns an empty promise
+     */
+    withdrawToken(
+        chain: Chain,
+        message: UnsignedMessageType,
+        signatures: Signature[]
+    ): Promise<void> {
+        if (message.status !== Status.Burned) {
+            return Promise.reject(
+                "Cannot withdraw with status other than burned"
+            );
+        }
+
+        const instance = this.chainsInstances.get(chain);
+        if (typeof instance === "undefined") {
+            return Promise.reject(
+                "Signer has not been defined for this chain."
+            );
+        }
+
+        switch (chain) {
+            case Chain.Tezos:
+                return withdrawTokenTezos(chain, message, signatures, instance);
+
+            case Chain.Ethereum:
+                return withdrawTokenEthereum(
+                    chain,
+                    message,
+                    signatures,
+                    instance
+                );
         }
     }
 }

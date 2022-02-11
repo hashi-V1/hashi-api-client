@@ -144,7 +144,7 @@ export function wrapTokenTezos(
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
  * @returns an empty promise
  */
-export function burnTezos(
+export function burnTokenTezos(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
@@ -165,5 +165,37 @@ export function burnTezos(
         .then((op) => op.confirmation())
         .then((confirm) => {
             if (!confirm.completed) return Promise.reject("could not burn");
+        });
+}
+
+/**
+ * Withdraws a token on a Tezos chain (sends back the initial token before the lock)
+ * @param chain The initial chain of the token
+ * @param message An unsigned message sent by the nodes
+ * @param signatures signatures returned by the nodes proving the message
+ * @param Tezos The TezosToolkit instance
+ * @returns an empty promise
+ */
+export function withdrawTokenTezos(
+    chain: Chain,
+    message: UnsignedMessageType,
+    signatures: Signature[],
+    Tezos: TezosToolkit
+): Promise<void> {
+    return Tezos.wallet
+        .at(ChainConfig[chain].lockerContract)
+        .then((lockerContract) =>
+            lockerContract.methodsObject
+                .withdraw({
+                    token_address: message.tokenContract,
+                    token_id: message.tokenId.toString(),
+                    locked_timestamp: message.timestamp.toString(),
+                    signatures: new MichelsonMap(),
+                })
+                .send()
+        )
+        .then((op) => op.confirmation())
+        .then((confirm) => {
+            if (!confirm.completed) return Promise.reject("could not withdraw");
         });
 }

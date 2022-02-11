@@ -116,7 +116,7 @@ export function wrapTokenEthereum(
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @returns an empty promise
  */
-export function burnEthereum(
+export function burnTokenEthereum(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
@@ -137,5 +137,38 @@ export function burnEthereum(
         ) as Promise<TransactionResponse>
     )
         .then((tx) => tx.wait())
-        .then(() => {});
+        .then();
+}
+
+/**
+ * Withdraws a token on an Ethereum chain (sends back the initial token before the lock)
+ * @param chain The initial chain of the token
+ * @param message An unsigned message sent by the nodes
+ * @param signatures signatures returned by the nodes proving the message
+ * @param signer The signer instance from ethers.js
+ * @returns an empty promise
+ */
+export function withdrawTokenEthereum(
+    chain: Chain,
+    message: UnsignedMessageType,
+    signatures: Signature[],
+    signer: Signer
+): Promise<void> {
+    const lockerContract = new Contract(
+        ChainConfig[chain].lockerContract,
+        lockerAbi.abi,
+        signer
+    );
+
+    return (
+        lockerContract.withdraw(
+            message.tokenContract,
+            message.tokenId,
+            message.timestamp,
+            [],
+            []
+        ) as Promise<TransactionResponse>
+    )
+        .then((tx) => tx.wait())
+        .then();
 }
