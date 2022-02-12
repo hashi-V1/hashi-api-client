@@ -66,6 +66,9 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<LockedTokenType> {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
+
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.ApprovingAndLocking);
 
@@ -183,6 +186,9 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<WrappedTokenType> {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
+
         return this.approveAndLock(
             sourceChain,
             token,
@@ -224,6 +230,9 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
+
         return this.burnToken(
             sourceChain,
             token,
@@ -294,6 +303,9 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
+
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.Burning);
 

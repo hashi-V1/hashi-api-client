@@ -15,7 +15,6 @@ import { hasOwnProperty } from "./utils";
 const hashi = new HashiBridge();
 
 function App() {
-    const [errors, setErrors] = useState<string[]>([]);
     const [ethAddress, setEthAddress] = useState("");
     const [tezAddress, setTezAddress] = useState("");
 
@@ -51,9 +50,7 @@ function App() {
             !hasOwnProperty(window, "ethereum") ||
             !(window.ethereum as ethers.providers.ExternalProvider)
         ) {
-            setErrors((err) =>
-                err.concat(["Please install the Metamask browser extension"])
-            );
+            alert("Please install the Metamask browser extension");
             return;
         }
 
@@ -70,30 +67,33 @@ function App() {
 
     const bridgeToChain = useCallback(
         (source: Chain, target: Chain) => {
-            hashi
-                .bridge(
-                    source,
-                    target,
-                    tokenFromAddressAndId(tokenAddress, tokenId, source),
-                    destinationAddress,
-                    (p: Progress) => setProgress(progressConstants[p])
-                )
-                .then(console.log)
-                .catch(alert);
+            try {
+                // tokenFromAddressAndId throws if any of its parameters is not valid.
+                const token = tokenFromAddressAndId(
+                    tokenAddress,
+                    tokenId,
+                    source
+                );
+
+                hashi
+                    .bridge(
+                        source,
+                        target,
+                        token,
+                        destinationAddress,
+                        (p: Progress) => setProgress(progressConstants[p])
+                    )
+                    .then(console.log)
+                    .catch(alert);
+            } catch (e) {
+                alert(e);
+            }
         },
         [tokenAddress, tokenId, destinationAddress]
     );
 
     return (
         <div className="main-div">
-            {errors.length > 0 && (
-                <div className="errors">
-                    {errors.map((err) => (
-                        <p key={err}>{err}</p>
-                    ))}
-                </div>
-            )}
-
             <div>
                 {ethAddress !== "" ? (
                     <span>Connected ({ethAddress})</span>

@@ -43,6 +43,8 @@ var HashiBridge = /** @class */ (function () {
      * @param progressCallback optional callback to track the progress
      */
     HashiBridge.prototype.approveAndLock = function (chain, token, destinationAddress, progressCallback) {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
         var setProgress = (0, utils_1.setProgressCallback)(progressCallback);
         setProgress(progress_1.Progress.ApprovingAndLocking);
         var instance = this.chainsInstances.get(chain);
@@ -110,6 +112,8 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.bridge = function (sourceChain, targetChain, token, destinationAddress, progressCallback) {
         var _this = this;
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
         return this.approveAndLock(sourceChain, token, destinationAddress, progressCallback)
             .then(function (lockedToken) {
             return _this.proveTokenStatus(sourceChain, targetChain, lockedToken, proof_1.Status.Locked, progressCallback);
@@ -130,6 +134,8 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.unbridge = function (sourceChain, targetChain, token, destinationAddress, progressCallback) {
         var _this = this;
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
         return this.burnToken(sourceChain, token, destinationAddress, progressCallback)
             .then(function () {
             return _this.proveTokenStatus(sourceChain, targetChain, token, proof_1.Status.Burned, progressCallback);
@@ -165,6 +171,8 @@ var HashiBridge = /** @class */ (function () {
      * @returns an empty promise
      */
     HashiBridge.prototype.burnToken = function (chain, token, destinationAddress, progressCallback) {
+        if (destinationAddress === "")
+            return Promise.reject(Error("DestinationAddress cannot be empty."));
         var setProgress = (0, utils_1.setProgressCallback)(progressCallback);
         setProgress(progress_1.Progress.Burning);
         var instance = this.chainsInstances.get(chain);

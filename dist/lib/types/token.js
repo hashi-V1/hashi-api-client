@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenFromAddressAndId = exports.isLockedTokenType = void 0;
+var chain_1 = require("./chain");
 /**
  * Checks whether the input is of the UnsignedMessageType type.
  * @param input Any input
@@ -25,6 +26,15 @@ exports.isLockedTokenType = isLockedTokenType;
  * @returns a Token
  */
 function tokenFromAddressAndId(tokenContract, tokenId, chain) {
+    if (tokenContract === "") {
+        throw new Error("tokenContract cannot be empty to build a token.");
+    }
+    if (isNaN(tokenId)) {
+        throw new Error("tokenId must be a valid integer to build a token.");
+    }
+    if (!(0, chain_1.isChain)(chain)) {
+        throw new Error("chain is not a valid Chain to build a token.");
+    }
     return {
         tokenContract: tokenContract,
         tokenId: tokenId,

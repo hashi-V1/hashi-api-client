@@ -1,4 +1,4 @@
-import { Chain } from "./chain";
+import { Chain, isChain } from "./chain";
 
 /**
  * Represents a token emitted by a wrapper on a specific chain
@@ -58,6 +58,16 @@ export function tokenFromAddressAndId(
     tokenId: number,
     chain: Chain
 ): Token {
+    if (tokenContract === "") {
+        throw new Error("tokenContract cannot be empty to build a token.");
+    }
+    if (isNaN(tokenId)) {
+        throw new Error("tokenId must be a valid integer to build a token.");
+    }
+    if (!isChain(chain)) {
+        throw new Error("chain is not a valid Chain to build a token.");
+    }
+
     return {
         tokenContract,
         tokenId,
