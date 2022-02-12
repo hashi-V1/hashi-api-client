@@ -96,8 +96,8 @@ export function wrapTokenEthereum(
             message.tokenId,
             message.timestamp,
             message.metadata,
-            [],
-            []
+            signatures.map((signature) => signature.publicKey),
+            signatures.map((signature) => signature.sig)
         ) as Promise<TransactionResponse>
     )
         .then((tx) => tx.wait())

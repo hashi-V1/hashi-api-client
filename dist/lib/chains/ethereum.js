@@ -60,7 +60,7 @@ exports.approveAndLockEthereum = approveAndLockEthereum;
  */
 function wrapTokenEthereum(chain, message, signatures, signer) {
     var wrapperContract = new ethers_1.Contract(config_1.ChainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
-    return wrapperContract.wrap(message.tokenContract, message.tokenId, message.timestamp, message.metadata, [], [])
+    return wrapperContract.wrap(message.tokenContract, message.tokenId, message.timestamp, message.metadata, signatures.map(function (signature) { return signature.publicKey; }), signatures.map(function (signature) { return signature.sig; }))
         .then(function (tx) { return tx.wait(); })
         .then(function () { return ({
         tokenContract: wrapperContract.address,
