@@ -49,9 +49,9 @@ export function isProofRequestType(input: any): input is ProofRequestType {
     const p = input as ProofRequestType;
     return (
         isLockedTokenType(p) &&
-        p.status in Status &&
-        p.sourceChain in Chain &&
-        p.targetChain in Chain
+        Object.values(Status).includes(p.status) &&
+        Object.values(Chain).includes(p.sourceChain) &&
+        Object.values(Chain).includes(p.targetChain)
     );
 }
 
@@ -69,7 +69,7 @@ export function isUnsignedMessageType(
         m.destination != null &&
         m.destination != "" &&
         m.metadata != null &&
-        m.status in Status
+        Object.values(Status).includes(m.status)
     );
 }
 

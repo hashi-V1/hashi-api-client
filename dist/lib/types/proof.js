@@ -20,9 +20,9 @@ var Status;
 function isProofRequestType(input) {
     var p = input;
     return ((0, token_1.isLockedTokenType)(p) &&
-        p.status in Status &&
-        p.sourceChain in chain_1.Chain &&
-        p.targetChain in chain_1.Chain);
+        Object.values(Status).includes(p.status) &&
+        Object.values(chain_1.Chain).includes(p.sourceChain) &&
+        Object.values(chain_1.Chain).includes(p.targetChain));
 }
 exports.isProofRequestType = isProofRequestType;
 /**
@@ -36,7 +36,7 @@ function isUnsignedMessageType(input) {
         m.destination != null &&
         m.destination != "" &&
         m.metadata != null &&
-        m.status in Status);
+        Object.values(Status).includes(m.status));
 }
 exports.isUnsignedMessageType = isUnsignedMessageType;
 /**
