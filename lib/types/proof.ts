@@ -1,4 +1,4 @@
-import { Chain } from "./chain";
+import { Chain, isChain } from "./chain";
 import { isLockedTokenType, LockedTokenType } from "./token";
 
 /**
@@ -37,9 +37,9 @@ export function isProofRequestType(input: any): input is ProofRequestType {
     const p = input as ProofRequestType;
     return (
         isLockedTokenType(p) &&
-        Object.values(Status).includes(p.status) &&
-        Object.values(Chain).includes(p.sourceChain) &&
-        Object.values(Chain).includes(p.targetChain)
+        isStatus(p.status) &&
+        isChain(p.sourceChain) &&
+        isChain(p.targetChain)
     );
 }
 
@@ -89,7 +89,7 @@ export function isUnsignedMessageType(
         m.destination != null &&
         m.destination != "" &&
         m.metadata != null &&
-        Object.values(Status).includes(m.status)
+        isStatus(m.status)
     );
 }
 
