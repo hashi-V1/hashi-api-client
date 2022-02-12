@@ -1,5 +1,5 @@
 import { Chain } from "./types/chain";
-import { Status, UnsignedMessageType } from "./types/proof";
+import { Signature, Status, UnsignedMessageType } from "./types/proof";
 import { LockedTokenType } from "./types/token";
 /**
  * Prove a token status with the federation
@@ -11,6 +11,6 @@ import { LockedTokenType } from "./types/token";
  * @returns a promise with the message and signatures
  */
 export declare function proveTokenStatus(sourceChain: Chain, targetChain: Chain, token: LockedTokenType, status: Status, progressCallback?: (done: number, total: number) => void): Promise<{
-    signatures: string[];
+    signatures: Signature[];
     message: UnsignedMessageType;
 }>;

@@ -7,19 +7,17 @@ export declare enum Chain {
     Ethereum = "Ethereum"
 }
 /**
+ * Checks whether the input is of the Chain enum type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+export declare function isChain(input: any): input is Chain;
+/**
  * Represents constants associated with a chain.
  */
 export declare type ChainConstantsType = {
     name: string;
     symbol: string;
-};
-/**
- * Represents a pair of chains.
- * Used in bridging (from source to target).
- */
-export declare type ChainPairType = {
-    source: Chain;
-    target: Chain;
 };
 /**
  * Lists constants (ChainConstantsType) of all chains defined in Chain.

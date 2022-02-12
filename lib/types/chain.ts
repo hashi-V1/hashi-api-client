@@ -8,20 +8,20 @@ export enum Chain {
 }
 
 /**
+ * Checks whether the input is of the Chain enum type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+export function isChain(input: any): input is Chain {
+    return Object.values(Chain).includes(input);
+}
+
+/**
  * Represents constants associated with a chain.
  */
 export type ChainConstantsType = {
     name: string;
     symbol: string;
-};
-
-/**
- * Represents a pair of chains.
- * Used in bridging (from source to target).
- */
-export type ChainPairType = {
-    source: Chain;
-    target: Chain;
 };
 
 /**

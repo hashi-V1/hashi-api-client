@@ -1,7 +1,7 @@
 "use strict";
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.chainConstants = exports.Chain = void 0;
+exports.chainConstants = exports.isChain = exports.Chain = void 0;
 /**
  * Represents a chain (a blockchain specific network).
  * Example: Ethereum-Ropsten is a different chain than Ethereum (Mainnet).
@@ -11,6 +11,15 @@ var Chain;
     Chain["Tezos"] = "Tezos";
     Chain["Ethereum"] = "Ethereum";
 })(Chain = exports.Chain || (exports.Chain = {}));
+/**
+ * Checks whether the input is of the Chain enum type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+function isChain(input) {
+    return Object.values(Chain).includes(input);
+}
+exports.isChain = isChain;
 /**
  * Lists constants (ChainConstantsType) of all chains defined in Chain.
  */

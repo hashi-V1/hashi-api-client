@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isSignedMessageType = exports.isUnsignedMessageType = exports.isProofRequestType = exports.Status = void 0;
+exports.isSignedMessageType = exports.isUnsignedMessageType = exports.isSignature = exports.isProofRequestType = exports.isStatus = exports.Status = void 0;
 var chain_1 = require("./chain");
 var token_1 = require("./token");
 /**
@@ -12,6 +12,15 @@ var Status;
     Status["Locked"] = "locked";
     Status["Burned"] = "burned";
 })(Status = exports.Status || (exports.Status = {}));
+/**
+ * Checks whether the input is of the Status enum type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+function isStatus(input) {
+    return Object.values(Status).includes(input);
+}
+exports.isStatus = isStatus;
 /**
  * Checks whether the input is of the ProofRequestType
  * @param input Any input
@@ -25,6 +34,19 @@ function isProofRequestType(input) {
         Object.values(chain_1.Chain).includes(p.targetChain));
 }
 exports.isProofRequestType = isProofRequestType;
+/**
+ * Checks whether the input is of the Signature Type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+function isSignature(input) {
+    var s = input;
+    return (s.publicKey != null &&
+        s.publicKey !== "" &&
+        s.sig != null &&
+        s.sig !== "");
+}
+exports.isSignature = isSignature;
 /**
  * Checks whether the input is of the UnsignedMessageType type.
  * @param input Any input
@@ -46,7 +68,7 @@ exports.isUnsignedMessageType = isUnsignedMessageType;
  */
 function isSignedMessageType(input) {
     var m = input;
-    return isUnsignedMessageType(m) && m.signature != null && m.signature != "";
+    return isUnsignedMessageType(m) && isSignature(m.signature);
 }
 exports.isSignedMessageType = isSignedMessageType;
 //# sourceMappingURL=proof.js.map

@@ -61,7 +61,7 @@ export declare class HashiBridge {
      * @returns a Promise with signatures and an UnsignedMessageType
      */
     proveTokenStatus(sourceChain: Chain, targetChain: Chain, token: LockedTokenType, status: Status): Promise<{
-        signatures: string[];
+        signatures: Signature[];
         message: UnsignedMessageType;
     }>;
     /**

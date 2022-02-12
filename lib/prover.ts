@@ -4,6 +4,7 @@ import { Chain } from "./types/chain";
 import {
     isSignedMessageType,
     ProofRequestType,
+    Signature,
     Status,
     UnsignedMessageType,
 } from "./types/proof";
@@ -32,7 +33,7 @@ export function proveTokenStatus(
         ...token,
     };
 
-    const signatures: string[] = [];
+    const signatures: Signature[] = [];
     const promises: Promise<void>[] = [];
     let message: UnsignedMessageType | undefined;
 

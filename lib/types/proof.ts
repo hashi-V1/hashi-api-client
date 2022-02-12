@@ -11,33 +11,21 @@ export enum Status {
 }
 
 /**
+ * Checks whether the input is of the Status enum type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+export function isStatus(input: any): input is Status {
+    return Object.values(Status).includes(input);
+}
+
+/**
  * Represents the request sent to each node to receive a signed message
  */
 export type ProofRequestType = LockedTokenType & {
     sourceChain: Chain;
     targetChain: Chain;
     status: Status;
-};
-
-/**
- * Represents a signature by one of the nodes.
- */
-export type Signature = string;
-
-/**
- * Represents a message not yet signed by the nodes.
- */
-export type UnsignedMessageType = LockedTokenType & {
-    status: Status;
-    destination: string;
-    metadata: string;
-};
-
-/**
- * Represents a message signed by a node.
- */
-export type SignedMessageType = UnsignedMessageType & {
-    signature: Signature;
 };
 
 /**
@@ -54,6 +42,38 @@ export function isProofRequestType(input: any): input is ProofRequestType {
         Object.values(Chain).includes(p.targetChain)
     );
 }
+
+/**
+ * Represents a signature by one of the nodes.
+ */
+export type Signature = {
+    sig: string;
+    publicKey: string;
+};
+
+/**
+ * Checks whether the input is of the Signature Type
+ * @param input Any input
+ * @returns a boolean and a type predicate
+ */
+export function isSignature(input: any): input is Signature {
+    const s = input as Signature;
+    return (
+        s.publicKey != null &&
+        s.publicKey !== "" &&
+        s.sig != null &&
+        s.sig !== ""
+    );
+}
+
+/**
+ * Represents a message not yet signed by the nodes.
+ */
+export type UnsignedMessageType = LockedTokenType & {
+    status: Status;
+    destination: string;
+    metadata: string;
+};
 
 /**
  * Checks whether the input is of the UnsignedMessageType type.
@@ -74,11 +94,18 @@ export function isUnsignedMessageType(
 }
 
 /**
+ * Represents a message signed by a node.
+ */
+export type SignedMessageType = UnsignedMessageType & {
+    signature: Signature;
+};
+
+/**
  * Checks whether the input is of the SignedMessageType type.
  * @param input Any input
  * @returns a boolean and a type predicate.
  */
 export function isSignedMessageType(input: any): input is SignedMessageType {
     const m = input as SignedMessageType;
-    return isUnsignedMessageType(m) && m.signature != null && m.signature != "";
+    return isUnsignedMessageType(m) && isSignature(m.signature);
 }
