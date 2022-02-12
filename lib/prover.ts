@@ -1,5 +1,5 @@
-const nodes = ["http://localhost:3030/proof", "http://localhost:3030/proof"];
 import axios from "axios";
+import { nodesConfig } from "./config";
 import { Chain } from "./types/chain";
 import { Progress } from "./types/progress";
 import {
@@ -39,7 +39,7 @@ export function proveTokenStatus(
     const promises: Promise<void>[] = [];
     let message: UnsignedMessageType | undefined;
 
-    nodes.forEach((node) => {
+    nodesConfig.forEach((node) => {
         promises.push(
             axios
                 .get(node, {

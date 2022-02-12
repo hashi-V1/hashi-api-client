@@ -36,10 +36,10 @@ exports.setChainSignerEthereum = setChainSignerEthereum;
  * @returns a promise with the token's lock timestamp
  */
 function approveAndLockEthereum(chain, token, destinationAddress, signer, setProgress) {
-    var lockerContract = new ethers_1.Contract(config_1.ChainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
+    var lockerContract = new ethers_1.Contract(config_1.chainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
     var tokenContract = new ethers_1.Contract(token.tokenContract, tokenAbi, signer);
     setProgress(progress_1.Progress.WaitingForUserApproval);
-    return tokenContract.approve(config_1.ChainConfig[chain].lockerContract, token.tokenId)
+    return tokenContract.approve(config_1.chainConfig[chain].lockerContract, token.tokenId)
         .then(function (tx) {
         setProgress(progress_1.Progress.WaitingForConfirmationApproval);
         return tx.wait();
@@ -70,7 +70,7 @@ exports.approveAndLockEthereum = approveAndLockEthereum;
  * @returns a wrapped token
  */
 function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
-    var wrapperContract = new ethers_1.Contract(config_1.ChainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
+    var wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
     setProgress(progress_1.Progress.WaitingForUserWrap);
     return wrapperContract.wrap(message.tokenContract, message.tokenId, message.timestamp, message.metadata, signatures.map(function (signature) { return signature.publicKey; }), signatures.map(function (signature) { return signature.sig; }))
         .then(function (tx) {
@@ -94,7 +94,7 @@ exports.wrapTokenEthereum = wrapTokenEthereum;
  * @returns an empty promise
  */
 function burnTokenEthereum(chain, token, destinationAddress, signer, setProgress) {
-    var wrapperContract = new ethers_1.Contract(config_1.ChainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
+    var wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
     setProgress(progress_1.Progress.WaitingForUserBurn);
     return wrapperContract.burn(token.tokenContract, token.tokenId, token.timestamp, destinationAddress)
         .then(function (tx) {
@@ -114,7 +114,7 @@ exports.burnTokenEthereum = burnTokenEthereum;
  * @returns an empty promise
  */
 function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) {
-    var lockerContract = new ethers_1.Contract(config_1.ChainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
+    var lockerContract = new ethers_1.Contract(config_1.chainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
     setProgress(progress_1.Progress.WaitingForUserWithdraw);
     return lockerContract.withdraw(message.tokenContract, message.tokenId, message.timestamp, [], [])
         .then(function (tx) {

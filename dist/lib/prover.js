@@ -15,8 +15,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.proveTokenStatus = void 0;
-var nodes = ["http://localhost:3030/proof", "http://localhost:3030/proof"];
 var axios_1 = __importDefault(require("axios"));
+var config_1 = require("./config");
 var progress_1 = require("./types/progress");
 var proof_1 = require("./types/proof");
 /**
@@ -34,7 +34,7 @@ function proveTokenStatus(sourceChain, targetChain, token, status, setProgress) 
     var signatures = [];
     var promises = [];
     var message;
-    nodes.forEach(function (node) {
+    config_1.nodesConfig.forEach(function (node) {
         promises.push(axios_1.default
             .get(node, {
             params: proofRequest,

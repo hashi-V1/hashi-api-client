@@ -4,7 +4,7 @@ import {
     TezosToolkit,
     WalletProvider,
 } from "@taquito/taquito";
-import { ChainConfig } from "../config";
+import { chainConfig } from "../config";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -36,7 +36,7 @@ function tezosSignerIsWalletProvider(
  * @returns The TezosToolkit instance
  */
 export function setChainSignerTezos(chain: Chain, signer: TezosSigner) {
-    const Tezos = new TezosToolkit(ChainConfig[chain].rpc);
+    const Tezos = new TezosToolkit(chainConfig[chain].rpc);
     if (tezosSignerIsWalletProvider(signer)) {
         Tezos.setWalletProvider(signer);
     } else {
@@ -62,7 +62,7 @@ export function approveAndLockTezos(
 ): Promise<number> {
     const operation = (signerAddress: string) =>
         Tezos.wallet
-            .at(ChainConfig[chain].lockerContract)
+            .at(chainConfig[chain].lockerContract)
             .then((lockerContract) =>
                 Tezos.wallet
                     .at(token.tokenContract)
@@ -130,7 +130,7 @@ export function wrapTokenTezos(
     setProgress: (progress: Progress) => void
 ): Promise<WrappedTokenType> {
     return Tezos.wallet
-        .at(ChainConfig[chain].wrapperContract)
+        .at(chainConfig[chain].wrapperContract)
         .then((wrapperContract) => {
             setProgress(Progress.WaitingForUserWrap);
             return wrapperContract.methodsObject
@@ -148,7 +148,7 @@ export function wrapTokenTezos(
             return op.confirmation();
         })
         .then((confirm) => ({
-            tokenContract: ChainConfig[chain].wrapperContract,
+            tokenContract: chainConfig[chain].wrapperContract,
             tokenId: 5,
             chain: chain,
         }));
@@ -171,7 +171,7 @@ export function burnTokenTezos(
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     return Tezos.wallet
-        .at(ChainConfig[chain].wrapperContract)
+        .at(chainConfig[chain].wrapperContract)
         .then((wrapperContract) => {
             setProgress(Progress.WaitingForUserBurn);
             return wrapperContract.methodsObject
@@ -209,7 +209,7 @@ export function withdrawTokenTezos(
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     return Tezos.wallet
-        .at(ChainConfig[chain].lockerContract)
+        .at(chainConfig[chain].lockerContract)
         .then((lockerContract) => {
             setProgress(Progress.WaitingForUserWithdraw);
             return lockerContract.methodsObject

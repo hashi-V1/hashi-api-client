@@ -2,7 +2,7 @@ import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { Contract, Signer } from "ethers";
 import lockerAbi from "../abi/ethereum/Locker.json";
 import wrapperAbi from "../abi/ethereum/Wrapper.json";
-import { ChainConfig } from "../config";
+import { chainConfig } from "../config";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -43,7 +43,7 @@ export function approveAndLockEthereum(
     setProgress: (progress: Progress) => void
 ): Promise<number> {
     const lockerContract = new Contract(
-        ChainConfig[chain].lockerContract,
+        chainConfig[chain].lockerContract,
         lockerAbi.abi,
         signer
     );
@@ -52,7 +52,7 @@ export function approveAndLockEthereum(
     setProgress(Progress.WaitingForUserApproval);
     return (
         tokenContract.approve(
-            ChainConfig[chain].lockerContract,
+            chainConfig[chain].lockerContract,
             token.tokenId
         ) as Promise<TransactionResponse>
     )
@@ -97,7 +97,7 @@ export function wrapTokenEthereum(
     setProgress: (progress: Progress) => void
 ): Promise<WrappedTokenType> {
     const wrapperContract = new Contract(
-        ChainConfig[chain].wrapperContract,
+        chainConfig[chain].wrapperContract,
         wrapperAbi.abi,
         signer
     );
@@ -141,7 +141,7 @@ export function burnTokenEthereum(
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     const wrapperContract = new Contract(
-        ChainConfig[chain].wrapperContract,
+        chainConfig[chain].wrapperContract,
         wrapperAbi.abi,
         signer
     );
@@ -179,7 +179,7 @@ export function withdrawTokenEthereum(
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     const lockerContract = new Contract(
-        ChainConfig[chain].lockerContract,
+        chainConfig[chain].lockerContract,
         lockerAbi.abi,
         signer
     );
