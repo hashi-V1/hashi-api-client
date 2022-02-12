@@ -17,7 +17,7 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
     [Chain.Tezos]: {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
-        wrapperContract: "KT1DhLyx7FfpM28UXLqzoAezWPX6kTaWxUsV",
+        wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
     },
     [Chain.Ethereum]: {
         rpc: "",
