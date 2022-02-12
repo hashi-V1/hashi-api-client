@@ -1,7 +1,13 @@
 import { NetworkType } from "@airgap/beacon-sdk";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { ethers } from "ethers";
-import { Chain, HashiBridge, Status } from "hashi-api-client";
+import {
+    Chain,
+    HashiBridge,
+    Progress,
+    progressConstants,
+    tokenFromAddressAndId,
+} from "hashi-api-client";
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { hasOwnProperty } from "./utils";
@@ -16,6 +22,7 @@ function App() {
     const [tokenAddress, setTokenAddress] = useState("");
     const [tokenId, setTokenId] = useState(0);
     const [destinationAddress, setDestinationAddress] = useState("");
+    const [progress, setProgress] = useState("");
 
     useEffect(() => {
         const options = {
@@ -63,68 +70,16 @@ function App() {
 
     const bridgeToChain = useCallback(
         (source: Chain, target: Chain) => {
-            /*hashi
-                .approveAndLock(
+            hashi
+                .bridge(
                     source,
-                    tokenFromAddressAndId(tokenAddress, tokenId, source),
-                    destinationAddress
-                )
-                .then((ok) => alert(ok))
-                .catch((reason) => {
-                    console.log(reason);
-                });*/
-            /*hashi
-                .wrapToken(
                     target,
-                    {
-                        status: Status.Locked,
-                        destination: "",
-                        metadata: "",
-                        tokenContract: "345675f432",
-                        tokenId: 44,
-                        timestamp: 3456345,
-                    },
-                    []
+                    tokenFromAddressAndId(tokenAddress, tokenId, source),
+                    destinationAddress,
+                    (p: Progress) => setProgress(progressConstants[p])
                 )
                 .then(console.log)
-                .catch(console.log);*/
-            /*hashi
-                .proveTokenStatus(
-                    Chain.Tezos,
-                    Chain.Ethereum,
-                    {
-                        tokenId: 2,
-                        tokenContract: "GRYHYGERGDSFGEZ",
-                        timestamp: 345678543,
-                    },
-                    Status.Locked
-                )
-                .then(console.log);*/
-            /*hashi
-                .burnToken(
-                    source,
-                    {
-                        tokenContract: "345675432",
-                        tokenId: 44,
-                        timestamp: 3456345,
-                    },
-                    "4567685432"
-                )
-                .then(() => console.log("done"))
-                .catch(console.log);*/
-
-            hashi.withdrawToken(
-                source,
-                {
-                    status: Status.Burned,
-                    destination: "",
-                    metadata: "",
-                    tokenContract: "0x43a31963eb24eF0cF9d35E2bA463589ff6F9EFc4",
-                    tokenId: 10,
-                    timestamp: 1644539782,
-                },
-                []
-            );
+                .catch(alert);
         },
         [tokenAddress, tokenId, destinationAddress]
     );
@@ -198,6 +153,8 @@ function App() {
                     Bridge to Ethereum
                 </button>
             </div>
+
+            <div>{progress}</div>
         </div>
     );
 }

@@ -15,6 +15,7 @@ __exportStar(require("./lib/config"), exports);
 var hashi_1 = require("./lib/hashi");
 Object.defineProperty(exports, "HashiBridge", { enumerable: true, get: function () { return hashi_1.HashiBridge; } });
 __exportStar(require("./lib/types/chain"), exports);
+__exportStar(require("./lib/types/progress"), exports);
 __exportStar(require("./lib/types/proof"), exports);
 __exportStar(require("./lib/types/token"), exports);
 //# sourceMappingURL=index.js.map

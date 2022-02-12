@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.proveTokenStatus = void 0;
 var nodes = ["http://localhost:3030/proof", "http://localhost:3030/proof"];
 var axios_1 = __importDefault(require("axios"));
+var progress_1 = require("./types/progress");
 var proof_1 = require("./types/proof");
 /**
  * Prove a token status with the federation
@@ -24,10 +25,11 @@ var proof_1 = require("./types/proof");
  * @param targetChain The chain where the proof will be used
  * @param token The locked token (contract address, id and timestamp)
  * @param status The status that should be proved
- * @param progressCallback A callback to get the progress of the proof
+ * @param setProgress callback to track the progress of the proof
  * @returns a promise with the message and signatures
  */
-function proveTokenStatus(sourceChain, targetChain, token, status, progressCallback) {
+function proveTokenStatus(sourceChain, targetChain, token, status, setProgress) {
+    setProgress(progress_1.Progress.ProvingStatus);
     var proofRequest = __assign({ sourceChain: sourceChain, targetChain: targetChain, status: status }, token);
     var signatures = [];
     var promises = [];
@@ -52,6 +54,7 @@ function proveTokenStatus(sourceChain, targetChain, token, status, progressCallb
         if (typeof message === "undefined") {
             return Promise.reject("Undefined message");
         }
+        setProgress(progress_1.Progress.ProvedStatus);
         return {
             signatures: signatures,
             message: message,

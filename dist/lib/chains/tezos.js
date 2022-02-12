@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.withdrawTokenTezos = exports.burnTokenTezos = exports.wrapTokenTezos = exports.approveAndLockTezos = exports.setChainSignerTezos = void 0;
 var taquito_1 = require("@taquito/taquito");
 var config_1 = require("../config");
+var progress_1 = require("../types/progress");
 /**
  * Checks whether the TezosSigner is a WalletProvider instead of a Signer
  * @param signer a TezosSigner signer
@@ -37,9 +38,10 @@ exports.setChainSignerTezos = setChainSignerTezos;
  * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-function approveAndLockTezos(chain, token, destinationAddress, Tezos) {
+function approveAndLockTezos(chain, token, destinationAddress, Tezos, setProgress) {
     var operation = function (signerAddress) {
         return Tezos.wallet
             .at(config_1.ChainConfig[chain].lockerContract)
@@ -47,6 +49,8 @@ function approveAndLockTezos(chain, token, destinationAddress, Tezos) {
             return Tezos.wallet
                 .at(token.tokenContract)
                 .then(function (tokenContract) {
+                setProgress(progress_1.Progress.WaitingForUserApproval);
+                setProgress(progress_1.Progress.WaitingForUserLock);
                 return Tezos.wallet
                     .batch()
                     .withContractCall(tokenContract.methods.update_operators([
@@ -65,7 +69,11 @@ function approveAndLockTezos(chain, token, destinationAddress, Tezos) {
                 }))
                     .send();
             })
-                .then(function (op) { return op.confirmation(); })
+                .then(function (op) {
+                setProgress(progress_1.Progress.WaitingForConfirmationApproval);
+                setProgress(progress_1.Progress.WaitingForConfirmationLock);
+                return op.confirmation();
+            })
                 .then(function (confirm) {
                 if (!confirm.completed) {
                     return Promise.reject("Transaction not completed");
@@ -84,12 +92,14 @@ exports.approveAndLockTezos = approveAndLockTezos;
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-function wrapTokenTezos(chain, message, signatures, Tezos) {
+function wrapTokenTezos(chain, message, signatures, Tezos, setProgress) {
     return Tezos.wallet
         .at(config_1.ChainConfig[chain].wrapperContract)
         .then(function (wrapperContract) {
+        setProgress(progress_1.Progress.WaitingForUserWrap);
         return wrapperContract.methodsObject
             .wrap({
             token_contract: message.tokenContract,
@@ -100,7 +110,10 @@ function wrapTokenTezos(chain, message, signatures, Tezos) {
         })
             .send();
     })
-        .then(function (op) { return op.confirmation(); })
+        .then(function (op) {
+        setProgress(progress_1.Progress.WaitingForConfirmationWrap);
+        return op.confirmation();
+    })
         .then(function (confirm) { return ({
         tokenContract: config_1.ChainConfig[chain].wrapperContract,
         tokenId: 5,
@@ -114,12 +127,14 @@ exports.wrapTokenTezos = wrapTokenTezos;
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function burnTokenTezos(chain, token, destinationAddress, Tezos) {
+function burnTokenTezos(chain, token, destinationAddress, Tezos, setProgress) {
     return Tezos.wallet
         .at(config_1.ChainConfig[chain].wrapperContract)
         .then(function (wrapperContract) {
+        setProgress(progress_1.Progress.WaitingForUserBurn);
         return wrapperContract.methodsObject
             .burn({
             destination_address: destinationAddress,
@@ -129,7 +144,10 @@ function burnTokenTezos(chain, token, destinationAddress, Tezos) {
         })
             .send();
     })
-        .then(function (op) { return op.confirmation(); })
+        .then(function (op) {
+        setProgress(progress_1.Progress.WaitingForConfirmationBurn);
+        return op.confirmation();
+    })
         .then(function (confirm) {
         if (!confirm.completed)
             return Promise.reject("could not burn");
@@ -142,12 +160,14 @@ exports.burnTokenTezos = burnTokenTezos;
  * @param message An unsigned message sent by the nodes
  * @param signatures signatures returned by the nodes proving the message
  * @param Tezos The TezosToolkit instance
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function withdrawTokenTezos(chain, message, signatures, Tezos) {
+function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
     return Tezos.wallet
         .at(config_1.ChainConfig[chain].lockerContract)
         .then(function (lockerContract) {
+        setProgress(progress_1.Progress.WaitingForUserWithdraw);
         return lockerContract.methodsObject
             .withdraw({
             token_address: message.tokenContract,
@@ -157,7 +177,10 @@ function withdrawTokenTezos(chain, message, signatures, Tezos) {
         })
             .send();
     })
-        .then(function (op) { return op.confirmation(); })
+        .then(function (op) {
+        setProgress(progress_1.Progress.WaitingForConfirmationWithdraw);
+        return op.confirmation();
+    })
         .then(function (confirm) {
         if (!confirm.completed)
             return Promise.reject("could not withdraw");

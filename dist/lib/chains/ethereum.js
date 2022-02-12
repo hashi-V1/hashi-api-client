@@ -8,6 +8,7 @@ var ethers_1 = require("ethers");
 var Locker_json_1 = __importDefault(require("../abi/ethereum/Locker.json"));
 var Wrapper_json_1 = __importDefault(require("../abi/ethereum/Wrapper.json"));
 var config_1 = require("../config");
+var progress_1 = require("../types/progress");
 /**
  * Abi represeting the approve function in ERC721 tokens.
  * TODO: Move this abi in a json file in ../abi/ethereum
@@ -31,17 +32,26 @@ exports.setChainSignerEthereum = setChainSignerEthereum;
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-function approveAndLockEthereum(chain, token, destinationAddress, signer) {
+function approveAndLockEthereum(chain, token, destinationAddress, signer, setProgress) {
     var lockerContract = new ethers_1.Contract(config_1.ChainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
     var tokenContract = new ethers_1.Contract(token.tokenContract, tokenAbi, signer);
+    setProgress(progress_1.Progress.WaitingForUserApproval);
     return tokenContract.approve(config_1.ChainConfig[chain].lockerContract, token.tokenId)
-        .then(function (tx) { return tx.wait(); })
+        .then(function (tx) {
+        setProgress(progress_1.Progress.WaitingForConfirmationApproval);
+        return tx.wait();
+    })
         .then(function () {
+        setProgress(progress_1.Progress.WaitingForUserLock);
         return lockerContract.lock(token.tokenContract, token.tokenId, destinationAddress);
     })
-        .then(function (tx) { return tx.wait(); })
+        .then(function (tx) {
+        setProgress(progress_1.Progress.WaitingForConfirmationLock);
+        return tx.wait();
+    })
         .then(function (confirm) {
         return signer
             .provider.getBlock(confirm.blockNumber)
@@ -56,12 +66,17 @@ exports.approveAndLockEthereum = approveAndLockEthereum;
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-function wrapTokenEthereum(chain, message, signatures, signer) {
+function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
     var wrapperContract = new ethers_1.Contract(config_1.ChainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
+    setProgress(progress_1.Progress.WaitingForUserWrap);
     return wrapperContract.wrap(message.tokenContract, message.tokenId, message.timestamp, message.metadata, signatures.map(function (signature) { return signature.publicKey; }), signatures.map(function (signature) { return signature.sig; }))
-        .then(function (tx) { return tx.wait(); })
+        .then(function (tx) {
+        setProgress(progress_1.Progress.WaitingForConfirmationWrap);
+        return tx.wait();
+    })
         .then(function () { return ({
         tokenContract: wrapperContract.address,
         tokenId: 5,
@@ -75,12 +90,17 @@ exports.wrapTokenEthereum = wrapTokenEthereum;
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function burnTokenEthereum(chain, token, destinationAddress, signer) {
+function burnTokenEthereum(chain, token, destinationAddress, signer, setProgress) {
     var wrapperContract = new ethers_1.Contract(config_1.ChainConfig[chain].wrapperContract, Wrapper_json_1.default.abi, signer);
+    setProgress(progress_1.Progress.WaitingForUserBurn);
     return wrapperContract.burn(token.tokenContract, token.tokenId, token.timestamp, destinationAddress)
-        .then(function (tx) { return tx.wait(); })
+        .then(function (tx) {
+        setProgress(progress_1.Progress.WaitingForConfirmationBurn);
+        return tx.wait();
+    })
         .then();
 }
 exports.burnTokenEthereum = burnTokenEthereum;
@@ -90,12 +110,17 @@ exports.burnTokenEthereum = burnTokenEthereum;
  * @param message An unsigned message sent by the nodes
  * @param signatures signatures returned by the nodes proving the message
  * @param signer The signer instance from ethers.js
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function withdrawTokenEthereum(chain, message, signatures, signer) {
+function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) {
     var lockerContract = new ethers_1.Contract(config_1.ChainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
+    setProgress(progress_1.Progress.WaitingForUserWithdraw);
     return lockerContract.withdraw(message.tokenContract, message.tokenId, message.timestamp, [], [])
-        .then(function (tx) { return tx.wait(); })
+        .then(function (tx) {
+        setProgress(progress_1.Progress.WaitingForConfirmationWithdraw);
+        return tx.wait();
+    })
         .then();
 }
 exports.withdrawTokenEthereum = withdrawTokenEthereum;

@@ -1,6 +1,7 @@
 const nodes = ["http://localhost:3030/proof", "http://localhost:3030/proof"];
 import axios from "axios";
 import { Chain } from "./types/chain";
+import { Progress } from "./types/progress";
 import {
     isSignedMessageType,
     ProofRequestType,
@@ -16,7 +17,7 @@ import { LockedTokenType } from "./types/token";
  * @param targetChain The chain where the proof will be used
  * @param token The locked token (contract address, id and timestamp)
  * @param status The status that should be proved
- * @param progressCallback A callback to get the progress of the proof
+ * @param setProgress callback to track the progress of the proof
  * @returns a promise with the message and signatures
  */
 export function proveTokenStatus(
@@ -24,8 +25,9 @@ export function proveTokenStatus(
     targetChain: Chain,
     token: LockedTokenType,
     status: Status,
-    progressCallback?: (done: number, total: number) => void
+    setProgress: (progress: Progress) => void
 ) {
+    setProgress(Progress.ProvingStatus);
     const proofRequest: ProofRequestType = {
         sourceChain,
         targetChain,
@@ -64,6 +66,9 @@ export function proveTokenStatus(
         if (typeof message === "undefined") {
             return Promise.reject("Undefined message");
         }
+
+        setProgress(Progress.ProvedStatus);
+
         return {
             signatures,
             message,

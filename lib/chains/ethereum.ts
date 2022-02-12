@@ -4,6 +4,7 @@ import lockerAbi from "../abi/ethereum/Locker.json";
 import wrapperAbi from "../abi/ethereum/Wrapper.json";
 import { ChainConfig } from "../config";
 import { Chain } from "../types/chain";
+import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
 
@@ -31,13 +32,15 @@ export function setChainSignerEthereum(chain: Chain, signer: Signer) {
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
 export function approveAndLockEthereum(
     chain: Chain,
     token: Token,
     destinationAddress: string,
-    signer: Signer
+    signer: Signer,
+    setProgress: (progress: Progress) => void
 ): Promise<number> {
     const lockerContract = new Contract(
         ChainConfig[chain].lockerContract,
@@ -46,22 +49,29 @@ export function approveAndLockEthereum(
     );
     const tokenContract = new Contract(token.tokenContract, tokenAbi, signer);
 
+    setProgress(Progress.WaitingForUserApproval);
     return (
         tokenContract.approve(
             ChainConfig[chain].lockerContract,
             token.tokenId
         ) as Promise<TransactionResponse>
     )
-        .then((tx) => tx.wait())
-        .then(
-            () =>
-                lockerContract.lock(
-                    token.tokenContract,
-                    token.tokenId,
-                    destinationAddress
-                ) as Promise<TransactionResponse>
-        )
-        .then((tx) => tx.wait())
+        .then((tx) => {
+            setProgress(Progress.WaitingForConfirmationApproval);
+            return tx.wait();
+        })
+        .then(() => {
+            setProgress(Progress.WaitingForUserLock);
+            return lockerContract.lock(
+                token.tokenContract,
+                token.tokenId,
+                destinationAddress
+            ) as Promise<TransactionResponse>;
+        })
+        .then((tx) => {
+            setProgress(Progress.WaitingForConfirmationLock);
+            return tx.wait();
+        })
         .then((confirm) =>
             signer
                 .provider!.getBlock(confirm.blockNumber)
@@ -76,13 +86,15 @@ export function approveAndLockEthereum(
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
 export function wrapTokenEthereum(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
-    signer: Signer
+    signer: Signer,
+    setProgress: (progress: Progress) => void
 ): Promise<WrappedTokenType> {
     const wrapperContract = new Contract(
         ChainConfig[chain].wrapperContract,
@@ -90,6 +102,7 @@ export function wrapTokenEthereum(
         signer
     );
 
+    setProgress(Progress.WaitingForUserWrap);
     return (
         wrapperContract.wrap(
             message.tokenContract,
@@ -100,7 +113,10 @@ export function wrapTokenEthereum(
             signatures.map((signature) => signature.sig)
         ) as Promise<TransactionResponse>
     )
-        .then((tx) => tx.wait())
+        .then((tx) => {
+            setProgress(Progress.WaitingForConfirmationWrap);
+            return tx.wait();
+        })
         .then(() => ({
             tokenContract: wrapperContract.address,
             tokenId: 5,
@@ -114,13 +130,15 @@ export function wrapTokenEthereum(
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
 export function burnTokenEthereum(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
-    signer: Signer
+    signer: Signer,
+    setProgress: (progress: Progress) => void
 ): Promise<void> {
     const wrapperContract = new Contract(
         ChainConfig[chain].wrapperContract,
@@ -128,6 +146,7 @@ export function burnTokenEthereum(
         signer
     );
 
+    setProgress(Progress.WaitingForUserBurn);
     return (
         wrapperContract.burn(
             token.tokenContract,
@@ -136,7 +155,10 @@ export function burnTokenEthereum(
             destinationAddress
         ) as Promise<TransactionResponse>
     )
-        .then((tx) => tx.wait())
+        .then((tx) => {
+            setProgress(Progress.WaitingForConfirmationBurn);
+            return tx.wait();
+        })
         .then();
 }
 
@@ -146,13 +168,15 @@ export function burnTokenEthereum(
  * @param message An unsigned message sent by the nodes
  * @param signatures signatures returned by the nodes proving the message
  * @param signer The signer instance from ethers.js
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
 export function withdrawTokenEthereum(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
-    signer: Signer
+    signer: Signer,
+    setProgress: (progress: Progress) => void
 ): Promise<void> {
     const lockerContract = new Contract(
         ChainConfig[chain].lockerContract,
@@ -160,6 +184,7 @@ export function withdrawTokenEthereum(
         signer
     );
 
+    setProgress(Progress.WaitingForUserWithdraw);
     return (
         lockerContract.withdraw(
             message.tokenContract,
@@ -169,6 +194,9 @@ export function withdrawTokenEthereum(
             []
         ) as Promise<TransactionResponse>
     )
-        .then((tx) => tx.wait())
+        .then((tx) => {
+            setProgress(Progress.WaitingForConfirmationWithdraw);
+            return tx.wait();
+        })
         .then();
 }

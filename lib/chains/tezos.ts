@@ -6,6 +6,7 @@ import {
 } from "@taquito/taquito";
 import { ChainConfig } from "../config";
 import { Chain } from "../types/chain";
+import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
 
@@ -49,13 +50,15 @@ export function setChainSignerTezos(chain: Chain, signer: TezosSigner) {
  * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
 export function approveAndLockTezos(
     chain: Chain,
     token: Token,
     destinationAddress: string,
-    Tezos: TezosToolkit
+    Tezos: TezosToolkit,
+    setProgress: (progress: Progress) => void
 ): Promise<number> {
     const operation = (signerAddress: string) =>
         Tezos.wallet
@@ -63,8 +66,11 @@ export function approveAndLockTezos(
             .then((lockerContract) =>
                 Tezos.wallet
                     .at(token.tokenContract)
-                    .then((tokenContract) =>
-                        Tezos.wallet
+                    .then((tokenContract) => {
+                        setProgress(Progress.WaitingForUserApproval);
+                        setProgress(Progress.WaitingForUserLock);
+
+                        return Tezos.wallet
                             .batch()
                             .withContractCall(
                                 tokenContract.methods.update_operators([
@@ -84,13 +90,19 @@ export function approveAndLockTezos(
                                     token_id: token.tokenId.toString(),
                                 })
                             )
-                            .send()
-                    )
-                    .then((op) => op.confirmation())
+                            .send();
+                    })
+                    .then((op) => {
+                        setProgress(Progress.WaitingForConfirmationApproval);
+                        setProgress(Progress.WaitingForConfirmationLock);
+
+                        return op.confirmation();
+                    })
                     .then((confirm) => {
                         if (!confirm.completed) {
                             return Promise.reject("Transaction not completed");
                         }
+
                         return Date.parse(
                             confirm.block.header.timestamp.toString()
                         );
@@ -107,18 +119,21 @@ export function approveAndLockTezos(
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
 export function wrapTokenTezos(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
-    Tezos: TezosToolkit
+    Tezos: TezosToolkit,
+    setProgress: (progress: Progress) => void
 ): Promise<WrappedTokenType> {
     return Tezos.wallet
         .at(ChainConfig[chain].wrapperContract)
-        .then((wrapperContract) =>
-            wrapperContract.methodsObject
+        .then((wrapperContract) => {
+            setProgress(Progress.WaitingForUserWrap);
+            return wrapperContract.methodsObject
                 .wrap({
                     token_contract: message.tokenContract,
                     token_id: message.tokenId.toString(),
@@ -126,9 +141,12 @@ export function wrapTokenTezos(
                     metadata: new MichelsonMap(),
                     signatures: new MichelsonMap(),
                 })
-                .send()
-        )
-        .then((op) => op.confirmation())
+                .send();
+        })
+        .then((op) => {
+            setProgress(Progress.WaitingForConfirmationWrap);
+            return op.confirmation();
+        })
         .then((confirm) => ({
             tokenContract: ChainConfig[chain].wrapperContract,
             tokenId: 5,
@@ -142,27 +160,33 @@ export function wrapTokenTezos(
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
 export function burnTokenTezos(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
-    Tezos: TezosToolkit
+    Tezos: TezosToolkit,
+    setProgress: (progress: Progress) => void
 ): Promise<void> {
     return Tezos.wallet
         .at(ChainConfig[chain].wrapperContract)
-        .then((wrapperContract) =>
-            wrapperContract.methodsObject
+        .then((wrapperContract) => {
+            setProgress(Progress.WaitingForUserBurn);
+            return wrapperContract.methodsObject
                 .burn({
                     destination_address: destinationAddress,
                     lock_timestamp: token.timestamp.toString(),
                     token_contract: token.tokenContract,
                     token_id: token.tokenId.toString(),
                 })
-                .send()
-        )
-        .then((op) => op.confirmation())
+                .send();
+        })
+        .then((op) => {
+            setProgress(Progress.WaitingForConfirmationBurn);
+            return op.confirmation();
+        })
         .then((confirm) => {
             if (!confirm.completed) return Promise.reject("could not burn");
         });
@@ -174,27 +198,33 @@ export function burnTokenTezos(
  * @param message An unsigned message sent by the nodes
  * @param signatures signatures returned by the nodes proving the message
  * @param Tezos The TezosToolkit instance
+ * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
 export function withdrawTokenTezos(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
-    Tezos: TezosToolkit
+    Tezos: TezosToolkit,
+    setProgress: (progress: Progress) => void
 ): Promise<void> {
     return Tezos.wallet
         .at(ChainConfig[chain].lockerContract)
-        .then((lockerContract) =>
-            lockerContract.methodsObject
+        .then((lockerContract) => {
+            setProgress(Progress.WaitingForUserWithdraw);
+            return lockerContract.methodsObject
                 .withdraw({
                     token_address: message.tokenContract,
                     token_id: message.tokenId.toString(),
                     locked_timestamp: message.timestamp.toString(),
                     signatures: new MichelsonMap(),
                 })
-                .send()
-        )
-        .then((op) => op.confirmation())
+                .send();
+        })
+        .then((op) => {
+            setProgress(Progress.WaitingForConfirmationWithdraw);
+            return op.confirmation();
+        })
         .then((confirm) => {
             if (!confirm.completed) return Promise.reject("could not withdraw");
         });
