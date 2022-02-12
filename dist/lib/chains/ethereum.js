@@ -5,17 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.withdrawTokenEthereum = exports.burnTokenEthereum = exports.wrapTokenEthereum = exports.approveAndLockEthereum = exports.setChainSignerEthereum = void 0;
 var ethers_1 = require("ethers");
+var ERC721_json_1 = __importDefault(require("../abi/ethereum/ERC721.json"));
 var Locker_json_1 = __importDefault(require("../abi/ethereum/Locker.json"));
 var Wrapper_json_1 = __importDefault(require("../abi/ethereum/Wrapper.json"));
 var config_1 = require("../config");
 var progress_1 = require("../types/progress");
-/**
- * Abi represeting the approve function in ERC721 tokens.
- * TODO: Move this abi in a json file in ../abi/ethereum
- */
-var tokenAbi = [
-    "function approve(address _approved, uint256 _tokenId) external payable",
-];
 /**
  * Sets the instance for the ethereum signer
  * @param chain The signer's current chain (used to know whether we are using a testnet or the mainnet)
@@ -37,7 +31,7 @@ exports.setChainSignerEthereum = setChainSignerEthereum;
  */
 function approveAndLockEthereum(chain, token, destinationAddress, signer, setProgress) {
     var lockerContract = new ethers_1.Contract(config_1.chainConfig[chain].lockerContract, Locker_json_1.default.abi, signer);
-    var tokenContract = new ethers_1.Contract(token.tokenContract, tokenAbi, signer);
+    var tokenContract = new ethers_1.Contract(token.tokenContract, ERC721_json_1.default, signer);
     setProgress(progress_1.Progress.WaitingForUserApproval);
     return tokenContract.approve(config_1.chainConfig[chain].lockerContract, token.tokenId)
         .then(function (tx) {

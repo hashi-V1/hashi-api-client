@@ -1,0 +1,4 @@
+[
+    "function approve(address _approved, uint256 _tokenId) external payable",
+    "function tokenURI(uint256 _tokenId) external view returns (string)"
+]

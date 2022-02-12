@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { Contract, Signer } from "ethers";
+import erc721Abi from "../abi/ethereum/ERC721.json";
 import lockerAbi from "../abi/ethereum/Locker.json";
 import wrapperAbi from "../abi/ethereum/Wrapper.json";
 import { chainConfig } from "../config";
@@ -7,14 +8,6 @@ import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
-
-/**
- * Abi represeting the approve function in ERC721 tokens.
- * TODO: Move this abi in a json file in ../abi/ethereum
- */
-const tokenAbi = [
-    "function approve(address _approved, uint256 _tokenId) external payable",
-];
 
 /**
  * Sets the instance for the ethereum signer
@@ -47,7 +40,7 @@ export function approveAndLockEthereum(
         lockerAbi.abi,
         signer
     );
-    const tokenContract = new Contract(token.tokenContract, tokenAbi, signer);
+    const tokenContract = new Contract(token.tokenContract, erc721Abi, signer);
 
     setProgress(Progress.WaitingForUserApproval);
     return (
