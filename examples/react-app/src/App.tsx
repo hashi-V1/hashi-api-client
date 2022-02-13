@@ -3,6 +3,7 @@ import { BeaconWallet } from "@taquito/beacon-wallet";
 import { ethers } from "ethers";
 import {
     Chain,
+    chainConfig,
     HashiBridge,
     Progress,
     progressConstants,
@@ -22,6 +23,10 @@ function App() {
     const [tokenId, setTokenId] = useState(0);
     const [destinationAddress, setDestinationAddress] = useState("");
     const [progress, setProgress] = useState("");
+    const [wrappedText, setWrappedText] = useState("");
+
+    const [wrappedId, setWrappedId] = useState(0);
+    const [wrappedDestination, setWrappedDestination] = useState("");
 
     useEffect(() => {
         const options = {
@@ -83,13 +88,40 @@ function App() {
                         destinationAddress,
                         (p: Progress) => setProgress(progressConstants[p])
                     )
-                    .then(console.log)
+                    .then((wrapped) =>
+                        setWrappedText(
+                            `(${wrapped.tokenContract} - ${wrapped.tokenId})`
+                        )
+                    )
                     .catch(alert);
             } catch (e) {
                 alert(e);
             }
         },
         [tokenAddress, tokenId, destinationAddress]
+    );
+
+    const burnToChain = useCallback(
+        (source: Chain, target: Chain) => {
+            hashi
+                .getLockedTokenFromWrapped({
+                    tokenContract: chainConfig[source].wrapperContract,
+                    tokenId: wrappedId,
+                    chain: source,
+                })
+                .then((locked) =>
+                    hashi.unbridge(
+                        source,
+                        target,
+                        locked,
+                        wrappedDestination,
+                        (p: Progress) => setProgress(progressConstants[p])
+                    )
+                )
+                .then(console.log)
+                .catch(alert);
+        },
+        [wrappedId, wrappedDestination]
     );
 
     return (
@@ -154,7 +186,46 @@ function App() {
                 </button>
             </div>
 
-            <div>{progress}</div>
+            <div>
+                {progress} {wrappedText}
+            </div>
+
+            {/*<div>
+                <label htmlFor="wrapped_id">
+                    Wrapped id
+                    <input
+                        id="wrapped_id"
+                        type="number"
+                        value={wrappedId}
+                        onChange={(event) =>
+                            setWrappedId(parseInt(event.target.value))
+                        }
+                    />
+                </label>
+                <label htmlFor="wrapped_destination">
+                    Wrapped destination
+                    <input
+                        id="wrapped_destination"
+                        value={wrappedDestination}
+                        onChange={(event) =>
+                            setWrappedDestination(event.target.value)
+                        }
+                    />
+                </label>
+            </div>
+
+            <div>
+                <button
+                    onClick={() => burnToChain(Chain.Ethereum, Chain.Tezos)}
+                >
+                    Burn to Tezos
+                </button>
+                <button
+                    onClick={() => burnToChain(Chain.Tezos, Chain.Ethereum)}
+                >
+                    Burn to Ethereum
+                </button>
+                    </div>*/}
         </div>
     );
 }

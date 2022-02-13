@@ -134,6 +134,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.unbridge = function (sourceChain, targetChain, token, destinationAddress, progressCallback) {
         var _this = this;
+        console.log(destinationAddress);
         if (destinationAddress === "")
             return Promise.reject(Error("DestinationAddress cannot be empty."));
         return this.burnToken(sourceChain, token, destinationAddress, progressCallback)
@@ -213,6 +214,18 @@ var HashiBridge = /** @class */ (function () {
                 return (0, tezos_1.withdrawTokenTezos)(chain, message, signatures, instance, setProgress);
             case chain_1.Chain.Ethereum:
                 return (0, ethereum_1.withdrawTokenEthereum)(chain, message, signatures, instance, setProgress);
+        }
+    };
+    HashiBridge.prototype.getLockedTokenFromWrapped = function (wrapped) {
+        var instance = this.chainsInstances.get(wrapped.chain);
+        if (typeof instance === "undefined") {
+            return Promise.reject("Signer has not been defined for this chain.");
+        }
+        switch (wrapped.chain) {
+            case chain_1.Chain.Tezos:
+                return (0, tezos_1.getLockedTokenFromWrappedTezos)(wrapped, instance);
+            case chain_1.Chain.Ethereum:
+                return (0, ethereum_1.getLockedTokenFromWrappedEthereum)(wrapped, instance);
         }
     };
     return HashiBridge;

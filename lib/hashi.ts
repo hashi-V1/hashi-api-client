@@ -1,6 +1,7 @@
 import {
     approveAndLockEthereum,
     burnTokenEthereum,
+    getLockedTokenFromWrappedEthereum,
     setChainSignerEthereum,
     withdrawTokenEthereum,
     wrapTokenEthereum,
@@ -8,6 +9,7 @@ import {
 import {
     approveAndLockTezos,
     burnTokenTezos,
+    getLockedTokenFromWrappedTezos,
     setChainSignerTezos,
     withdrawTokenTezos,
     wrapTokenTezos,
@@ -230,6 +232,7 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
+        console.log(destinationAddress);
         if (destinationAddress === "")
             return Promise.reject(Error("DestinationAddress cannot be empty."));
 
@@ -390,6 +393,22 @@ export class HashiBridge {
                     instance,
                     setProgress
                 );
+        }
+    }
+
+    getLockedTokenFromWrapped(wrapped: WrappedTokenType) {
+        const instance = this.chainsInstances.get(wrapped.chain);
+        if (typeof instance === "undefined") {
+            return Promise.reject(
+                "Signer has not been defined for this chain."
+            );
+        }
+
+        switch (wrapped.chain) {
+            case Chain.Tezos:
+                return getLockedTokenFromWrappedTezos(wrapped, instance);
+            case Chain.Ethereum:
+                return getLockedTokenFromWrappedEthereum(wrapped, instance);
         }
     }
 }

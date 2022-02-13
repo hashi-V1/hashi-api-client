@@ -26,3 +26,16 @@ export function stringToHex(input: string): string {
     }
     return ret;
 }
+
+/**
+ * Check whether the object obj has a property called prop.
+ * @param obj Any object
+ * @param prop A property
+ * @returns a boolean and a type predicate
+ */
+export function hasOwnProperty<X extends {}, Y extends PropertyKey>(
+    obj: X,
+    prop: Y
+): obj is X & Record<Y, unknown> {
+    return obj.hasOwnProperty(prop);
+}

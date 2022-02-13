@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringToHex = exports.setProgressCallback = void 0;
+exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
 var progress_1 = require("./types/progress");
 /**
  * Creates a non optional progressCallback with the parameter or if it is undefined
@@ -68,4 +68,14 @@ function stringToHex(input) {
     return ret;
 }
 exports.stringToHex = stringToHex;
+/**
+ * Check whether the object obj has a property called prop.
+ * @param obj Any object
+ * @param prop A property
+ * @returns a boolean and a type predicate
+ */
+function hasOwnProperty(obj, prop) {
+    return obj.hasOwnProperty(prop);
+}
+exports.hasOwnProperty = hasOwnProperty;
 //# sourceMappingURL=utils.js.map

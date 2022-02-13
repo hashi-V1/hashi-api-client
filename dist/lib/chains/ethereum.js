@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.withdrawTokenEthereum = exports.burnTokenEthereum = exports.wrapTokenEthereum = exports.approveAndLockEthereum = exports.setChainSignerEthereum = void 0;
+exports.getLockedTokenFromWrappedEthereum = exports.withdrawTokenEthereum = exports.burnTokenEthereum = exports.wrapTokenEthereum = exports.approveAndLockEthereum = exports.setChainSignerEthereum = void 0;
 var ethers_1 = require("ethers");
 var ERC721_json_1 = __importDefault(require("../abi/ethereum/ERC721.json"));
 var Locker_json_1 = __importDefault(require("../abi/ethereum/Locker.json"));
@@ -71,9 +71,17 @@ function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
         setProgress(progress_1.Progress.WaitingForConfirmationWrap);
         return tx.wait();
     })
-        .then(function () { return ({
+        .then(function () {
+        return wrapperContract.wrappedTokens(message.tokenContract, message.tokenId).then(function (tid) {
+            if (isNaN(tid) || tid === 0) {
+                return Promise.reject("Failed to retrieve token id.");
+            }
+            return tid;
+        });
+    })
+        .then(function (tokenId) { return ({
         tokenContract: wrapperContract.address,
-        tokenId: 5,
+        tokenId: tokenId,
         chain: chain,
     }); });
 }
@@ -118,4 +126,13 @@ function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) 
         .then();
 }
 exports.withdrawTokenEthereum = withdrawTokenEthereum;
+function getLockedTokenFromWrappedEthereum(wrapped, signer) {
+    var wrapperContract = new ethers_1.Contract(config_1.chainConfig[wrapped.chain].wrapperContract, Wrapper_json_1.default.abi, signer);
+    return wrapperContract.wrappedId(wrapped.tokenId).then(function (val) { return ({
+        tokenContract: val.tokenContract,
+        tokenId: val.tokenId,
+        timestamp: val.tokenLockTimestamp,
+    }); });
+}
+exports.getLockedTokenFromWrappedEthereum = getLockedTokenFromWrappedEthereum;
 //# sourceMappingURL=ethereum.js.map

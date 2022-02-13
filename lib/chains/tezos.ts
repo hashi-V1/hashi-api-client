@@ -9,7 +9,7 @@ import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
-import { stringToHex } from "../utils";
+import { hasOwnProperty, stringToHex } from "../utils";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -128,7 +128,6 @@ export function approveAndLockTezos(
 
 /**
  * Wraps a token on a specific chain with proofs from the federation.
- * TODO: Get the wrapped token id from storage
  * TODO: Signatures not recognized by contracts
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
@@ -156,15 +155,48 @@ export function wrapTokenTezos(
                     token_metadata: stringToHex(message.metadata),
                     signatures: new MichelsonMap(),
                 })
-                .send();
+                .send()
+                .then((op) => {
+                    setProgress(Progress.WaitingForConfirmationWrap);
+                    return op.confirmation();
+                })
+                .then((confirm) => {
+                    if (!confirm.completed) {
+                        return Promise.reject("Transaction not completed");
+                    }
+
+                    return wrapperContract.storage().then((wrapperStorage) => {
+                        if (
+                            wrapperStorage === null ||
+                            typeof wrapperStorage !== "object" ||
+                            !hasOwnProperty(wrapperStorage, "wrapped_tokens") ||
+                            !MichelsonMap.isMichelsonMap(
+                                wrapperStorage.wrapped_tokens
+                            )
+                        ) {
+                            return Promise.reject("Invalid wrapper storage");
+                        }
+
+                        const tid = parseInt(
+                            wrapperStorage.wrapped_tokens.get({
+                                token_contract: message.tokenContract,
+                                token_id: message.tokenId.toString(),
+                            })
+                        );
+
+                        if (isNaN(tid)) {
+                            return Promise.reject(
+                                "Could not retrieve wrapped token id"
+                            );
+                        }
+
+                        return tid;
+                    });
+                });
         })
-        .then((op) => {
-            setProgress(Progress.WaitingForConfirmationWrap);
-            return op.confirmation();
-        })
-        .then((confirm) => ({
+        .then((tokenId) => ({
             tokenContract: chainConfig[chain].wrapperContract,
-            tokenId: 5,
+            tokenId,
             chain: chain,
         }));
 }
@@ -242,5 +274,42 @@ export function withdrawTokenTezos(
         })
         .then((confirm) => {
             if (!confirm.completed) return Promise.reject("could not withdraw");
+        });
+}
+
+export function getLockedTokenFromWrappedTezos(
+    wrapped: WrappedTokenType,
+    Tezos: TezosToolkit
+): Promise<LockedTokenType> {
+    return Tezos.contract
+        .at(wrapped.tokenContract)
+        .then((wrapperContract) => wrapperContract.storage())
+        .then((wrapperStorage) => {
+            if (
+                wrapperStorage === null ||
+                typeof wrapperStorage !== "object" ||
+                !hasOwnProperty(wrapperStorage, "wrapped_id") ||
+                !MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_id)
+            ) {
+                return Promise.reject("Invalid wrapper storage.");
+            }
+
+            const r = wrapperStorage.wrapped_id.get(wrapped.tokenId.toString());
+
+            if (
+                r === null ||
+                typeof r !== "object" ||
+                !hasOwnProperty(r, "lock_timestamp") ||
+                !hasOwnProperty(r, "token_contract") ||
+                !hasOwnProperty(r, "token_id")
+            ) {
+                return Promise.reject("Could not retrieve wrapped token");
+            }
+
+            return {
+                tokenId: r.token_id,
+                tokenContract: r.token_contract,
+                timestamp: r.lock_timestamp,
+            };
         });
 }

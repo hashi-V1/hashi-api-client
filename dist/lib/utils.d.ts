@@ -12,3 +12,10 @@ export declare function setProgressCallback(progressCallback?: (progress: Progre
  * @returns an hexadecimal representation of the input
  */
 export declare function stringToHex(input: string): string;
+/**
+ * Check whether the object obj has a property called prop.
+ * @param obj Any object
+ * @param prop A property
+ * @returns a boolean and a type predicate
+ */
+export declare function hasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): obj is X & Record<Y, unknown>;

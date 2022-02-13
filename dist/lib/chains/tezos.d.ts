@@ -22,7 +22,6 @@ export declare function setChainSignerTezos(chain: Chain, signer: TezosSigner): 
 export declare function approveAndLockTezos(chain: Chain, token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<number>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
- * TODO: Get the wrapped token id from storage
  * TODO: Signatures not recognized by contracts
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
@@ -52,4 +51,5 @@ export declare function burnTokenTezos(chain: Chain, token: LockedTokenType, des
  * @returns an empty promise
  */
 export declare function withdrawTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function getLockedTokenFromWrappedTezos(wrapped: WrappedTokenType, Tezos: TezosToolkit): Promise<LockedTokenType>;
 export {};

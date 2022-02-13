@@ -110,9 +110,22 @@ export function wrapTokenEthereum(
             setProgress(Progress.WaitingForConfirmationWrap);
             return tx.wait();
         })
-        .then(() => ({
+        .then(() => {
+            return (
+                wrapperContract.wrappedTokens(
+                    message.tokenContract,
+                    message.tokenId
+                ) as Promise<number>
+            ).then((tid) => {
+                if (isNaN(tid) || tid === 0) {
+                    return Promise.reject("Failed to retrieve token id.");
+                }
+                return tid;
+            });
+        })
+        .then((tokenId) => ({
             tokenContract: wrapperContract.address,
-            tokenId: 5,
+            tokenId,
             chain: chain,
         }));
 }
@@ -192,4 +205,27 @@ export function withdrawTokenEthereum(
             return tx.wait();
         })
         .then();
+}
+
+export function getLockedTokenFromWrappedEthereum(
+    wrapped: WrappedTokenType,
+    signer: Signer
+): Promise<LockedTokenType> {
+    const wrapperContract = new Contract(
+        chainConfig[wrapped.chain].wrapperContract,
+        wrapperAbi.abi,
+        signer
+    );
+
+    return (
+        wrapperContract.wrappedId(wrapped.tokenId) as Promise<{
+            tokenContract: string;
+            tokenId: number;
+            tokenLockTimestamp: number;
+        }>
+    ).then((val) => ({
+        tokenContract: val.tokenContract,
+        tokenId: val.tokenId,
+        timestamp: val.tokenLockTimestamp,
+    }));
 }
