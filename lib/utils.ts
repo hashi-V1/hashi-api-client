@@ -13,3 +13,16 @@ export function setProgressCallback(
         ? async (progress: Progress) => console.log(progressConstants[progress])
         : async (progress: Progress) => progressCallback(progress);
 }
+
+/**
+ * Transforms a text from ascii to hex.
+ * @param input An Ascii string
+ * @returns an hexadecimal representation of the input
+ */
+export function stringToHex(input: string): string {
+    let ret = "";
+    for (let i = 0; i < input.length; i++) {
+        ret += input.charCodeAt(i).toString(16);
+    }
+    return ret;
+}

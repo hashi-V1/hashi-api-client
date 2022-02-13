@@ -11,7 +11,7 @@ exports.chainConfig = (_a = {},
     _a[chain_1.Chain.Tezos] = {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
-        wrapperContract: "KT1DhLyx7FfpM28UXLqzoAezWPX6kTaWxUsV",
+        wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
     },
     _a[chain_1.Chain.Ethereum] = {
         rpc: "",

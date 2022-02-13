@@ -10,7 +10,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HashiBridge = void 0;
+exports.stringToHex = exports.HashiBridge = void 0;
 __exportStar(require("./lib/config"), exports);
 var hashi_1 = require("./lib/hashi");
 Object.defineProperty(exports, "HashiBridge", { enumerable: true, get: function () { return hashi_1.HashiBridge; } });
@@ -18,4 +18,6 @@ __exportStar(require("./lib/types/chain"), exports);
 __exportStar(require("./lib/types/progress"), exports);
 __exportStar(require("./lib/types/proof"), exports);
 __exportStar(require("./lib/types/token"), exports);
+var utils_1 = require("./lib/utils");
+Object.defineProperty(exports, "stringToHex", { enumerable: true, get: function () { return utils_1.stringToHex; } });
 //# sourceMappingURL=index.js.map

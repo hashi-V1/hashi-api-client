@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setProgressCallback = void 0;
+exports.stringToHex = exports.setProgressCallback = void 0;
 var progress_1 = require("./types/progress");
 /**
  * Creates a non optional progressCallback with the parameter or if it is undefined
@@ -55,4 +55,17 @@ function setProgressCallback(progressCallback) {
         }); }); };
 }
 exports.setProgressCallback = setProgressCallback;
+/**
+ * Transforms a text from ascii to hex.
+ * @param input An Ascii string
+ * @returns an hexadecimal representation of the input
+ */
+function stringToHex(input) {
+    var ret = "";
+    for (var i = 0; i < input.length; i++) {
+        ret += input.charCodeAt(i).toString(16);
+    }
+    return ret;
+}
+exports.stringToHex = stringToHex;
 //# sourceMappingURL=utils.js.map
