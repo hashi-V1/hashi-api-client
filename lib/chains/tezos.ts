@@ -9,6 +9,7 @@ import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
+import { stringToHex } from "../utils";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -43,6 +44,19 @@ export function setChainSignerTezos(chain: Chain, signer: TezosSigner) {
         Tezos.setSignerProvider(signer);
     }
     return Tezos;
+}
+
+/**
+ * Convert an array of Signatures to a MichelsonMap
+ * @param signatures an array of Signature(s)
+ * @returns a MichelsonMap with the public key as key and sig as value
+ */
+function signatureArrayToMichelsonMap(signatures: Signature[]) {
+    let map = new MichelsonMap<string, string>();
+    signatures.forEach((signature) =>
+        map.set(signature.publicKey, signature.sig)
+    );
+    return map;
 }
 
 /**
@@ -115,6 +129,7 @@ export function approveAndLockTezos(
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * TODO: Get the wrapped token id from storage
+ * TODO: Signatures not recognized by contracts
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
@@ -137,8 +152,8 @@ export function wrapTokenTezos(
                 .wrap({
                     token_contract: message.tokenContract,
                     token_id: message.tokenId.toString(),
-                    lock_timestamp: message.timestamp.toString(),
-                    metadata: new MichelsonMap(),
+                    lock_timestamp: new Date(message.timestamp).toISOString(),
+                    token_metadata: stringToHex(message.metadata),
                     signatures: new MichelsonMap(),
                 })
                 .send();
