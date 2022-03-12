@@ -11,7 +11,8 @@ var utils_1 = require("../utils");
  * @returns a boolean and a type predicate
  */
 function tezosSignerIsWalletProvider(signer) {
-    return ("getPKH" in signer &&
+    return (typeof signer === "object" &&
+        "getPKH" in signer &&
         "mapTransferParamsToWalletParams" in signer &&
         "mapOriginateParamsToWalletParams" in signer &&
         "mapDelegateParamsToWalletParams" in signer &&
@@ -119,7 +120,7 @@ function wrapTokenTezos(chain, message, signatures, Tezos, setProgress) {
             token_id: message.tokenId.toString(),
             lock_timestamp: new Date(message.timestamp).toISOString(),
             token_metadata: (0, utils_1.stringToHex)(message.metadata),
-            signatures: new taquito_1.MichelsonMap(),
+            signatures: signatureArrayToMichelsonMap(signatures),
         })
             .send()
             .then(function (op) {

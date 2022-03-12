@@ -16,6 +16,10 @@ import {
 } from "./chains/tezos";
 import { proveTokenStatus } from "./prover";
 import { Chain } from "./types/chain";
+import {
+    EmptyDestinationAddressError,
+    NoSignerForChainError,
+} from "./types/errors";
 import { Progress } from "./types/progress";
 import { Signature, Status, UnsignedMessageType } from "./types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "./types/token";
@@ -69,16 +73,14 @@ export class HashiBridge {
         progressCallback?: (progress: Progress) => void
     ): Promise<LockedTokenType> {
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(EmptyDestinationAddressError);
 
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.ApprovingAndLocking);
 
         const instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject(
-                "Signer has not been defined for this chain."
-            );
+            return Promise.reject(NoSignerForChainError);
         }
 
         let timestampedPromise: Promise<number>;
@@ -130,7 +132,7 @@ export class HashiBridge {
         progressCallback?: (progress: Progress) => void
     ): Promise<WrappedTokenType> {
         if (message.status !== Status.Locked) {
-            return Promise.reject("Cannot wrap with status other than locked");
+            return Promise.reject();
         }
 
         const setProgress = setProgressCallback(progressCallback);
@@ -138,9 +140,7 @@ export class HashiBridge {
 
         const instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject(
-                "Signer has not been defined for this chain."
-            );
+            return Promise.reject(NoSignerForChainError);
         }
 
         let wrappedPromise;
@@ -189,7 +189,7 @@ export class HashiBridge {
         progressCallback?: (progress: Progress) => void
     ): Promise<WrappedTokenType> {
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(EmptyDestinationAddressError);
 
         return this.approveAndLock(
             sourceChain,
@@ -232,9 +232,8 @@ export class HashiBridge {
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
-        console.log(destinationAddress);
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(EmptyDestinationAddressError);
 
         return this.burnToken(
             sourceChain,
@@ -307,16 +306,14 @@ export class HashiBridge {
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(EmptyDestinationAddressError);
 
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.Burning);
 
         const instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject(
-                "Signer has not been defined for this chain."
-            );
+            return Promise.reject(NoSignerForChainError);
         }
 
         let burnPromise;
@@ -370,9 +367,7 @@ export class HashiBridge {
 
         const instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject(
-                "Signer has not been defined for this chain."
-            );
+            return Promise.reject(NoSignerForChainError);
         }
 
         switch (chain) {
@@ -399,9 +394,7 @@ export class HashiBridge {
     getLockedTokenFromWrapped(wrapped: WrappedTokenType) {
         const instance = this.chainsInstances.get(wrapped.chain);
         if (typeof instance === "undefined") {
-            return Promise.reject(
-                "Signer has not been defined for this chain."
-            );
+            return Promise.reject(NoSignerForChainError);
         }
 
         switch (wrapped.chain) {

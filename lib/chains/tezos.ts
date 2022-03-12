@@ -22,6 +22,7 @@ function tezosSignerIsWalletProvider(
     signer: TezosSigner
 ): signer is WalletProvider {
     return (
+        typeof signer === "object" &&
         "getPKH" in signer &&
         "mapTransferParamsToWalletParams" in signer &&
         "mapOriginateParamsToWalletParams" in signer &&
@@ -153,7 +154,7 @@ export function wrapTokenTezos(
                     token_id: message.tokenId.toString(),
                     lock_timestamp: new Date(message.timestamp).toISOString(),
                     token_metadata: stringToHex(message.metadata),
-                    signatures: new MichelsonMap(),
+                    signatures: signatureArrayToMichelsonMap(signatures),
                 })
                 .send()
                 .then((op) => {

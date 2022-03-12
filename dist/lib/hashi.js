@@ -5,6 +5,7 @@ var ethereum_1 = require("./chains/ethereum");
 var tezos_1 = require("./chains/tezos");
 var prover_1 = require("./prover");
 var chain_1 = require("./types/chain");
+var errors_1 = require("./types/errors");
 var progress_1 = require("./types/progress");
 var proof_1 = require("./types/proof");
 var utils_1 = require("./utils");
@@ -44,12 +45,12 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.approveAndLock = function (chain, token, destinationAddress, progressCallback) {
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(errors_1.EmptyDestinationAddressError);
         var setProgress = (0, utils_1.setProgressCallback)(progressCallback);
         setProgress(progress_1.Progress.ApprovingAndLocking);
         var instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject("Signer has not been defined for this chain.");
+            return Promise.reject(errors_1.NoSignerForChainError);
         }
         var timestampedPromise;
         switch (chain) {
@@ -79,13 +80,13 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.wrapToken = function (chain, message, signatures, progressCallback) {
         if (message.status !== proof_1.Status.Locked) {
-            return Promise.reject("Cannot wrap with status other than locked");
+            return Promise.reject();
         }
         var setProgress = (0, utils_1.setProgressCallback)(progressCallback);
         setProgress(progress_1.Progress.Wrapping);
         var instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject("Signer has not been defined for this chain.");
+            return Promise.reject(errors_1.NoSignerForChainError);
         }
         var wrappedPromise;
         switch (chain) {
@@ -113,7 +114,7 @@ var HashiBridge = /** @class */ (function () {
     HashiBridge.prototype.bridge = function (sourceChain, targetChain, token, destinationAddress, progressCallback) {
         var _this = this;
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(errors_1.EmptyDestinationAddressError);
         return this.approveAndLock(sourceChain, token, destinationAddress, progressCallback)
             .then(function (lockedToken) {
             return _this.proveTokenStatus(sourceChain, targetChain, lockedToken, proof_1.Status.Locked, progressCallback);
@@ -134,9 +135,8 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.unbridge = function (sourceChain, targetChain, token, destinationAddress, progressCallback) {
         var _this = this;
-        console.log(destinationAddress);
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(errors_1.EmptyDestinationAddressError);
         return this.burnToken(sourceChain, token, destinationAddress, progressCallback)
             .then(function () {
             return _this.proveTokenStatus(sourceChain, targetChain, token, proof_1.Status.Burned, progressCallback);
@@ -173,12 +173,12 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.burnToken = function (chain, token, destinationAddress, progressCallback) {
         if (destinationAddress === "")
-            return Promise.reject(Error("DestinationAddress cannot be empty."));
+            return Promise.reject(errors_1.EmptyDestinationAddressError);
         var setProgress = (0, utils_1.setProgressCallback)(progressCallback);
         setProgress(progress_1.Progress.Burning);
         var instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject("Signer has not been defined for this chain.");
+            return Promise.reject(errors_1.NoSignerForChainError);
         }
         var burnPromise;
         switch (chain) {
@@ -207,7 +207,7 @@ var HashiBridge = /** @class */ (function () {
         setProgress(progress_1.Progress.Withdrawing);
         var instance = this.chainsInstances.get(chain);
         if (typeof instance === "undefined") {
-            return Promise.reject("Signer has not been defined for this chain.");
+            return Promise.reject(errors_1.NoSignerForChainError);
         }
         switch (chain) {
             case chain_1.Chain.Tezos:
@@ -219,7 +219,7 @@ var HashiBridge = /** @class */ (function () {
     HashiBridge.prototype.getLockedTokenFromWrapped = function (wrapped) {
         var instance = this.chainsInstances.get(wrapped.chain);
         if (typeof instance === "undefined") {
-            return Promise.reject("Signer has not been defined for this chain.");
+            return Promise.reject(errors_1.NoSignerForChainError);
         }
         switch (wrapped.chain) {
             case chain_1.Chain.Tezos:
