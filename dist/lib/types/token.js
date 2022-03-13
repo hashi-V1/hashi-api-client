@@ -8,6 +8,8 @@ var chain_1 = require("./chain");
  * @returns a boolean and a type predicate.
  */
 function isLockedTokenType(input) {
+    if (typeof input === "undefined" || input == null)
+        return false;
     var m = input;
     return (m.tokenContract != null &&
         m.tokenContract != "" &&

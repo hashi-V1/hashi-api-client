@@ -24,6 +24,7 @@ export type LockedTokenType = {
  * @returns a boolean and a type predicate.
  */
 export function isLockedTokenType(input: any): input is LockedTokenType {
+    if (typeof input === "undefined" || input == null) return false;
     const m = input as LockedTokenType;
     return (
         m.tokenContract != null &&
