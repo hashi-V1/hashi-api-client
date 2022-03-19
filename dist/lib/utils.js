@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
+exports.isNotEmpty = exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
 var progress_1 = require("./types/progress");
 /**
  * Creates a non optional progressCallback with the parameter or if it is undefined
@@ -75,7 +75,16 @@ exports.stringToHex = stringToHex;
  * @returns a boolean and a type predicate
  */
 function hasOwnProperty(obj, prop) {
-    return obj.hasOwnProperty(prop);
+    return obj != null && obj.hasOwnProperty(prop);
 }
 exports.hasOwnProperty = hasOwnProperty;
+/**
+ * Check whether the input is of type string.
+ * @param input Any object
+ * @returns a boolean and a type predicate
+ */
+function isNotEmpty(input) {
+    return input != null && input !== "";
+}
+exports.isNotEmpty = isNotEmpty;
 //# sourceMappingURL=utils.js.map

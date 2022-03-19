@@ -27,15 +27,20 @@ export declare function isLockedTokenType(input: any): input is LockedTokenType;
 export declare type Token = {
     tokenContract: string;
     tokenId: number;
-    currentChain: Chain;
-    initialChain: Chain;
+    chain: Chain;
+    uid: string;
+    wrapped: boolean;
+    name?: string;
+    imageUrl?: string;
+    description?: string;
+    symbol?: string;
 };
+export declare function isToken(input: any): input is Token;
 /**
  * Creates a token object from its contract address and id and its chain.
- * TODO Implement something to retrieve the real state of the token (initial and current chains);
  * @param tokenContract
  * @param tokenId
  * @param chain
  * @returns a Token
  */
-export declare function tokenFromAddressAndId(tokenContract: string, tokenId: number, chain: Chain): Token;
+export declare function tokenFromAddressAndId(tokenContract: string, tokenId: number, chain: Chain, wrapped?: boolean): Token;

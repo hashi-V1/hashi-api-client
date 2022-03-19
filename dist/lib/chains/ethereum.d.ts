@@ -12,14 +12,13 @@ import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
 export declare function setChainSignerEthereum(chain: Chain, signer: Signer): Signer;
 /**
  * Approves and locks at the same time a token on an Ethereum network.
- * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-export declare function approveAndLockEthereum(chain: Chain, token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<number>;
+export declare function approveAndLockEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<number>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * TODO: Get the wrapped token id from storage
@@ -52,3 +51,4 @@ export declare function burnTokenEthereum(chain: Chain, token: LockedTokenType, 
  */
 export declare function withdrawTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
 export declare function getLockedTokenFromWrappedEthereum(wrapped: WrappedTokenType, signer: Signer): Promise<LockedTokenType>;
+export declare function getTokensForAccountEthereum(chain: Chain, address: string): Promise<never[]>;

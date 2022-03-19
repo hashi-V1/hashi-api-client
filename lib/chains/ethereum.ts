@@ -21,7 +21,6 @@ export function setChainSignerEthereum(chain: Chain, signer: Signer) {
 
 /**
  * Approves and locks at the same time a token on an Ethereum network.
- * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
@@ -29,14 +28,13 @@ export function setChainSignerEthereum(chain: Chain, signer: Signer) {
  * @returns a promise with the token's lock timestamp
  */
 export function approveAndLockEthereum(
-    chain: Chain,
     token: Token,
     destinationAddress: string,
     signer: Signer,
     setProgress: (progress: Progress) => void
 ): Promise<number> {
     const lockerContract = new Contract(
-        chainConfig[chain].lockerContract,
+        chainConfig[token.chain].lockerContract,
         lockerAbi.abi,
         signer
     );
@@ -45,7 +43,7 @@ export function approveAndLockEthereum(
     setProgress(Progress.WaitingForUserApproval);
     return (
         tokenContract.approve(
-            chainConfig[chain].lockerContract,
+            chainConfig[token.chain].lockerContract,
             token.tokenId
         ) as Promise<TransactionResponse>
     )
@@ -228,4 +226,11 @@ export function getLockedTokenFromWrappedEthereum(
         tokenId: val.tokenId,
         timestamp: val.tokenLockTimestamp,
     }));
+}
+
+export async function getTokensForAccountEthereum(
+    chain: Chain,
+    address: string
+) {
+    return [];
 }

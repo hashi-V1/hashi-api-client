@@ -2,7 +2,9 @@ import { assert } from "chai";
 import { Chain } from "../../lib/types/chain";
 import {
     isLockedTokenType,
+    isToken,
     LockedTokenType,
+    Token,
     tokenFromAddressAndId,
 } from "../../lib/types/token";
 
@@ -81,8 +83,7 @@ describe("token", () => {
 
         assert.strictEqual(token.tokenContract, tokenContract);
         assert.strictEqual(token.tokenId, tokenId);
-        assert.strictEqual(token.currentChain, chain);
-        assert.strictEqual(token.initialChain, chain); // TODO: implement initial chain
+        assert.strictEqual(token.chain, chain);
     });
 
     it("tokenFromAddressAndIf should throw when parameters are not well formatted", () => {
@@ -96,6 +97,78 @@ describe("token", () => {
         );
         assert.throws(() =>
             tokenFromAddressAndId(tokenContract, tokenId, "Test" as Chain)
+        );
+    });
+
+    it("isToken should return true if input is IndexedToken", () => {
+        const token: Token = {
+            tokenContract: "fdghfhjfhdsjf",
+            tokenId: 5,
+            name: "token",
+            chain: Chain.Tezos,
+            uid: "fdghfhjfhdsjf-5",
+            wrapped: false,
+
+            imageUrl: "https://djgikjdfikgjd.png",
+            description: "description",
+            symbol: "NFT",
+        };
+
+        assert.isTrue(isToken(token));
+    });
+
+    it("isToken should return false when input is not IndexedToken", () => {
+        assert.isFalse(isToken(undefined));
+        assert.isFalse(isToken(null));
+        assert.isFalse(isToken("test"));
+        assert.isFalse(isToken(4));
+
+        assert.isFalse(
+            isToken({
+                tokenContract: null,
+                tokenId: 5,
+                name: "token",
+            })
+        );
+
+        assert.isFalse(
+            isToken({
+                tokenContract: "",
+                tokenId: 5,
+                name: "token",
+            })
+        );
+
+        assert.isFalse(
+            isToken({
+                tokenContract: "fdsfgdfhdf",
+                tokenId: null,
+                name: "token",
+            })
+        );
+
+        assert.isFalse(
+            isToken({
+                tokenContract: "dghfghfghdfhdf",
+                tokenId: Number.NaN,
+                name: "token",
+            })
+        );
+
+        assert.isFalse(
+            isToken({
+                tokenContract: "dfgdfgdfgdf",
+                tokenId: 5,
+                name: null,
+            })
+        );
+
+        assert.isFalse(
+            isToken({
+                tokenContract: "dfgdfgdfgdf",
+                tokenId: 5,
+                name: "",
+            })
         );
     });
 });

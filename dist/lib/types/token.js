@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenFromAddressAndId = exports.isLockedTokenType = void 0;
+exports.tokenFromAddressAndId = exports.isToken = exports.isLockedTokenType = void 0;
 var chain_1 = require("./chain");
 /**
  * Checks whether the input is of the UnsignedMessageType type.
@@ -19,15 +19,28 @@ function isLockedTokenType(input) {
         !isNaN(m.timestamp));
 }
 exports.isLockedTokenType = isLockedTokenType;
+function isToken(input) {
+    if (typeof input === "undefined" || input == null)
+        return false;
+    var token = input;
+    return (token.tokenContract != null &&
+        token.tokenContract != "" &&
+        token.tokenId != null &&
+        !isNaN(token.tokenId) &&
+        token.uid != null &&
+        token.uid != "" &&
+        (0, chain_1.isChain)(token.chain));
+}
+exports.isToken = isToken;
 /**
  * Creates a token object from its contract address and id and its chain.
- * TODO Implement something to retrieve the real state of the token (initial and current chains);
  * @param tokenContract
  * @param tokenId
  * @param chain
  * @returns a Token
  */
-function tokenFromAddressAndId(tokenContract, tokenId, chain) {
+function tokenFromAddressAndId(tokenContract, tokenId, chain, wrapped) {
+    if (wrapped === void 0) { wrapped = false; }
     if (tokenContract === "") {
         throw new Error("tokenContract cannot be empty to build a token.");
     }
@@ -40,8 +53,9 @@ function tokenFromAddressAndId(tokenContract, tokenId, chain) {
     return {
         tokenContract: tokenContract,
         tokenId: tokenId,
-        currentChain: chain,
-        initialChain: chain,
+        chain: chain,
+        uid: "".concat(tokenContract, "-").concat(tokenId),
+        wrapped: wrapped,
     };
 }
 exports.tokenFromAddressAndId = tokenFromAddressAndId;

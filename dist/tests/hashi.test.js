@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -56,26 +45,19 @@ var hashi_1 = require("../lib/hashi");
 var chain_1 = require("../lib/types/chain");
 var errors_1 = require("../lib/types/errors");
 var proof_1 = require("../lib/types/proof");
+var token_1 = require("../lib/types/token");
 (0, chai_1.use)(chai_as_promised_1.default);
 describe("HashiBridge", function () {
-    var token = {
-        tokenContract: "tzjredfrhgjkujrefd",
-        tokenId: 5,
-        currentChain: chain_1.Chain.Tezos,
-        initialChain: chain_1.Chain.Ethereum,
-    };
-    var lockedToken = {
+    var token = (0, token_1.tokenFromAddressAndId)("tzjredfrhgjkujrefd", 5, chain_1.Chain.Ethereum);
+    var dest = "tzERZH55TGHJHFGDS";
+    var message = {
+        status: proof_1.Status.Locked,
+        destination: dest,
+        metadata: "",
         tokenContract: "tzjredfrhgjkujrefd",
         tokenId: 5,
         timestamp: 4467897754,
     };
-    var wrappedToken = {
-        tokenContract: "tzjredfrhgjkujrefd",
-        tokenId: 5,
-        chain: chain_1.Chain.Tezos,
-    };
-    var dest = "tzERZH55TGHJHFGDS";
-    var message = __assign({ status: proof_1.Status.Locked, destination: dest, metadata: "" }, lockedToken);
     var progress = function () { };
     it("should fail when destination addresses are empty", function () { return __awaiter(void 0, void 0, void 0, function () {
         var hashi;
@@ -83,16 +65,16 @@ describe("HashiBridge", function () {
             switch (_a.label) {
                 case 0:
                     hashi = new hashi_1.HashiBridge();
-                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.approveAndLock(chain_1.Chain.Tezos, token, "", progress), errors_1.EmptyDestinationAddressError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.approveAndLock(token, "", progress), errors_1.EmptyDestinationAddressError)];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.bridge(chain_1.Chain.Tezos, chain_1.Chain.Ethereum, token, "", progress), errors_1.EmptyDestinationAddressError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.bridge(chain_1.Chain.Ethereum, token, "", progress), errors_1.EmptyDestinationAddressError)];
                 case 2:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.unbridge(chain_1.Chain.Tezos, chain_1.Chain.Ethereum, lockedToken, "", progress), errors_1.EmptyDestinationAddressError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.unbridge(chain_1.Chain.Ethereum, token, "", progress), errors_1.EmptyDestinationAddressError)];
                 case 3:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.burnToken(chain_1.Chain.Tezos, lockedToken, "", progress), errors_1.EmptyDestinationAddressError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.burnToken(token, "", progress), errors_1.EmptyDestinationAddressError)];
                 case 4:
                     _a.sent();
                     return [2 /*return*/];
@@ -105,21 +87,21 @@ describe("HashiBridge", function () {
             switch (_a.label) {
                 case 0:
                     bridge = new hashi_1.HashiBridge();
-                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.approveAndLock(chain_1.Chain.Tezos, token, dest, progress), errors_1.NoSignerForChainError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.approveAndLock(token, dest, progress), errors_1.NoSignerForChainError)];
                 case 1:
                     _a.sent();
                     message.status = proof_1.Status.Locked;
                     return [4 /*yield*/, chai_1.assert.isRejected(bridge.wrapToken(chain_1.Chain.Tezos, message, [], progress), errors_1.NoSignerForChainError)];
                 case 2:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.burnToken(chain_1.Chain.Tezos, lockedToken, dest, progress), errors_1.NoSignerForChainError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.burnToken(token, dest, progress), errors_1.NoSignerForChainError)];
                 case 3:
                     _a.sent();
                     message.status = proof_1.Status.Burned;
                     return [4 /*yield*/, chai_1.assert.isRejected(bridge.withdrawToken(chain_1.Chain.Tezos, message, [], progress), errors_1.NoSignerForChainError)];
                 case 4:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.getLockedTokenFromWrapped(wrappedToken), errors_1.NoSignerForChainError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.getLockedTokenFromToken(token), errors_1.NoSignerForChainError)];
                 case 5:
                     _a.sent();
                     return [2 /*return*/];

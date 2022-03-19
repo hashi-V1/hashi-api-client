@@ -13,13 +13,12 @@ declare type TezosSigner = WalletProvider | Signer;
 export declare function setChainSignerTezos(chain: Chain, signer: TezosSigner): TezosToolkit;
 /**
  * Approves and locks at the same time a token on a Tezos network.
- * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-export declare function approveAndLockTezos(chain: Chain, token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<number>;
+export declare function approveAndLockTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<number>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * TODO: Signatures not recognized by contracts
@@ -52,4 +51,5 @@ export declare function burnTokenTezos(chain: Chain, token: LockedTokenType, des
  */
 export declare function withdrawTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
 export declare function getLockedTokenFromWrappedTezos(wrapped: WrappedTokenType, Tezos: TezosToolkit): Promise<LockedTokenType>;
+export declare function getTokensForAccountTezos(chain: Chain, address: string): Promise<any>;
 export {};

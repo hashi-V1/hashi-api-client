@@ -6,3 +6,6 @@ export const NoSignerForChainError =
 
 export const CannotWrapWithStatusOtherThanLocked =
     "Cannot wrap with status other than locked";
+
+export const CannotWithdrawWithStatusOtherThanBurned =
+    "Cannot withdraw with status other than burned";

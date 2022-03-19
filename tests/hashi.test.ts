@@ -7,28 +7,15 @@ import {
     NoSignerForChainError,
 } from "../lib/types/errors";
 import { Status, UnsignedMessageType } from "../lib/types/proof";
-import { LockedTokenType, Token, WrappedTokenType } from "../lib/types/token";
+import { Token, tokenFromAddressAndId } from "../lib/types/token";
 use(chaiAsPromised);
 
 describe("HashiBridge", () => {
-    const token: Token = {
-        tokenContract: "tzjredfrhgjkujrefd",
-        tokenId: 5,
-        currentChain: Chain.Tezos,
-        initialChain: Chain.Ethereum,
-    };
-
-    const lockedToken: LockedTokenType = {
-        tokenContract: "tzjredfrhgjkujrefd",
-        tokenId: 5,
-        timestamp: 4467897754,
-    };
-
-    const wrappedToken: WrappedTokenType = {
-        tokenContract: "tzjredfrhgjkujrefd",
-        tokenId: 5,
-        chain: Chain.Tezos,
-    };
+    const token: Token = tokenFromAddressAndId(
+        "tzjredfrhgjkujrefd",
+        5,
+        Chain.Ethereum
+    );
 
     const dest = "tzERZH55TGHJHFGDS";
 
@@ -36,7 +23,9 @@ describe("HashiBridge", () => {
         status: Status.Locked,
         destination: dest,
         metadata: "",
-        ...lockedToken,
+        tokenContract: "tzjredfrhgjkujrefd",
+        tokenId: 5,
+        timestamp: 4467897754,
     };
 
     const progress = () => {};
@@ -45,28 +34,22 @@ describe("HashiBridge", () => {
         const hashi = new HashiBridge();
 
         await assert.isRejected(
-            hashi.approveAndLock(Chain.Tezos, token, "", progress),
+            hashi.approveAndLock(token, "", progress),
             EmptyDestinationAddressError
         );
 
         await assert.isRejected(
-            hashi.bridge(Chain.Tezos, Chain.Ethereum, token, "", progress),
+            hashi.bridge(Chain.Ethereum, token, "", progress),
             EmptyDestinationAddressError
         );
 
         await assert.isRejected(
-            hashi.unbridge(
-                Chain.Tezos,
-                Chain.Ethereum,
-                lockedToken,
-                "",
-                progress
-            ),
+            hashi.unbridge(Chain.Ethereum, token, "", progress),
             EmptyDestinationAddressError
         );
 
         await assert.isRejected(
-            hashi.burnToken(Chain.Tezos, lockedToken, "", progress),
+            hashi.burnToken(token, "", progress),
             EmptyDestinationAddressError
         );
     });
@@ -75,7 +58,7 @@ describe("HashiBridge", () => {
         const bridge = new HashiBridge();
 
         await assert.isRejected(
-            bridge.approveAndLock(Chain.Tezos, token, dest, progress),
+            bridge.approveAndLock(token, dest, progress),
             NoSignerForChainError
         );
 
@@ -86,7 +69,7 @@ describe("HashiBridge", () => {
         );
 
         await assert.isRejected(
-            bridge.burnToken(Chain.Tezos, lockedToken, dest, progress),
+            bridge.burnToken(token, dest, progress),
             NoSignerForChainError
         );
 
@@ -97,7 +80,7 @@ describe("HashiBridge", () => {
         );
 
         await assert.isRejected(
-            bridge.getLockedTokenFromWrapped(wrappedToken),
+            bridge.getLockedTokenFromToken(token),
             NoSignerForChainError
         );
     });

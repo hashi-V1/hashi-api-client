@@ -55,8 +55,7 @@ describe("token", function () {
         var token = (0, token_1.tokenFromAddressAndId)(tokenContract, tokenId, chain);
         chai_1.assert.strictEqual(token.tokenContract, tokenContract);
         chai_1.assert.strictEqual(token.tokenId, tokenId);
-        chai_1.assert.strictEqual(token.currentChain, chain);
-        chai_1.assert.strictEqual(token.initialChain, chain); // TODO: implement initial chain
+        chai_1.assert.strictEqual(token.chain, chain);
     });
     it("tokenFromAddressAndIf should throw when parameters are not well formatted", function () {
         var tokenContract = "dfghjfgrdeszq";
@@ -69,6 +68,56 @@ describe("token", function () {
         chai_1.assert.throws(function () {
             return (0, token_1.tokenFromAddressAndId)(tokenContract, tokenId, "Test");
         });
+    });
+    it("isToken should return true if input is IndexedToken", function () {
+        var token = {
+            tokenContract: "fdghfhjfhdsjf",
+            tokenId: 5,
+            name: "token",
+            chain: chain_1.Chain.Tezos,
+            uid: "fdghfhjfhdsjf-5",
+            wrapped: false,
+            imageUrl: "https://djgikjdfikgjd.png",
+            description: "description",
+            symbol: "NFT",
+        };
+        chai_1.assert.isTrue((0, token_1.isToken)(token));
+    });
+    it("isToken should return false when input is not IndexedToken", function () {
+        chai_1.assert.isFalse((0, token_1.isToken)(undefined));
+        chai_1.assert.isFalse((0, token_1.isToken)(null));
+        chai_1.assert.isFalse((0, token_1.isToken)("test"));
+        chai_1.assert.isFalse((0, token_1.isToken)(4));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: null,
+            tokenId: 5,
+            name: "token",
+        }));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: "",
+            tokenId: 5,
+            name: "token",
+        }));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: "fdsfgdfhdf",
+            tokenId: null,
+            name: "token",
+        }));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: "dghfghfghdfhdf",
+            tokenId: Number.NaN,
+            name: "token",
+        }));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: "dfgdfgdfgdf",
+            tokenId: 5,
+            name: null,
+        }));
+        chai_1.assert.isFalse((0, token_1.isToken)({
+            tokenContract: "dfgdfgdfgdf",
+            tokenId: 5,
+            name: "",
+        }));
     });
 });
 //# sourceMappingURL=token.test.js.map

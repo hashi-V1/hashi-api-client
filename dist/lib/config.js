@@ -1,7 +1,7 @@
 "use strict";
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.nodesConfig = exports.chainConfig = void 0;
+exports.isTokenWrapped = exports.getUrlFromIpfs = exports.ipfsNodes = exports.nodesConfig = exports.chainConfig = void 0;
 var chain_1 = require("./types/chain");
 /**
  * Contains the constant configuration for each chain
@@ -12,6 +12,7 @@ exports.chainConfig = (_a = {},
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
         wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
+        indexerUrl: "https://api.hangzhou2net.tzkt.io/v1/tokens/balances",
     },
     _a[chain_1.Chain.Ethereum] = {
         rpc: "",
@@ -28,4 +29,17 @@ exports.nodesConfig = [
     "http://localhost:3030/proof",
     "http://localhost:3030/proof",
 ];
+exports.ipfsNodes = [
+    "https://ipfs.io/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/",
+];
+function getUrlFromIpfs(ipfsUrl) {
+    var node = exports.ipfsNodes[Math.round(Math.random() * (exports.ipfsNodes.length - 1))];
+    return "".concat(node).concat(ipfsUrl.replace("ipfs://", ""));
+}
+exports.getUrlFromIpfs = getUrlFromIpfs;
+function isTokenWrapped(token, chain) {
+    return exports.chainConfig[chain].wrapperContract === token.tokenContract;
+}
+exports.isTokenWrapped = isTokenWrapped;
 //# sourceMappingURL=config.js.map

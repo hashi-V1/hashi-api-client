@@ -42,13 +42,32 @@ export function isLockedTokenType(input: any): input is LockedTokenType {
 export type Token = {
     tokenContract: string;
     tokenId: number;
-    currentChain: Chain;
-    initialChain: Chain;
+    chain: Chain;
+    uid: string;
+    wrapped: boolean;
+
+    name?: string;
+    imageUrl?: string;
+    description?: string;
+    symbol?: string;
 };
+
+export function isToken(input: any): input is Token {
+    if (typeof input === "undefined" || input == null) return false;
+    const token = input as Token;
+    return (
+        token.tokenContract != null &&
+        token.tokenContract != "" &&
+        token.tokenId != null &&
+        !isNaN(token.tokenId) &&
+        token.uid != null &&
+        token.uid != "" &&
+        isChain(token.chain)
+    );
+}
 
 /**
  * Creates a token object from its contract address and id and its chain.
- * TODO Implement something to retrieve the real state of the token (initial and current chains);
  * @param tokenContract
  * @param tokenId
  * @param chain
@@ -57,7 +76,8 @@ export type Token = {
 export function tokenFromAddressAndId(
     tokenContract: string,
     tokenId: number,
-    chain: Chain
+    chain: Chain,
+    wrapped: boolean = false
 ): Token {
     if (tokenContract === "") {
         throw new Error("tokenContract cannot be empty to build a token.");
@@ -72,7 +92,8 @@ export function tokenFromAddressAndId(
     return {
         tokenContract,
         tokenId,
-        currentChain: chain,
-        initialChain: chain,
+        chain,
+        uid: `${tokenContract}-${tokenId}`,
+        wrapped,
     };
 }

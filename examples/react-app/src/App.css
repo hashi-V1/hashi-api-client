@@ -2,14 +2,40 @@ div.main-div {
     padding: 20px;
 }
 
-div.main-div .errors {
-    color: red;
-    width: 100%;
-}
-
-div.main-div div {
-    margin: 30px 0px;
+div.main-div section {
+    margin: 20px 0px;
     width: 100%;
     display: flex;
     justify-content: space-around;
+}
+
+div.main-div section .destinationInput {
+    min-width: 50%;
+}
+
+.tokenlist {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tokenlist .token {
+    margin: 5px;
+    padding: 10px 20px;
+    border: 1px solid black;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tokenlist .token.selected {
+    background-color: cyan;
+}
+
+.tokenlist .token img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
 }

@@ -19,3 +19,9 @@ export declare function stringToHex(input: string): string;
  * @returns a boolean and a type predicate
  */
 export declare function hasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): obj is X & Record<Y, unknown>;
+/**
+ * Check whether the input is of type string.
+ * @param input Any object
+ * @returns a boolean and a type predicate
+ */
+export declare function isNotEmpty(input: any): input is string;

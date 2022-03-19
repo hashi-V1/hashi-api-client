@@ -1,4 +1,5 @@
 import { Chain } from "./types/chain";
+import { Token } from "./types/token";
 /**
  * Represents the configuration fields for a specific chain.
  */
@@ -6,6 +7,7 @@ export declare type ChainConfigType = {
     rpc: string;
     lockerContract: string;
     wrapperContract: string;
+    indexerUrl?: string;
 };
 /**
  * Contains the constant configuration for each chain
@@ -20,3 +22,6 @@ export declare const chainConfig: {
  * e.g. "http://localhost:3030/proof"
  */
 export declare const nodesConfig: string[];
+export declare const ipfsNodes: string[];
+export declare function getUrlFromIpfs(ipfsUrl: string): string;
+export declare function isTokenWrapped(token: Token, chain: Chain): boolean;

@@ -1,14 +1,7 @@
 import { NetworkType } from "@airgap/beacon-sdk";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { ethers } from "ethers";
-import {
-    Chain,
-    chainConfig,
-    HashiBridge,
-    Progress,
-    progressConstants,
-    tokenFromAddressAndId,
-} from "hashi-api-client";
+import { Chain, HashiBridge, progressConstants, Token } from "hashi-api-client";
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { hasOwnProperty } from "./utils";
@@ -19,16 +12,17 @@ function App() {
     const [ethAddress, setEthAddress] = useState("");
     const [tezAddress, setTezAddress] = useState("");
 
-    const [tokenAddress, setTokenAddress] = useState("");
-    const [tokenId, setTokenId] = useState(0);
+    const [indexedTokens, setIndexedTokens] = useState<Token[]>([]);
+    const [selectedToken, setSelectedToken] = useState<Token | undefined>();
+
     const [destinationAddress, setDestinationAddress] = useState("");
-    const [progress, setProgress] = useState("");
+    const [progress, setProgress] = useState(
+        "Please select a token and a destination address"
+    );
     const [wrappedText, setWrappedText] = useState("");
 
-    const [wrappedId, setWrappedId] = useState(0);
-    const [wrappedDestination, setWrappedDestination] = useState("");
-
     useEffect(() => {
+        if (tezAddress !== "") return;
         const options = {
             name: "Hashi Example app",
             preferredNetwork: NetworkType.HANGZHOUNET,
@@ -48,9 +42,10 @@ function App() {
                 setTezAddress(pkh);
                 hashi.setChainSigner(Chain.Tezos, wallet);
             });
-    }, []);
+    });
 
     useEffect(() => {
+        if (ethAddress) return;
         if (
             !hasOwnProperty(window, "ethereum") ||
             !(window.ethereum as ethers.providers.ExternalProvider)
@@ -68,65 +63,37 @@ function App() {
             setEthAddress(address);
             hashi.setChainSigner(Chain.Ethereum, signer);
         });
-    }, []);
+    });
 
-    const bridgeToChain = useCallback(
-        (source: Chain, target: Chain) => {
-            try {
-                // tokenFromAddressAndId throws if any of its parameters is not valid.
-                const token = tokenFromAddressAndId(
-                    tokenAddress,
-                    tokenId,
-                    source
-                );
+    const bridge = useCallback(() => {
+        if (typeof selectedToken === "undefined") return;
 
-                hashi
-                    .bridge(
-                        source,
-                        target,
-                        token,
-                        destinationAddress,
-                        (p: Progress) => setProgress(progressConstants[p])
-                    )
-                    .then((wrapped) =>
-                        setWrappedText(
-                            `(${wrapped.tokenContract} - ${wrapped.tokenId})`
-                        )
-                    )
-                    .catch(alert);
-            } catch (e) {
-                alert(e);
-            }
-        },
-        [tokenAddress, tokenId, destinationAddress]
-    );
+        const target =
+            selectedToken.chain === Chain.Tezos ? Chain.Ethereum : Chain.Tezos;
 
-    const burnToChain = useCallback(
-        (source: Chain, target: Chain) => {
-            hashi
-                .getLockedTokenFromWrapped({
-                    tokenContract: chainConfig[source].wrapperContract,
-                    tokenId: wrappedId,
-                    chain: source,
-                })
-                .then((locked) =>
-                    hashi.unbridge(
-                        source,
-                        target,
-                        locked,
-                        wrappedDestination,
-                        (p: Progress) => setProgress(progressConstants[p])
-                    )
+        hashi
+            .bridge(target, selectedToken, destinationAddress, (p) =>
+                setProgress(progressConstants[p])
+            )
+            .then((wrapped) =>
+                setWrappedText(
+                    `(${wrapped.tokenContract} - ${wrapped.tokenId})`
                 )
-                .then(console.log)
-                .catch(alert);
-        },
-        [wrappedId, wrappedDestination]
-    );
+            )
+            .catch(alert);
+    }, [selectedToken, destinationAddress]);
+
+    const refreshTokens = useCallback(() => {
+        if (tezAddress === "") return;
+        hashi
+            .getTokensForAccount(Chain.Tezos, tezAddress)
+            .then(setIndexedTokens);
+    }, [tezAddress]);
+    useEffect(refreshTokens, [refreshTokens]);
 
     return (
         <div className="main-div">
-            <div>
+            <section>
                 {ethAddress !== "" ? (
                     <span>Connected ({ethAddress})</span>
                 ) : (
@@ -137,95 +104,60 @@ function App() {
                 ) : (
                     <span>Please connect Temple</span>
                 )}
-            </div>
+            </section>
 
-            <div>
-                <label htmlFor="token_address">
-                    Token address
-                    <input
-                        id="token_address"
-                        value={tokenAddress}
-                        onChange={(event) =>
-                            setTokenAddress(event.target.value)
-                        }
-                    />
-                </label>
-                <label htmlFor="token_id">
-                    Token id
-                    <input
-                        id="token_id"
-                        type="number"
-                        value={tokenId}
-                        onChange={(event) =>
-                            setTokenId(parseInt(event.target.value))
-                        }
-                    />
-                </label>
-                <label htmlFor="destination_address">
-                    Destination address
-                    <input
-                        id="destination_address"
-                        value={destinationAddress}
-                        onChange={(event) =>
-                            setDestinationAddress(event.target.value)
-                        }
-                    />
-                </label>
-            </div>
+            <section>
+                <input
+                    type="text"
+                    className="destinationInput"
+                    onChange={(event) =>
+                        setDestinationAddress(event.target.value)
+                    }
+                    placeholder="Destination address"
+                />
 
-            <div>
-                <button
-                    onClick={() => bridgeToChain(Chain.Ethereum, Chain.Tezos)}
-                >
-                    Bridge to Tezos
+                <button onClick={bridge}>
+                    Bridge{" "}
+                    {selectedToken && selectedToken.name
+                        ? selectedToken.name
+                        : "token"}
                 </button>
-                <button
-                    onClick={() => bridgeToChain(Chain.Tezos, Chain.Ethereum)}
-                >
-                    Bridge to Ethereum
-                </button>
-            </div>
+                <button onClick={refreshTokens}>Refresh tokens</button>
+            </section>
 
-            <div>
-                {progress} {wrappedText}
-            </div>
+            {(progress || wrappedText) && (
+                <section>
+                    <p>
+                        {progress} {wrappedText}
+                    </p>
+                </section>
+            )}
 
-            {/*<div>
-                <label htmlFor="wrapped_id">
-                    Wrapped id
-                    <input
-                        id="wrapped_id"
-                        type="number"
-                        value={wrappedId}
-                        onChange={(event) =>
-                            setWrappedId(parseInt(event.target.value))
-                        }
-                    />
-                </label>
-                <label htmlFor="wrapped_destination">
-                    Wrapped destination
-                    <input
-                        id="wrapped_destination"
-                        value={wrappedDestination}
-                        onChange={(event) =>
-                            setWrappedDestination(event.target.value)
-                        }
-                    />
-                </label>
-            </div>
+            <section>
+                <div className="tokenlist">
+                    {indexedTokens.map((token) => (
+                        <button
+                            onClick={() => setSelectedToken(token)}
+                            className={[
+                                "token",
+                                selectedToken === token ? "selected" : "",
+                            ].join(" ")}
+                            key={`${token.uid}`}
+                        >
+                            <img src={token.imageUrl ?? "/token.png"} alt="" />
+                            <h4>
+                                {token.name ?? token.uid}
+                                {token.symbol ? `(${token.symbol})` : ""}
+                            </h4>
 
-            <div>
-                <button
-                    onClick={() => burnToChain(Chain.Ethereum, Chain.Tezos)}
-                >
-                    Burn to Tezos
-                </button>
-                <button
-                    onClick={() => burnToChain(Chain.Tezos, Chain.Ethereum)}
-                >
-                    Burn to Ethereum
-                </button>
-                    </div>*/}
+                            <p>{token.description}</p>
+
+                            <h3>{token.wrapped ? "WRAPPED" : ""}</h3>
+                            <h2>{token.chain}</h2>
+                        </button>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }

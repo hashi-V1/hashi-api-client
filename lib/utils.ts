@@ -37,5 +37,14 @@ export function hasOwnProperty<X extends {}, Y extends PropertyKey>(
     obj: X,
     prop: Y
 ): obj is X & Record<Y, unknown> {
-    return obj.hasOwnProperty(prop);
+    return obj != null && obj.hasOwnProperty(prop);
+}
+
+/**
+ * Check whether the input is of type string.
+ * @param input Any object
+ * @returns a boolean and a type predicate
+ */
+export function isNotEmpty(input: any): input is string {
+    return input != null && input !== "";
 }

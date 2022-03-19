@@ -2,6 +2,7 @@ import {
     approveAndLockEthereum,
     burnTokenEthereum,
     getLockedTokenFromWrappedEthereum,
+    getTokensForAccountEthereum,
     setChainSignerEthereum,
     withdrawTokenEthereum,
     wrapTokenEthereum,
@@ -10,6 +11,7 @@ import {
     approveAndLockTezos,
     burnTokenTezos,
     getLockedTokenFromWrappedTezos,
+    getTokensForAccountTezos,
     setChainSignerTezos,
     withdrawTokenTezos,
     wrapTokenTezos,
@@ -17,6 +19,8 @@ import {
 import { proveTokenStatus } from "./prover";
 import { Chain } from "./types/chain";
 import {
+    CannotWithdrawWithStatusOtherThanBurned,
+    CannotWrapWithStatusOtherThanLocked,
     EmptyDestinationAddressError,
     NoSignerForChainError,
 } from "./types/errors";
@@ -61,13 +65,11 @@ export class HashiBridge {
 
     /**
      * Approves and locks at the same time a token.
-     * @param chain The token's current chain.
      * @param token The token that will be locked
      * @param destinationAddress The address that will receive the token on the target chain
      * @param progressCallback optional callback to track the progress
      */
-    approveAndLock(
-        chain: Chain,
+    async approveAndLock(
         token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
@@ -78,16 +80,14 @@ export class HashiBridge {
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.ApprovingAndLocking);
 
-        const instance = this.chainsInstances.get(chain);
-        if (typeof instance === "undefined") {
+        const instance = this.chainsInstances.get(token.chain);
+        if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
-        }
 
-        let timestampedPromise: Promise<number>;
-        switch (chain) {
+        let timestamp = 0;
+        switch (token.chain) {
             case Chain.Tezos:
-                timestampedPromise = approveAndLockTezos(
-                    chain,
+                timestamp = await approveAndLockTezos(
                     token,
                     destinationAddress,
                     instance,
@@ -96,8 +96,7 @@ export class HashiBridge {
                 break;
 
             case Chain.Ethereum:
-                timestampedPromise = approveAndLockEthereum(
-                    chain,
+                timestamp = await approveAndLockEthereum(
                     token,
                     destinationAddress,
                     instance,
@@ -106,15 +105,12 @@ export class HashiBridge {
                 break;
         }
 
-        return timestampedPromise.then((timestamp) => {
-            setProgress(Progress.ApprovedAndLocked);
-
-            return {
-                tokenContract: token.tokenContract,
-                tokenId: token.tokenId,
-                timestamp,
-            };
-        });
+        setProgress(Progress.ApprovedAndLocked);
+        return {
+            tokenContract: token.tokenContract,
+            tokenId: token.tokenId,
+            timestamp,
+        };
     }
 
     /**
@@ -125,28 +121,26 @@ export class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns a promise with a Wrapped token
      */
-    wrapToken(
+    async wrapToken(
         chain: Chain,
         message: UnsignedMessageType,
         signatures: Signature[],
         progressCallback?: (progress: Progress) => void
     ): Promise<WrappedTokenType> {
-        if (message.status !== Status.Locked) {
-            return Promise.reject();
-        }
+        if (message.status !== Status.Locked)
+            return Promise.reject(CannotWrapWithStatusOtherThanLocked);
 
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.Wrapping);
 
         const instance = this.chainsInstances.get(chain);
-        if (typeof instance === "undefined") {
+        if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
-        }
 
-        let wrappedPromise;
+        let wrappedToken: WrappedTokenType;
         switch (chain) {
             case Chain.Tezos:
-                wrappedPromise = wrapTokenTezos(
+                wrappedToken = await wrapTokenTezos(
                     chain,
                     message,
                     signatures,
@@ -156,7 +150,7 @@ export class HashiBridge {
                 break;
 
             case Chain.Ethereum:
-                wrappedPromise = wrapTokenEthereum(
+                wrappedToken = await wrapTokenEthereum(
                     chain,
                     message,
                     signatures,
@@ -166,23 +160,19 @@ export class HashiBridge {
                 break;
         }
 
-        return wrappedPromise.then((wrapped) => {
-            setProgress(Progress.Wrapped);
-            return wrapped;
-        });
+        setProgress(Progress.Wrapped);
+        return wrappedToken;
     }
 
     /**
      * Bridges (transfers) a token from one chain to another
-     * @param sourceChain The token's current chain
      * @param targetChain The chain where the token should be after the bridge
      * @param token The token to tranfer
      * @param destinationAddress The address on the target chain that will receive the wrapped token
      * @param progressCallback optional callback to track the progress
      * @returns a promise with the wrapped token
      */
-    bridge(
-        sourceChain: Chain,
+    async bridge(
         targetChain: Chain,
         token: Token,
         destinationAddress: string,
@@ -191,73 +181,59 @@ export class HashiBridge {
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        return this.approveAndLock(
-            sourceChain,
+        const lockedToken = await this.approveAndLock(
             token,
             destinationAddress,
             progressCallback
-        )
-            .then((lockedToken) =>
-                this.proveTokenStatus(
-                    sourceChain,
-                    targetChain,
-                    lockedToken,
-                    Status.Locked,
-                    progressCallback
-                )
-            )
-            .then(({ signatures, message }) =>
-                this.wrapToken(
-                    targetChain,
-                    message,
-                    signatures,
-                    progressCallback
-                )
-            );
+        );
+        const { signatures, message } = await this.proveTokenStatus(
+            token.chain,
+            targetChain,
+            lockedToken,
+            Status.Locked,
+            progressCallback
+        );
+        return this.wrapToken(
+            targetChain,
+            message,
+            signatures,
+            progressCallback
+        );
     }
 
     /**
      * Unbridges a wrapped token (releases the initial token)
-     * @param sourceChain The token's current chain
      * @param targetChain The token's initial chain
      * @param token The token to tranfer
      * @param destinationAddress The address on the target chain that will receive the token
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    unbridge(
-        sourceChain: Chain,
+    async unbridge(
         targetChain: Chain,
-        token: LockedTokenType,
+        token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        return this.burnToken(
-            sourceChain,
-            token,
-            destinationAddress,
+        await this.burnToken(token, destinationAddress, progressCallback);
+
+        const lockedToken = await this.getLockedTokenFromToken(token);
+        const { signatures, message } = await this.proveTokenStatus(
+            token.chain,
+            targetChain,
+            lockedToken,
+            Status.Burned,
             progressCallback
-        )
-            .then(() =>
-                this.proveTokenStatus(
-                    sourceChain,
-                    targetChain,
-                    token,
-                    Status.Burned,
-                    progressCallback
-                )
-            )
-            .then(({ signatures, message }) =>
-                this.withdrawToken(
-                    targetChain,
-                    message,
-                    signatures,
-                    progressCallback
-                )
-            );
+        );
+        await this.withdrawToken(
+            targetChain,
+            message,
+            signatures,
+            progressCallback
+        );
     }
 
     /**
@@ -269,39 +245,37 @@ export class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns a Promise with signatures and an UnsignedMessageType
      */
-    proveTokenStatus(
+    async proveTokenStatus(
         sourceChain: Chain,
         targetChain: Chain,
         token: LockedTokenType,
         status: Status,
         progressCallback?: (progress: Progress) => void
-    ) {
+    ): Promise<{ signatures: Signature[]; message: UnsignedMessageType }> {
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.ProvingStatus);
 
-        return proveTokenStatus(
+        const value = await proveTokenStatus(
             sourceChain,
             targetChain,
             token,
             status,
             setProgress
-        ).then((value) => {
-            setProgress(Progress.ProvedStatus);
-            return value;
-        });
+        );
+
+        setProgress(Progress.ProvedStatus);
+        return value;
     }
 
     /**
      * Burn a wrapped token to transfer it to another chain
-     * @param chain The chain where the token is currently wrapped
      * @param token The wrapped token to burn
      * @param destinationAddress The address on the target chain that will receive the token
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    burnToken(
-        chain: Chain,
-        token: LockedTokenType,
+    async burnToken(
+        token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
@@ -311,17 +285,17 @@ export class HashiBridge {
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.Burning);
 
-        const instance = this.chainsInstances.get(chain);
-        if (typeof instance === "undefined") {
+        const instance = this.chainsInstances.get(token.chain);
+        if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
-        }
 
-        let burnPromise;
-        switch (chain) {
+        const lockedToken = await this.getLockedTokenFromToken(token);
+
+        switch (token.chain) {
             case Chain.Tezos:
-                burnPromise = burnTokenTezos(
-                    chain,
-                    token,
+                await burnTokenTezos(
+                    token.chain,
+                    lockedToken,
                     destinationAddress,
                     instance,
                     setProgress
@@ -329,9 +303,9 @@ export class HashiBridge {
                 break;
 
             case Chain.Ethereum:
-                burnPromise = burnTokenEthereum(
-                    chain,
-                    token,
+                await burnTokenEthereum(
+                    token.chain,
+                    lockedToken,
                     destinationAddress,
                     instance,
                     setProgress
@@ -339,7 +313,7 @@ export class HashiBridge {
                 break;
         }
 
-        return burnPromise.then(() => setProgress(Progress.Burned));
+        setProgress(Progress.Burned);
     }
 
     /**
@@ -356,19 +330,15 @@ export class HashiBridge {
         signatures: Signature[],
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
-        if (message.status !== Status.Burned) {
-            return Promise.reject(
-                "Cannot withdraw with status other than burned"
-            );
-        }
+        if (message.status !== Status.Burned)
+            return Promise.reject(CannotWithdrawWithStatusOtherThanBurned);
 
         const setProgress = setProgressCallback(progressCallback);
         setProgress(Progress.Withdrawing);
 
         const instance = this.chainsInstances.get(chain);
-        if (typeof instance === "undefined") {
+        if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
-        }
 
         switch (chain) {
             case Chain.Tezos:
@@ -391,7 +361,7 @@ export class HashiBridge {
         }
     }
 
-    getLockedTokenFromWrapped(wrapped: WrappedTokenType) {
+    getLockedTokenFromToken(wrapped: Token) {
         const instance = this.chainsInstances.get(wrapped.chain);
         if (typeof instance === "undefined") {
             return Promise.reject(NoSignerForChainError);
@@ -402,6 +372,15 @@ export class HashiBridge {
                 return getLockedTokenFromWrappedTezos(wrapped, instance);
             case Chain.Ethereum:
                 return getLockedTokenFromWrappedEthereum(wrapped, instance);
+        }
+    }
+
+    getTokensForAccount(chain: Chain, address: string): Promise<Token[]> {
+        switch (chain) {
+            case Chain.Tezos:
+                return getTokensForAccountTezos(chain, address);
+            case Chain.Ethereum:
+                return getTokensForAccountEthereum(chain, address);
         }
     }
 }

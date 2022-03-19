@@ -4,12 +4,13 @@ import {
     TezosToolkit,
     WalletProvider,
 } from "@taquito/taquito";
-import { chainConfig } from "../config";
+import axios from "axios";
+import { chainConfig, getUrlFromIpfs, isTokenWrapped } from "../config";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
-import { hasOwnProperty, stringToHex } from "../utils";
+import { hasOwnProperty, isNotEmpty, stringToHex } from "../utils";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -62,14 +63,12 @@ function signatureArrayToMichelsonMap(signatures: Signature[]) {
 
 /**
  * Approves and locks at the same time a token on a Tezos network.
- * @param chain The token's current chain (used to know whether we are using a testnet or the mainnet)
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
 export function approveAndLockTezos(
-    chain: Chain,
     token: Token,
     destinationAddress: string,
     Tezos: TezosToolkit,
@@ -77,7 +76,7 @@ export function approveAndLockTezos(
 ): Promise<number> {
     const operation = (signerAddress: string) =>
         Tezos.wallet
-            .at(chainConfig[chain].lockerContract)
+            .at(chainConfig[token.chain].lockerContract)
             .then((lockerContract) =>
                 Tezos.wallet
                     .at(token.tokenContract)
@@ -312,5 +311,64 @@ export function getLockedTokenFromWrappedTezos(
                 tokenContract: r.token_contract,
                 timestamp: r.lock_timestamp,
             };
+        });
+}
+
+export async function getTokensForAccountTezos(chain: Chain, address: string) {
+    const url = chainConfig[chain].indexerUrl;
+    if (!url || url === "") return [];
+
+    const response = await axios.get(url, {
+        params: {
+            account: address,
+            "token.standard": "fa2",
+            "balance.gt": 0,
+        },
+    });
+
+    if (response.status !== 200 || typeof response.data !== "object") {
+        return Promise.reject("Indexer error");
+    }
+
+    return response.data
+        .filter(
+            (t: any) =>
+                hasOwnProperty(t, "token") &&
+                hasOwnProperty(t.token, "contract") &&
+                hasOwnProperty(t.token.contract, "address") &&
+                isNotEmpty(t.token.contract.address) &&
+                hasOwnProperty(t.token, "tokenId") &&
+                isNotEmpty(t.token.tokenId) &&
+                !isNaN(Number(t.token.tokenId))
+        )
+        .map((t: any) => {
+            const token: Token = {
+                tokenContract: t.token.contract.address,
+                tokenId: Number(t.token.tokenId),
+                uid: `${t.token.contract.address}-${t.token.tokenId}`,
+                chain,
+                wrapped: false,
+            };
+
+            token.wrapped = isTokenWrapped(token, chain);
+
+            if (t.token.metadata) {
+                const metadata = t.token.metadata;
+
+                if (metadata.name) token.name = metadata.name;
+                if (metadata.description)
+                    token.description = metadata.description;
+                if (metadata.symbol) token.symbol = metadata.symbol;
+
+                if (metadata.display_uri) {
+                    if (metadata.display_uri.match("^ipfs://")) {
+                        token.imageUrl = getUrlFromIpfs(metadata.display_uri);
+                    } else {
+                        token.imageUrl = metadata.display_uri;
+                    }
+                }
+            }
+
+            return token;
         });
 }

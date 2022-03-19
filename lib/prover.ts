@@ -26,7 +26,7 @@ export function proveTokenStatus(
     token: LockedTokenType,
     status: Status,
     setProgress: (progress: Progress) => void
-) {
+): Promise<{ signatures: Signature[]; message: UnsignedMessageType }> {
     setProgress(Progress.ProvingStatus);
     const proofRequest: ProofRequestType = {
         sourceChain,

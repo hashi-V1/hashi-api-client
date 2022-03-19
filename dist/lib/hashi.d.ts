@@ -22,12 +22,11 @@ export declare class HashiBridge {
     setChainSigner(chain: Chain, signer: any): void;
     /**
      * Approves and locks at the same time a token.
-     * @param chain The token's current chain.
      * @param token The token that will be locked
      * @param destinationAddress The address that will receive the token on the target chain
      * @param progressCallback optional callback to track the progress
      */
-    approveAndLock(chain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<LockedTokenType>;
+    approveAndLock(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<LockedTokenType>;
     /**
      * Wrap a token with signatures from the federation
      * @param chain The wrapping chain
@@ -39,24 +38,22 @@ export declare class HashiBridge {
     wrapToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<WrappedTokenType>;
     /**
      * Bridges (transfers) a token from one chain to another
-     * @param sourceChain The token's current chain
      * @param targetChain The chain where the token should be after the bridge
      * @param token The token to tranfer
      * @param destinationAddress The address on the target chain that will receive the wrapped token
      * @param progressCallback optional callback to track the progress
      * @returns a promise with the wrapped token
      */
-    bridge(sourceChain: Chain, targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<WrappedTokenType>;
+    bridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<WrappedTokenType>;
     /**
      * Unbridges a wrapped token (releases the initial token)
-     * @param sourceChain The token's current chain
      * @param targetChain The token's initial chain
      * @param token The token to tranfer
      * @param destinationAddress The address on the target chain that will receive the token
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    unbridge(sourceChain: Chain, targetChain: Chain, token: LockedTokenType, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
+    unbridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
     /**
      * Collects proofs of a specific status from nodes.
      * @param sourceChain The chain where the status action took place (lock or burn)
@@ -72,13 +69,12 @@ export declare class HashiBridge {
     }>;
     /**
      * Burn a wrapped token to transfer it to another chain
-     * @param chain The chain where the token is currently wrapped
      * @param token The wrapped token to burn
      * @param destinationAddress The address on the target chain that will receive the token
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    burnToken(chain: Chain, token: LockedTokenType, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
+    burnToken(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
     /**
      * Withdraws a token on a specific chain (sends back the initial token before the lock)
      * @param chain The initial chain of the token
@@ -88,5 +84,6 @@ export declare class HashiBridge {
      * @returns an empty promise
      */
     withdrawToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<void>;
-    getLockedTokenFromWrapped(wrapped: WrappedTokenType): Promise<LockedTokenType>;
+    getLockedTokenFromToken(wrapped: Token): Promise<LockedTokenType>;
+    getTokensForAccount(chain: Chain, address: string): Promise<Token[]>;
 }
