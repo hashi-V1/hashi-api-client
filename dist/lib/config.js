@@ -1,7 +1,7 @@
 "use strict";
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isTokenWrapped = exports.getUrlFromIpfs = exports.ipfsNodes = exports.nodesConfig = exports.chainConfig = void 0;
+exports.hashiIndexerUrl = exports.isTokenWrapped = exports.nodesConfig = exports.chainConfig = void 0;
 var chain_1 = require("./types/chain");
 /**
  * Contains the constant configuration for each chain
@@ -29,17 +29,9 @@ exports.nodesConfig = [
     "http://localhost:3030/proof",
     "http://localhost:3030/proof",
 ];
-exports.ipfsNodes = [
-    "https://ipfs.io/ipfs/",
-    "https://cloudflare-ipfs.com/ipfs/",
-];
-function getUrlFromIpfs(ipfsUrl) {
-    var node = exports.ipfsNodes[Math.round(Math.random() * (exports.ipfsNodes.length - 1))];
-    return "".concat(node).concat(ipfsUrl.replace("ipfs://", ""));
-}
-exports.getUrlFromIpfs = getUrlFromIpfs;
 function isTokenWrapped(token, chain) {
     return exports.chainConfig[chain].wrapperContract === token.tokenContract;
 }
 exports.isTokenWrapped = isTokenWrapped;
+exports.hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";
 //# sourceMappingURL=config.js.map

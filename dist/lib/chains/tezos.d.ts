@@ -51,5 +51,4 @@ export declare function burnTokenTezos(chain: Chain, token: LockedTokenType, des
  */
 export declare function withdrawTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
 export declare function getLockedTokenFromWrappedTezos(wrapped: WrappedTokenType, Tezos: TezosToolkit): Promise<LockedTokenType>;
-export declare function getTokensForAccountTezos(chain: Chain, address: string): Promise<any>;
 export {};

@@ -51,4 +51,3 @@ export declare function burnTokenEthereum(chain: Chain, token: LockedTokenType, 
  */
 export declare function withdrawTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
 export declare function getLockedTokenFromWrappedEthereum(wrapped: WrappedTokenType, signer: Signer): Promise<LockedTokenType>;
-export declare function getTokensForAccountEthereum(chain: Chain, address: string): Promise<never[]>;

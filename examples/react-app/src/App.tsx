@@ -66,7 +66,10 @@ function App() {
     });
 
     const bridge = useCallback(() => {
-        if (typeof selectedToken === "undefined") return;
+        if (typeof selectedToken === "undefined") {
+            alert("Please select a token");
+            return;
+        }
 
         const target =
             selectedToken.chain === Chain.Tezos ? Chain.Ethereum : Chain.Tezos;
@@ -83,13 +86,26 @@ function App() {
             .catch(alert);
     }, [selectedToken, destinationAddress]);
 
-    const refreshTokens = useCallback(() => {
-        if (tezAddress === "") return;
-        hashi
-            .getTokensForAccount(Chain.Tezos, tezAddress)
-            .then(setIndexedTokens);
-    }, [tezAddress]);
-    useEffect(refreshTokens, [refreshTokens]);
+    const refreshTokens = useCallback(async () => {
+        let tokens: Token[] = [];
+
+        if (tezAddress) {
+            tokens = tokens.concat(
+                await hashi.getTokensForAccount(Chain.Tezos, tezAddress)
+            );
+        }
+
+        if (ethAddress) {
+            tokens = tokens.concat(
+                await hashi.getTokensForAccount(Chain.Ethereum, ethAddress)
+            );
+        }
+
+        setIndexedTokens(tokens);
+    }, [tezAddress, ethAddress]);
+    useEffect(() => {
+        refreshTokens();
+    }, [refreshTokens]);
 
     return (
         <div className="main-div">

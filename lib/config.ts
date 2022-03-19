@@ -39,16 +39,8 @@ export const nodesConfig: string[] = [
     "http://localhost:3030/proof",
 ];
 
-export const ipfsNodes: string[] = [
-    "https://ipfs.io/ipfs/",
-    "https://cloudflare-ipfs.com/ipfs/",
-];
-
-export function getUrlFromIpfs(ipfsUrl: string) {
-    const node = ipfsNodes[Math.round(Math.random() * (ipfsNodes.length - 1))];
-    return `${node}${ipfsUrl.replace("ipfs://", "")}`;
-}
-
 export function isTokenWrapped(token: Token, chain: Chain) {
     return chainConfig[chain].wrapperContract === token.tokenContract;
 }
+
+export const hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";

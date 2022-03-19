@@ -1,8 +1,8 @@
+import axios from "axios";
 import {
     approveAndLockEthereum,
     burnTokenEthereum,
     getLockedTokenFromWrappedEthereum,
-    getTokensForAccountEthereum,
     setChainSignerEthereum,
     withdrawTokenEthereum,
     wrapTokenEthereum,
@@ -11,11 +11,11 @@ import {
     approveAndLockTezos,
     burnTokenTezos,
     getLockedTokenFromWrappedTezos,
-    getTokensForAccountTezos,
     setChainSignerTezos,
     withdrawTokenTezos,
     wrapTokenTezos,
 } from "./chains/tezos";
+import { hashiIndexerUrl } from "./config";
 import { proveTokenStatus } from "./prover";
 import { Chain } from "./types/chain";
 import {
@@ -375,12 +375,28 @@ export class HashiBridge {
         }
     }
 
-    getTokensForAccount(chain: Chain, address: string): Promise<Token[]> {
-        switch (chain) {
-            case Chain.Tezos:
-                return getTokensForAccountTezos(chain, address);
-            case Chain.Ethereum:
-                return getTokensForAccountEthereum(chain, address);
+    async getTokensForAccount(chain: Chain, address: string): Promise<Token[]> {
+        if (!hashiIndexerUrl) return [];
+
+        try {
+            const response = await axios.get(
+                `${hashiIndexerUrl}/nftsForAccount`,
+                {
+                    params: {
+                        chain,
+                        address,
+                    },
+                }
+            );
+
+            if (response.status !== 200) return Promise.reject(response.data);
+
+            if (!response.data || !Array.isArray(response.data.data))
+                throw new Error(); // Indexer Error
+
+            return response.data.data;
+        } catch (e) {
+            return Promise.reject("Indexer error");
         }
     }
 }

@@ -35,10 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HashiBridge = void 0;
+var axios_1 = __importDefault(require("axios"));
 var ethereum_1 = require("./chains/ethereum");
 var tezos_1 = require("./chains/tezos");
+var config_1 = require("./config");
 var prover_1 = require("./prover");
 var chain_1 = require("./types/chain");
 var errors_1 = require("./types/errors");
@@ -325,12 +330,36 @@ var HashiBridge = /** @class */ (function () {
         }
     };
     HashiBridge.prototype.getTokensForAccount = function (chain, address) {
-        switch (chain) {
-            case chain_1.Chain.Tezos:
-                return (0, tezos_1.getTokensForAccountTezos)(chain, address);
-            case chain_1.Chain.Ethereum:
-                return (0, ethereum_1.getTokensForAccountEthereum)(chain, address);
-        }
+        return __awaiter(this, void 0, void 0, function () {
+            var response, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!config_1.hashiIndexerUrl)
+                            return [2 /*return*/, []];
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get("".concat(config_1.hashiIndexerUrl, "/nftsForAccount"), {
+                                params: {
+                                    chain: chain,
+                                    address: address,
+                                },
+                            })];
+                    case 2:
+                        response = _a.sent();
+                        if (response.status !== 200)
+                            return [2 /*return*/, Promise.reject(response.data)];
+                        if (!response.data || !Array.isArray(response.data.data))
+                            throw new Error(); // Indexer Error
+                        return [2 /*return*/, response.data.data];
+                    case 3:
+                        e_1 = _a.sent();
+                        return [2 /*return*/, Promise.reject("Indexer error")];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
     };
     return HashiBridge;
 }());

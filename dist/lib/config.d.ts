@@ -22,6 +22,5 @@ export declare const chainConfig: {
  * e.g. "http://localhost:3030/proof"
  */
 export declare const nodesConfig: string[];
-export declare const ipfsNodes: string[];
-export declare function getUrlFromIpfs(ipfsUrl: string): string;
 export declare function isTokenWrapped(token: Token, chain: Chain): boolean;
+export declare const hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";

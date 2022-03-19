@@ -227,10 +227,3 @@ export function getLockedTokenFromWrappedEthereum(
         timestamp: val.tokenLockTimestamp,
     }));
 }
-
-export async function getTokensForAccountEthereum(
-    chain: Chain,
-    address: string
-) {
-    return [];
-}
