@@ -101,7 +101,7 @@ describe("HashiBridge", function () {
                     return [4 /*yield*/, chai_1.assert.isRejected(bridge.withdrawToken(chain_1.Chain.Tezos, message, [], progress), errors_1.NoSignerForChainError)];
                 case 4:
                     _a.sent();
-                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.getLockedTokenFromToken(token), errors_1.NoSignerForChainError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.getLockedToken(token), errors_1.NoSignerForChainError)];
                 case 5:
                     _a.sent();
                     return [2 /*return*/];

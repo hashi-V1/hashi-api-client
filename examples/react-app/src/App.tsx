@@ -40,7 +40,7 @@ function App() {
             .then(() => wallet.getPKH())
             .then((pkh) => {
                 setTezAddress(pkh);
-                hashi.setChainSigner(Chain.Tezos, wallet);
+                hashi.setChainSigner(Chain.Hangzhounet, wallet);
             });
     });
 
@@ -61,7 +61,7 @@ function App() {
             const signer = provider.getSigner();
             const address = await signer.getAddress();
             setEthAddress(address);
-            hashi.setChainSigner(Chain.Ethereum, signer);
+            hashi.setChainSigner(Chain.Ropsten, signer);
         });
     });
 
@@ -72,7 +72,9 @@ function App() {
         }
 
         const target =
-            selectedToken.chain === Chain.Tezos ? Chain.Ethereum : Chain.Tezos;
+            selectedToken.chain === Chain.Hangzhounet
+                ? Chain.Ropsten
+                : Chain.Hangzhounet;
 
         hashi
             .bridge(target, selectedToken, destinationAddress, (p) =>
@@ -91,13 +93,13 @@ function App() {
 
         if (tezAddress) {
             tokens = tokens.concat(
-                await hashi.getTokensForAccount(Chain.Tezos, tezAddress)
+                await hashi.getTokensForAccount(Chain.Hangzhounet, tezAddress)
             );
         }
 
         if (ethAddress) {
             tokens = tokens.concat(
-                await hashi.getTokensForAccount(Chain.Ethereum, ethAddress)
+                await hashi.getTokensForAccount(Chain.Ropsten, ethAddress)
             );
         }
 

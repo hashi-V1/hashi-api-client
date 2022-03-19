@@ -80,7 +80,7 @@ describe("HashiBridge", () => {
         );
 
         await assert.isRejected(
-            bridge.getLockedTokenFromToken(token),
+            bridge.getLockedToken(token),
             NoSignerForChainError
         );
     });

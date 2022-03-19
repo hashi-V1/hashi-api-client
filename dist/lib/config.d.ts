@@ -4,10 +4,9 @@ import { Token } from "./types/token";
  * Represents the configuration fields for a specific chain.
  */
 export declare type ChainConfigType = {
-    rpc: string;
+    rpc?: string;
     lockerContract: string;
     wrapperContract: string;
-    indexerUrl?: string;
 };
 /**
  * Contains the constant configuration for each chain

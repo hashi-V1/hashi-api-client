@@ -50,4 +50,4 @@ export declare function burnTokenEthereum(chain: Chain, token: LockedTokenType, 
  * @returns an empty promise
  */
 export declare function withdrawTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
-export declare function getLockedTokenFromWrappedEthereum(wrapped: WrappedTokenType, signer: Signer): Promise<LockedTokenType>;
+export declare function getLockedTokenEthereum(wrapped: WrappedTokenType, signer: Signer): Promise<LockedTokenType>;

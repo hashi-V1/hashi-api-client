@@ -20,7 +20,7 @@ import { LockedTokenType } from "./types/token";
  * @param setProgress callback to track the progress of the proof
  * @returns a promise with the message and signatures
  */
-export function proveTokenStatus(
+export async function proveTokenStatus(
     sourceChain: Chain,
     targetChain: Chain,
     token: LockedTokenType,
@@ -35,43 +35,30 @@ export function proveTokenStatus(
         ...token,
     };
 
-    const signatures: Signature[] = [];
-    const promises: Promise<void>[] = [];
     let message: UnsignedMessageType | undefined;
 
-    nodesConfig.forEach((node) => {
-        promises.push(
-            axios
-                .get(node, {
-                    params: proofRequest,
-                })
-                .then((response) => {
-                    const signedMessage = response.data;
+    const signatures = await Promise.all(
+        nodesConfig.map(async (node) => {
+            const response = await axios.get(node, {
+                params: proofRequest,
+            });
+            const signedMessage = response.data;
 
-                    if (!isSignedMessageType(signedMessage)) {
-                        return Promise.reject(
-                            "Wrong response type (not SignedMessageType)"
-                        );
-                    }
+            if (!isSignedMessageType(signedMessage))
+                return Promise.reject(
+                    "Wrong response type (not SignedMessageType)"
+                );
 
-                    signatures.push(signedMessage.signature);
-                    if (typeof message === "undefined") {
-                        message = signedMessage;
-                    }
-                })
-        );
-    });
+            if (typeof message === "undefined") message = signedMessage;
+            return signedMessage.signature;
+        })
+    );
+    if (typeof message === "undefined")
+        return Promise.reject("Undefined message");
 
-    return Promise.all(promises).then(() => {
-        if (typeof message === "undefined") {
-            return Promise.reject("Undefined message");
-        }
-
-        setProgress(Progress.ProvedStatus);
-
-        return {
-            signatures,
-            message,
-        };
-    });
+    setProgress(Progress.ProvedStatus);
+    return {
+        signatures,
+        message,
+    };
 }

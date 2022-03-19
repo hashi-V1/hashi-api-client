@@ -4,7 +4,9 @@
  */
 export declare enum Chain {
     Tezos = "Tezos",
-    Ethereum = "Ethereum"
+    Hangzhounet = "Hangzhounet",
+    Ethereum = "Ethereum",
+    Ropsten = "Ropsten"
 }
 /**
  * Checks whether the input is of the Chain enum type

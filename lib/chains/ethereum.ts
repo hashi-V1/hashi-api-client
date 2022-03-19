@@ -35,7 +35,7 @@ export function approveAndLockEthereum(
 ): Promise<number> {
     const lockerContract = new Contract(
         chainConfig[token.chain].lockerContract,
-        lockerAbi.abi,
+        lockerAbi,
         signer
     );
     const tokenContract = new Contract(token.tokenContract, erc721Abi, signer);
@@ -89,7 +89,7 @@ export function wrapTokenEthereum(
 ): Promise<WrappedTokenType> {
     const wrapperContract = new Contract(
         chainConfig[chain].wrapperContract,
-        wrapperAbi.abi,
+        wrapperAbi,
         signer
     );
 
@@ -146,7 +146,7 @@ export function burnTokenEthereum(
 ): Promise<void> {
     const wrapperContract = new Contract(
         chainConfig[chain].wrapperContract,
-        wrapperAbi.abi,
+        wrapperAbi,
         signer
     );
 
@@ -184,7 +184,7 @@ export function withdrawTokenEthereum(
 ): Promise<void> {
     const lockerContract = new Contract(
         chainConfig[chain].lockerContract,
-        lockerAbi.abi,
+        lockerAbi,
         signer
     );
 
@@ -205,13 +205,13 @@ export function withdrawTokenEthereum(
         .then();
 }
 
-export function getLockedTokenFromWrappedEthereum(
+export function getLockedTokenEthereum(
     wrapped: WrappedTokenType,
     signer: Signer
 ): Promise<LockedTokenType> {
     const wrapperContract = new Contract(
         chainConfig[wrapped.chain].wrapperContract,
-        wrapperAbi.abi,
+        wrapperAbi,
         signer
     );
 

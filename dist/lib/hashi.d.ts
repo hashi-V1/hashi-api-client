@@ -84,6 +84,6 @@ export declare class HashiBridge {
      * @returns an empty promise
      */
     withdrawToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<void>;
-    getLockedTokenFromToken(wrapped: Token): Promise<LockedTokenType>;
+    getLockedToken(wrapped: Token): Promise<LockedTokenType>;
     getTokensForAccount(chain: Chain, address: string): Promise<Token[]>;
 }

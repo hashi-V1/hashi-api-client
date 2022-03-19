@@ -9,7 +9,9 @@ exports.chainConstants = exports.isChain = exports.Chain = void 0;
 var Chain;
 (function (Chain) {
     Chain["Tezos"] = "Tezos";
+    Chain["Hangzhounet"] = "Hangzhounet";
     Chain["Ethereum"] = "Ethereum";
+    Chain["Ropsten"] = "Ropsten";
 })(Chain = exports.Chain || (exports.Chain = {}));
 /**
  * Checks whether the input is of the Chain enum type
@@ -28,8 +30,16 @@ exports.chainConstants = (_a = {},
         name: Chain.Tezos,
         symbol: "XTZ",
     },
+    _a[Chain.Hangzhounet] = {
+        name: Chain.Hangzhounet,
+        symbol: "XTZ",
+    },
     _a[Chain.Ethereum] = {
         name: Chain.Ethereum,
+        symbol: "ETH",
+    },
+    _a[Chain.Ropsten] = {
+        name: Chain.Ropsten,
         symbol: "ETH",
     },
     _a);

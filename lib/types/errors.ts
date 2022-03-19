@@ -9,3 +9,5 @@ export const CannotWrapWithStatusOtherThanLocked =
 
 export const CannotWithdrawWithStatusOtherThanBurned =
     "Cannot withdraw with status other than burned";
+
+export const UnknownChain = "Unknown Chain";

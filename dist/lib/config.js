@@ -9,13 +9,20 @@ var chain_1 = require("./types/chain");
  */
 exports.chainConfig = (_a = {},
     _a[chain_1.Chain.Tezos] = {
+        rpc: "https://mainnet-node.madfish.solutions",
+        lockerContract: "not implemented",
+        wrapperContract: "not implemented",
+    },
+    _a[chain_1.Chain.Hangzhounet] = {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
         wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
-        indexerUrl: "https://api.hangzhou2net.tzkt.io/v1/tokens/balances",
     },
     _a[chain_1.Chain.Ethereum] = {
-        rpc: "",
+        lockerContract: "not implemented",
+        wrapperContract: "not implemented",
+    },
+    _a[chain_1.Chain.Ropsten] = {
         lockerContract: "0x1b4622d90811f57020e96f78f1f2883020882780",
         wrapperContract: "0x43a31963eb24ef0cf9d35e2ba463589ff6f9efc4",
     },

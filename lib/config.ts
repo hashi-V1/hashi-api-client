@@ -5,10 +5,9 @@ import { Token } from "./types/token";
  * Represents the configuration fields for a specific chain.
  */
 export type ChainConfigType = {
-    rpc: string;
+    rpc?: string;
     lockerContract: string;
     wrapperContract: string;
-    indexerUrl?: string;
 };
 
 /**
@@ -17,13 +16,21 @@ export type ChainConfigType = {
  */
 export const chainConfig: { [key in Chain]: ChainConfigType } = {
     [Chain.Tezos]: {
+        rpc: "https://mainnet-node.madfish.solutions",
+        lockerContract: "not implemented",
+        wrapperContract: "not implemented",
+    },
+    [Chain.Hangzhounet]: {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
         wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
-        indexerUrl: "https://api.hangzhou2net.tzkt.io/v1/tokens/balances",
     },
+
     [Chain.Ethereum]: {
-        rpc: "",
+        lockerContract: "not implemented",
+        wrapperContract: "not implemented",
+    },
+    [Chain.Ropsten]: {
         lockerContract: "0x1b4622d90811f57020e96f78f1f2883020882780",
         wrapperContract: "0x43a31963eb24ef0cf9d35e2ba463589ff6f9efc4",
     },

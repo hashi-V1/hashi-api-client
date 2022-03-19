@@ -38,7 +38,7 @@ function tezosSignerIsWalletProvider(
  * @returns The TezosToolkit instance
  */
 export function setChainSignerTezos(chain: Chain, signer: TezosSigner) {
-    const Tezos = new TezosToolkit(chainConfig[chain].rpc);
+    const Tezos = new TezosToolkit(chainConfig[chain].rpc!);
     if (tezosSignerIsWalletProvider(signer)) {
         Tezos.setWalletProvider(signer);
     } else {
@@ -276,7 +276,7 @@ export function withdrawTokenTezos(
         });
 }
 
-export function getLockedTokenFromWrappedTezos(
+export function getLockedTokenTezos(
     wrapped: WrappedTokenType,
     Tezos: TezosToolkit
 ): Promise<LockedTokenType> {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLockedTokenFromWrappedTezos = exports.withdrawTokenTezos = exports.burnTokenTezos = exports.wrapTokenTezos = exports.approveAndLockTezos = exports.setChainSignerTezos = void 0;
+exports.getLockedTokenTezos = exports.withdrawTokenTezos = exports.burnTokenTezos = exports.wrapTokenTezos = exports.approveAndLockTezos = exports.setChainSignerTezos = void 0;
 var taquito_1 = require("@taquito/taquito");
 var config_1 = require("../config");
 var progress_1 = require("../types/progress");
@@ -221,7 +221,7 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
     });
 }
 exports.withdrawTokenTezos = withdrawTokenTezos;
-function getLockedTokenFromWrappedTezos(wrapped, Tezos) {
+function getLockedTokenTezos(wrapped, Tezos) {
     return Tezos.contract
         .at(wrapped.tokenContract)
         .then(function (wrapperContract) { return wrapperContract.storage(); })
@@ -247,5 +247,5 @@ function getLockedTokenFromWrappedTezos(wrapped, Tezos) {
         };
     });
 }
-exports.getLockedTokenFromWrappedTezos = getLockedTokenFromWrappedTezos;
+exports.getLockedTokenTezos = getLockedTokenTezos;
 //# sourceMappingURL=tezos.js.map

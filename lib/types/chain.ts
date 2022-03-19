@@ -4,7 +4,10 @@
  */
 export enum Chain {
     Tezos = "Tezos",
+    Hangzhounet = "Hangzhounet",
+
     Ethereum = "Ethereum",
+    Ropsten = "Ropsten",
 }
 
 /**
@@ -32,8 +35,17 @@ export const chainConstants: { [key in Chain]: ChainConstantsType } = {
         name: Chain.Tezos,
         symbol: "XTZ",
     },
+    [Chain.Hangzhounet]: {
+        name: Chain.Hangzhounet,
+        symbol: "XTZ",
+    },
+
     [Chain.Ethereum]: {
         name: Chain.Ethereum,
+        symbol: "ETH",
+    },
+    [Chain.Ropsten]: {
+        name: Chain.Ropsten,
         symbol: "ETH",
     },
 };
