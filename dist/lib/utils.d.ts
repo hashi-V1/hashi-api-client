@@ -25,3 +25,9 @@ export declare function hasOwnProperty<X extends {}, Y extends PropertyKey>(obj:
  * @returns a boolean and a type predicate
  */
 export declare function isNotEmpty(input: any): input is string;
+/**
+ * Check whether the input timestamp is in milliseconds.
+ * @param timestamp any timestamp
+ * @returns a boolean
+ */
+export declare function isMillisTimestamp(timestamp: number): boolean;

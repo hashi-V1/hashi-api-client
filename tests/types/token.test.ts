@@ -13,7 +13,7 @@ describe("token", () => {
         const lockedToken: LockedTokenType = {
             tokenContract: "fdghfhjfhdsjf",
             tokenId: 5,
-            timestamp: 345674567,
+            timestamp: 1647745387000,
         };
 
         assert.isTrue(isLockedTokenType(lockedToken));
@@ -29,7 +29,7 @@ describe("token", () => {
             isLockedTokenType({
                 tokenContract: null,
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -37,7 +37,7 @@ describe("token", () => {
             isLockedTokenType({
                 tokenContract: "",
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -45,7 +45,7 @@ describe("token", () => {
             isLockedTokenType({
                 tokenContract: "fdsfgdfhdf",
                 tokenId: null,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -53,7 +53,7 @@ describe("token", () => {
             isLockedTokenType({
                 tokenContract: "dghfghfghdfhdf",
                 tokenId: Number.NaN,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 

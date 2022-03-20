@@ -9,6 +9,7 @@ export declare type WrappedTokenType = {
 };
 /**
  * Represents a token locked by hashi
+ * timestamp should be in milliseconds
  */
 export declare type LockedTokenType = {
     tokenContract: string;

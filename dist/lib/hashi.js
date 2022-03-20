@@ -104,6 +104,8 @@ var HashiBridge = /** @class */ (function () {
                         return [4 /*yield*/, approveAndLock(token, destinationAddress, instance, setProgress)];
                     case 1:
                         timestamp = _a.sent();
+                        if (!(0, utils_1.isMillisTimestamp)(timestamp))
+                            console.log("DEBUG: Probable wrong timestamp (should be using milliseconds)");
                         setProgress(progress_1.Progress.ApprovedAndLocked);
                         return [2 /*return*/, {
                                 tokenContract: token.tokenContract,

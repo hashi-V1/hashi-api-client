@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenFromAddressAndId = exports.isToken = exports.isLockedTokenType = void 0;
+var utils_1 = require("../utils");
 var chain_1 = require("./chain");
 /**
  * Checks whether the input is of the UnsignedMessageType type.
@@ -16,7 +17,7 @@ function isLockedTokenType(input) {
         m.tokenId != null &&
         !isNaN(m.tokenId) &&
         m.timestamp != null &&
-        !isNaN(m.timestamp));
+        (0, utils_1.isMillisTimestamp)(m.timestamp));
 }
 exports.isLockedTokenType = isLockedTokenType;
 function isToken(input) {

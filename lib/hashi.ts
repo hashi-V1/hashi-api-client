@@ -28,7 +28,7 @@ import {
 import { Progress } from "./types/progress";
 import { Signature, Status, UnsignedMessageType } from "./types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "./types/token";
-import { setProgressCallback } from "./utils";
+import { isMillisTimestamp, setProgressCallback } from "./utils";
 
 /**
  * Main class of the Hashi Protocol bridge.
@@ -97,6 +97,10 @@ export class HashiBridge {
             instance,
             setProgress
         );
+        if (!isMillisTimestamp(timestamp))
+            console.log(
+                "DEBUG: Probable wrong timestamp (should be using milliseconds)"
+            );
 
         setProgress(Progress.ApprovedAndLocked);
         return {

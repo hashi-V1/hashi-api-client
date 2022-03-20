@@ -56,7 +56,7 @@ describe("HashiBridge", function () {
         metadata: "",
         tokenContract: "tzjredfrhgjkujrefd",
         tokenId: 5,
-        timestamp: 4467897754,
+        timestamp: 1647745387000,
     };
     var progress = function () { };
     it("should fail when destination addresses are empty", function () { return __awaiter(void 0, void 0, void 0, function () {

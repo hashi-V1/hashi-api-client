@@ -1,3 +1,4 @@
+import { isMillisTimestamp } from "../utils";
 import { Chain, isChain } from "./chain";
 
 /**
@@ -11,6 +12,7 @@ export type WrappedTokenType = {
 
 /**
  * Represents a token locked by hashi
+ * timestamp should be in milliseconds
  */
 export type LockedTokenType = {
     tokenContract: string;
@@ -32,7 +34,7 @@ export function isLockedTokenType(input: any): input is LockedTokenType {
         m.tokenId != null &&
         !isNaN(m.tokenId) &&
         m.timestamp != null &&
-        !isNaN(m.timestamp)
+        isMillisTimestamp(m.timestamp)
     );
 }
 

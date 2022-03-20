@@ -48,3 +48,12 @@ export function hasOwnProperty<X extends {}, Y extends PropertyKey>(
 export function isNotEmpty(input: any): input is string {
     return input != null && input !== "";
 }
+
+/**
+ * Check whether the input timestamp is in milliseconds.
+ * @param timestamp any timestamp
+ * @returns a boolean
+ */
+export function isMillisTimestamp(timestamp: number) {
+    return !isNaN(timestamp) && timestamp > 1000000000000;
+}

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isNotEmpty = exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
+exports.isMillisTimestamp = exports.isNotEmpty = exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
 var progress_1 = require("./types/progress");
 /**
  * Creates a non optional progressCallback with the parameter or if it is undefined
@@ -87,4 +87,13 @@ function isNotEmpty(input) {
     return input != null && input !== "";
 }
 exports.isNotEmpty = isNotEmpty;
+/**
+ * Check whether the input timestamp is in milliseconds.
+ * @param timestamp any timestamp
+ * @returns a boolean
+ */
+function isMillisTimestamp(timestamp) {
+    return !isNaN(timestamp) && timestamp > 1000000000000;
+}
+exports.isMillisTimestamp = isMillisTimestamp;
 //# sourceMappingURL=utils.js.map

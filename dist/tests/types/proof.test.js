@@ -21,7 +21,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         };
         chai_1.assert.isTrue((0, proof_1.isProofRequestType)(request));
     });
@@ -41,7 +41,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -49,7 +49,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -57,7 +57,7 @@ describe("proof type", function () {
             status: null,
             tokenContract: "rfdghjhgfds",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -65,7 +65,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -73,7 +73,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: null,
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -81,7 +81,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: null,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,
@@ -89,7 +89,7 @@ describe("proof type", function () {
             status: proof_1.Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: Number.NaN,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, proof_1.isProofRequestType)({
             sourceChain: chain_1.Chain.Tezos,

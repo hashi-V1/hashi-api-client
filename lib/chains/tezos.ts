@@ -9,7 +9,7 @@ import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
-import { hasOwnProperty, stringToHex } from "../utils";
+import { hasOwnProperty, isMillisTimestamp, stringToHex } from "../utils";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -276,6 +276,11 @@ export async function getLockedTokenTezos(
         isNaN(Number(value.token_id))
     )
         return Promise.reject("Could not retrieve wrapped token");
+
+    if (!isMillisTimestamp(value.lock_timestamp))
+        console.log(
+            "DEBUG: Probable wrong timestamp (should be using milliseconds)"
+        );
 
     return {
         tokenId: Number(value.token_id),

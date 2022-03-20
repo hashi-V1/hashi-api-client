@@ -303,6 +303,8 @@ function getLockedTokenTezos(wrapped, Tezos) {
                         !(0, utils_1.hasOwnProperty)(value, "token_id") ||
                         isNaN(Number(value.token_id)))
                         return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
+                    if (!(0, utils_1.isMillisTimestamp)(value.lock_timestamp))
+                        console.log("DEBUG: Probable wrong timestamp (should be using milliseconds)");
                     return [2 /*return*/, {
                             tokenId: Number(value.token_id),
                             tokenContract: value.token_contract,

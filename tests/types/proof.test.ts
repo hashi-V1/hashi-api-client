@@ -27,7 +27,7 @@ describe("proof type", () => {
             status: Status.Locked,
             tokenContract: "rfdghjhgfds",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         };
         assert.isTrue(isProofRequestType(request));
     });
@@ -52,7 +52,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: "rfdghjhgfds",
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -63,7 +63,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: "rfdghjhgfds",
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -74,7 +74,7 @@ describe("proof type", () => {
                 status: null,
                 tokenContract: "rfdghjhgfds",
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -85,7 +85,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: "",
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -96,7 +96,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: null,
                 tokenId: 5,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -107,7 +107,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: "rfdghjhgfds",
                 tokenId: null,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 
@@ -118,7 +118,7 @@ describe("proof type", () => {
                 status: Status.Locked,
                 tokenContract: "rfdghjhgfds",
                 tokenId: Number.NaN,
-                timestamp: 3456786543,
+                timestamp: 1647745387000,
             })
         );
 

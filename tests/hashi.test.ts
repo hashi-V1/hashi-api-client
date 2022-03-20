@@ -25,7 +25,7 @@ describe("HashiBridge", () => {
         metadata: "",
         tokenContract: "tzjredfrhgjkujrefd",
         tokenId: 5,
-        timestamp: 4467897754,
+        timestamp: 1647745387000,
     };
 
     const progress = () => {};

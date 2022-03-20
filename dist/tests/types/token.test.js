@@ -8,7 +8,7 @@ describe("token", function () {
         var lockedToken = {
             tokenContract: "fdghfhjfhdsjf",
             tokenId: 5,
-            timestamp: 345674567,
+            timestamp: 1647745387000,
         };
         chai_1.assert.isTrue((0, token_1.isLockedTokenType)(lockedToken));
     });
@@ -20,22 +20,22 @@ describe("token", function () {
         chai_1.assert.isFalse((0, token_1.isLockedTokenType)({
             tokenContract: null,
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, token_1.isLockedTokenType)({
             tokenContract: "",
             tokenId: 5,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, token_1.isLockedTokenType)({
             tokenContract: "fdsfgdfhdf",
             tokenId: null,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, token_1.isLockedTokenType)({
             tokenContract: "dghfghfghdfhdf",
             tokenId: Number.NaN,
-            timestamp: 3456786543,
+            timestamp: 1647745387000,
         }));
         chai_1.assert.isFalse((0, token_1.isLockedTokenType)({
             tokenContract: "dfgdfgdfgdf",
