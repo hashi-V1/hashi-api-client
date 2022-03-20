@@ -133,7 +133,7 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                     confirmation = _a.sent();
                     if (!confirmation.completed)
                         return [2 /*return*/, Promise.reject("Transaction not completed")];
-                    return [2 /*return*/, Date.parse(confirmation.block.header.timestamp.toString())];
+                    return [2 /*return*/, Date.parse(confirmation.block.header.timestamp.toString()) * 1000];
             }
         });
     });
@@ -220,7 +220,7 @@ function burnTokenTezos(chain, token, destinationAddress, Tezos, setProgress) {
                     return [4 /*yield*/, wrapperContract.methodsObject
                             .burn({
                             destination_address: destinationAddress,
-                            lock_timestamp: token.timestamp.toString(),
+                            lock_timestamp: new Date(token.timestamp).toISOString(),
                             token_contract: token.tokenContract,
                             token_id: token.tokenId.toString(),
                         })
@@ -301,14 +301,13 @@ function getLockedTokenTezos(wrapped, Tezos) {
                         !(0, utils_1.hasOwnProperty)(value, "lock_timestamp") ||
                         !(0, utils_1.hasOwnProperty)(value, "token_contract") ||
                         !(0, utils_1.hasOwnProperty)(value, "token_id") ||
-                        isNaN(Number(value.token_id)))
+                        isNaN(Number(value.token_id)) ||
+                        isNaN(Date.parse(value.lock_timestamp)))
                         return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
-                    if (!(0, utils_1.isMillisTimestamp)(value.lock_timestamp))
-                        console.log("DEBUG: Probable wrong timestamp (should be using milliseconds)");
                     return [2 /*return*/, {
                             tokenId: Number(value.token_id),
                             tokenContract: value.token_contract,
-                            timestamp: value.lock_timestamp,
+                            timestamp: Date.parse(value.lock_timestamp),
                         }];
             }
         });

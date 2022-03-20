@@ -91,7 +91,7 @@ function approveAndLockEthereum(token, destinationAddress, signer, setProgress) 
                     return [4 /*yield*/, signer.provider.getBlock(confirm.blockNumber)];
                 case 5:
                     block = _a.sent();
-                    return [2 /*return*/, block.timestamp];
+                    return [2 /*return*/, block.timestamp * 1000];
             }
         });
     });

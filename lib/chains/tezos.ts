@@ -9,7 +9,7 @@ import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
 import { LockedTokenType, Token, WrappedTokenType } from "../types/token";
-import { hasOwnProperty, isMillisTimestamp, stringToHex } from "../utils";
+import { hasOwnProperty, stringToHex } from "../utils";
 
 type TezosSigner = WalletProvider | Signer;
 
@@ -111,7 +111,7 @@ export async function approveAndLockTezos(
     if (!confirmation.completed)
         return Promise.reject("Transaction not completed");
 
-    return Date.parse(confirmation.block.header.timestamp.toString());
+    return Date.parse(confirmation.block.header.timestamp.toString()) * 1000;
 }
 
 /**
@@ -203,7 +203,7 @@ export async function burnTokenTezos(
     const operation = await wrapperContract.methodsObject
         .burn({
             destination_address: destinationAddress,
-            lock_timestamp: token.timestamp.toString(),
+            lock_timestamp: new Date(token.timestamp).toISOString(),
             token_contract: token.tokenContract,
             token_id: token.tokenId.toString(),
         })
@@ -273,18 +273,14 @@ export async function getLockedTokenTezos(
         !hasOwnProperty(value, "lock_timestamp") ||
         !hasOwnProperty(value, "token_contract") ||
         !hasOwnProperty(value, "token_id") ||
-        isNaN(Number(value.token_id))
+        isNaN(Number(value.token_id)) ||
+        isNaN(Date.parse(value.lock_timestamp))
     )
         return Promise.reject("Could not retrieve wrapped token");
-
-    if (!isMillisTimestamp(value.lock_timestamp))
-        console.log(
-            "DEBUG: Probable wrong timestamp (should be using milliseconds)"
-        );
 
     return {
         tokenId: Number(value.token_id),
         tokenContract: value.token_contract,
-        timestamp: value.lock_timestamp,
+        timestamp: Date.parse(value.lock_timestamp),
     };
 }

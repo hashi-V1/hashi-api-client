@@ -308,20 +308,28 @@ var HashiBridge = /** @class */ (function () {
     };
     HashiBridge.prototype.getLockedToken = function (wrapped) {
         return __awaiter(this, void 0, void 0, function () {
-            var chain, getLocked, instance;
+            var chain, getLocked, instance, locked;
             return __generator(this, function (_a) {
-                chain = wrapped.chain;
-                if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
-                    getLocked = tezos_1.getLockedTokenTezos;
-                else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
-                    getLocked = ethereum_1.getLockedTokenEthereum;
-                if (!getLocked)
-                    return [2 /*return*/, Promise.reject(errors_1.UnknownChain)];
-                instance = this.chainsInstances.get(chain);
-                if (typeof instance === "undefined") {
-                    return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
+                switch (_a.label) {
+                    case 0:
+                        chain = wrapped.chain;
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                            getLocked = tezos_1.getLockedTokenTezos;
+                        else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
+                            getLocked = ethereum_1.getLockedTokenEthereum;
+                        if (!getLocked)
+                            return [2 /*return*/, Promise.reject(errors_1.UnknownChain)];
+                        instance = this.chainsInstances.get(chain);
+                        if (typeof instance === "undefined") {
+                            return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
+                        }
+                        return [4 /*yield*/, getLocked(wrapped, instance)];
+                    case 1:
+                        locked = _a.sent();
+                        if (!(0, utils_1.isMillisTimestamp)(locked.timestamp))
+                            console.log("DEBUG: Probable wrong timestamp (should be using milliseconds)");
+                        return [2 /*return*/, locked];
                 }
-                return [2 /*return*/, getLocked(wrapped, instance)];
             });
         });
     };

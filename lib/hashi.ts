@@ -349,7 +349,13 @@ export class HashiBridge {
             return Promise.reject(NoSignerForChainError);
         }
 
-        return getLocked(wrapped, instance);
+        const locked = await getLocked(wrapped, instance);
+        if (!isMillisTimestamp(locked.timestamp))
+            console.log(
+                "DEBUG: Probable wrong timestamp (should be using milliseconds)"
+            );
+
+        return locked;
     }
 
     async getTokensForAccount(chain: Chain, address: string): Promise<Token[]> {

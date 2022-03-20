@@ -60,7 +60,7 @@ export async function approveAndLockEthereum(
     const confirm = await lockTx.wait();
 
     const block = await signer.provider!.getBlock(confirm.blockNumber);
-    return block.timestamp;
+    return block.timestamp * 1000;
 }
 
 /**
