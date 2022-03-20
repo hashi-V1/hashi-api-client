@@ -21,7 +21,6 @@ export declare function setChainSignerEthereum(chain: Chain, signer: Signer): Si
 export declare function approveAndLockEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<number>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
- * TODO: Get the wrapped token id from storage
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message

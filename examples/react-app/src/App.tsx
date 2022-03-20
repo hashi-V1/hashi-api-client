@@ -23,25 +23,26 @@ function App() {
 
     useEffect(() => {
         if (tezAddress !== "") return;
-        const options = {
-            name: "Hashi Example app",
-            preferredNetwork: NetworkType.HANGZHOUNET,
-        };
-        const wallet = new BeaconWallet(options);
 
-        (typeof wallet.client.getActiveAccount() === "undefined"
-            ? wallet.requestPermissions({
-                  network: {
-                      type: NetworkType.HANGZHOUNET,
-                  },
-              })
-            : Promise.resolve()
-        )
-            .then(() => wallet.getPKH())
-            .then((pkh) => {
-                setTezAddress(pkh);
-                hashi.setChainSigner(Chain.Hangzhounet, wallet);
-            });
+        (async () => {
+            const options = {
+                name: "Hashi Example app",
+                preferredNetwork: NetworkType.HANGZHOUNET,
+            };
+            const wallet = new BeaconWallet(options);
+
+            if (typeof wallet.client.getActiveAccount() === "undefined") {
+                await wallet.requestPermissions({
+                    network: {
+                        type: NetworkType.HANGZHOUNET,
+                    },
+                });
+            }
+
+            hashi.setChainSigner(Chain.Hangzhounet, wallet);
+
+            setTezAddress(await wallet.getPKH());
+        })();
     });
 
     useEffect(() => {
@@ -54,15 +55,17 @@ function App() {
             return;
         }
 
-        const provider = new ethers.providers.Web3Provider(
-            window.ethereum as ethers.providers.ExternalProvider
-        );
-        provider.send("eth_requestAccounts", [3]).then(async () => {
+        (async () => {
+            const provider = new ethers.providers.Web3Provider(
+                window.ethereum as ethers.providers.ExternalProvider
+            );
+            await provider.send("eth_requestAccounts", [3]);
+
             const signer = provider.getSigner();
-            const address = await signer.getAddress();
-            setEthAddress(address);
             hashi.setChainSigner(Chain.Ropsten, signer);
-        });
+
+            setEthAddress(await signer.getAddress());
+        })();
     });
 
     const bridge = useCallback(() => {
@@ -80,11 +83,8 @@ function App() {
             .bridge(target, selectedToken, destinationAddress, (p) =>
                 setProgress(progressConstants[p])
             )
-            .then((wrapped) =>
-                setWrappedText(
-                    `(${wrapped.tokenContract} - ${wrapped.tokenId})`
-                )
-            )
+            .then((t) => `(${t.tokenContract} - ${t.tokenId})`)
+            .then(setWrappedText)
             .catch(alert);
     }, [selectedToken, destinationAddress]);
 
@@ -158,13 +158,15 @@ function App() {
                             onClick={() => setSelectedToken(token)}
                             className={[
                                 "token",
-                                selectedToken === token ? "selected" : "",
+                                selectedToken?.uid === token.uid
+                                    ? "selected"
+                                    : "",
                             ].join(" ")}
                             key={`${token.uid}`}
                         >
                             <img src={token.imageUrl ?? "/token.png"} alt="" />
                             <h4>
-                                {token.name ?? token.uid}
+                                {token.name ?? token.uid}{" "}
                                 {token.symbol ? `(${token.symbol})` : ""}
                             </h4>
 

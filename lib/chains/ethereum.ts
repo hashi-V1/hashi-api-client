@@ -27,7 +27,7 @@ export function setChainSignerEthereum(chain: Chain, signer: Signer) {
  * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-export function approveAndLockEthereum(
+export async function approveAndLockEthereum(
     token: Token,
     destinationAddress: string,
     signer: Signer,
@@ -41,38 +41,30 @@ export function approveAndLockEthereum(
     const tokenContract = new Contract(token.tokenContract, erc721Abi, signer);
 
     setProgress(Progress.WaitingForUserApproval);
-    return (
-        tokenContract.approve(
-            chainConfig[token.chain].lockerContract,
-            token.tokenId
-        ) as Promise<TransactionResponse>
-    )
-        .then((tx) => {
-            setProgress(Progress.WaitingForConfirmationApproval);
-            return tx.wait();
-        })
-        .then(() => {
-            setProgress(Progress.WaitingForUserLock);
-            return lockerContract.lock(
-                token.tokenContract,
-                token.tokenId,
-                destinationAddress
-            ) as Promise<TransactionResponse>;
-        })
-        .then((tx) => {
-            setProgress(Progress.WaitingForConfirmationLock);
-            return tx.wait();
-        })
-        .then((confirm) =>
-            signer
-                .provider!.getBlock(confirm.blockNumber)
-                .then((block) => block.timestamp)
-        );
+    const approveTx: TransactionResponse = await tokenContract.approve(
+        chainConfig[token.chain].lockerContract,
+        token.tokenId
+    );
+
+    setProgress(Progress.WaitingForConfirmationApproval);
+    await approveTx.wait();
+
+    setProgress(Progress.WaitingForUserLock);
+    const lockTx: TransactionResponse = await lockerContract.lock(
+        token.tokenContract,
+        token.tokenId,
+        destinationAddress
+    );
+
+    setProgress(Progress.WaitingForConfirmationLock);
+    const confirm = await lockTx.wait();
+
+    const block = await signer.provider!.getBlock(confirm.blockNumber);
+    return block.timestamp;
 }
 
 /**
  * Wraps a token on a specific chain with proofs from the federation.
- * TODO: Get the wrapped token id from storage
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
@@ -80,7 +72,7 @@ export function approveAndLockEthereum(
  * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-export function wrapTokenEthereum(
+export async function wrapTokenEthereum(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
@@ -94,38 +86,31 @@ export function wrapTokenEthereum(
     );
 
     setProgress(Progress.WaitingForUserWrap);
-    return (
-        wrapperContract.wrap(
-            message.tokenContract,
-            message.tokenId,
-            message.timestamp,
-            message.metadata,
-            signatures.map((signature) => signature.publicKey),
-            signatures.map((signature) => signature.sig)
-        ) as Promise<TransactionResponse>
-    )
-        .then((tx) => {
-            setProgress(Progress.WaitingForConfirmationWrap);
-            return tx.wait();
-        })
-        .then(() => {
-            return (
-                wrapperContract.wrappedTokens(
-                    message.tokenContract,
-                    message.tokenId
-                ) as Promise<number>
-            ).then((tid) => {
-                if (isNaN(tid) || tid === 0) {
-                    return Promise.reject("Failed to retrieve token id.");
-                }
-                return tid;
-            });
-        })
-        .then((tokenId) => ({
-            tokenContract: wrapperContract.address,
-            tokenId,
-            chain: chain,
-        }));
+    const wrapTx: TransactionResponse = await wrapperContract.wrap(
+        message.tokenContract,
+        message.tokenId,
+        message.timestamp,
+        message.metadata,
+        signatures.map((signature) => signature.publicKey),
+        signatures.map((signature) => signature.sig)
+    );
+
+    setProgress(Progress.WaitingForConfirmationWrap);
+    await wrapTx.wait();
+
+    const tokenId: number = await wrapperContract.wrappedTokens(
+        message.tokenContract,
+        message.tokenId
+    );
+
+    if (isNaN(tokenId) || tokenId === 0)
+        return Promise.reject("Failed to retrieve token id.");
+
+    return {
+        tokenContract: wrapperContract.address,
+        tokenId,
+        chain: chain,
+    };
 }
 
 /**
@@ -137,7 +122,7 @@ export function wrapTokenEthereum(
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export function burnTokenEthereum(
+export async function burnTokenEthereum(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
@@ -151,19 +136,15 @@ export function burnTokenEthereum(
     );
 
     setProgress(Progress.WaitingForUserBurn);
-    return (
-        wrapperContract.burn(
-            token.tokenContract,
-            token.tokenId,
-            token.timestamp,
-            destinationAddress
-        ) as Promise<TransactionResponse>
-    )
-        .then((tx) => {
-            setProgress(Progress.WaitingForConfirmationBurn);
-            return tx.wait();
-        })
-        .then();
+    const burnTx: TransactionResponse = await wrapperContract.burn(
+        token.tokenContract,
+        token.tokenId,
+        token.timestamp,
+        destinationAddress
+    );
+
+    setProgress(Progress.WaitingForConfirmationBurn);
+    await burnTx.wait();
 }
 
 /**
@@ -175,7 +156,7 @@ export function burnTokenEthereum(
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export function withdrawTokenEthereum(
+export async function withdrawTokenEthereum(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
@@ -189,23 +170,19 @@ export function withdrawTokenEthereum(
     );
 
     setProgress(Progress.WaitingForUserWithdraw);
-    return (
-        lockerContract.withdraw(
-            message.tokenContract,
-            message.tokenId,
-            message.timestamp,
-            [],
-            []
-        ) as Promise<TransactionResponse>
-    )
-        .then((tx) => {
-            setProgress(Progress.WaitingForConfirmationWithdraw);
-            return tx.wait();
-        })
-        .then();
+    const withdrawTx: TransactionResponse = await lockerContract.withdraw(
+        message.tokenContract,
+        message.tokenId,
+        message.timestamp,
+        [],
+        []
+    );
+
+    setProgress(Progress.WaitingForConfirmationWithdraw);
+    await withdrawTx.wait();
 }
 
-export function getLockedTokenEthereum(
+export async function getLockedTokenEthereum(
     wrapped: WrappedTokenType,
     signer: Signer
 ): Promise<LockedTokenType> {
@@ -215,15 +192,15 @@ export function getLockedTokenEthereum(
         signer
     );
 
-    return (
-        wrapperContract.wrappedId(wrapped.tokenId) as Promise<{
-            tokenContract: string;
-            tokenId: number;
-            tokenLockTimestamp: number;
-        }>
-    ).then((val) => ({
+    const val: {
+        tokenContract: string;
+        tokenId: number;
+        tokenLockTimestamp: number;
+    } = await wrapperContract.wrappedId(wrapped.tokenId);
+
+    return {
         tokenContract: val.tokenContract,
         tokenId: val.tokenId,
         timestamp: val.tokenLockTimestamp,
-    }));
+    };
 }

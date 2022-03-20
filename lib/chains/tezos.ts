@@ -62,67 +62,56 @@ function signatureArrayToMichelsonMap(signatures: Signature[]) {
 
 /**
  * Approves and locks at the same time a token on a Tezos network.
+ * TODO: get timestamp from storage
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-export function approveAndLockTezos(
+export async function approveAndLockTezos(
     token: Token,
     destinationAddress: string,
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
 ): Promise<number> {
-    const operation = (signerAddress: string) =>
-        Tezos.wallet
-            .at(chainConfig[token.chain].lockerContract)
-            .then((lockerContract) =>
-                Tezos.wallet
-                    .at(token.tokenContract)
-                    .then((tokenContract) => {
-                        setProgress(Progress.WaitingForUserApproval);
-                        setProgress(Progress.WaitingForUserLock);
+    const signerAddress = await Tezos.wallet.pkh();
+    const lockerContract = await Tezos.wallet.at(
+        chainConfig[token.chain].lockerContract
+    );
+    const tokenContract = await Tezos.wallet.at(token.tokenContract);
 
-                        return Tezos.wallet
-                            .batch()
-                            .withContractCall(
-                                tokenContract.methods.update_operators([
-                                    {
-                                        add_operator: {
-                                            owner: signerAddress,
-                                            operator: lockerContract.address,
-                                            token_id: token.tokenId,
-                                        },
-                                    },
-                                ])
-                            )
-                            .withContractCall(
-                                lockerContract.methodsObject.lock({
-                                    destination_address: destinationAddress,
-                                    token_address: token.tokenContract,
-                                    token_id: token.tokenId.toString(),
-                                })
-                            )
-                            .send();
-                    })
-                    .then((op) => {
-                        setProgress(Progress.WaitingForConfirmationApproval);
-                        setProgress(Progress.WaitingForConfirmationLock);
+    setProgress(Progress.WaitingForUserApproval);
+    setProgress(Progress.WaitingForUserLock);
+    const operation = await Tezos.wallet
+        .batch()
+        .withContractCall(
+            tokenContract.methods.update_operators([
+                {
+                    add_operator: {
+                        owner: signerAddress,
+                        operator: lockerContract.address,
+                        token_id: token.tokenId,
+                    },
+                },
+            ])
+        )
+        .withContractCall(
+            lockerContract.methodsObject.lock({
+                destination_address: destinationAddress,
+                token_address: token.tokenContract,
+                token_id: token.tokenId.toString(),
+            })
+        )
+        .send();
 
-                        return op.confirmation();
-                    })
-                    .then((confirm) => {
-                        if (!confirm.completed) {
-                            return Promise.reject("Transaction not completed");
-                        }
+    setProgress(Progress.WaitingForConfirmationApproval);
+    setProgress(Progress.WaitingForConfirmationLock);
+    const confirmation = await operation.confirmation();
 
-                        return Date.parse(
-                            confirm.block.header.timestamp.toString()
-                        );
-                    })
-            );
+    if (!confirmation.completed)
+        return Promise.reject("Transaction not completed");
 
-    return Tezos.wallet.pkh().then(operation);
+    return Date.parse(confirmation.block.header.timestamp.toString());
 }
 
 /**
@@ -135,69 +124,59 @@ export function approveAndLockTezos(
  * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-export function wrapTokenTezos(
+export async function wrapTokenTezos(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
 ): Promise<WrappedTokenType> {
-    return Tezos.wallet
-        .at(chainConfig[chain].wrapperContract)
-        .then((wrapperContract) => {
-            setProgress(Progress.WaitingForUserWrap);
-            return wrapperContract.methodsObject
-                .wrap({
-                    token_contract: message.tokenContract,
-                    token_id: message.tokenId.toString(),
-                    lock_timestamp: new Date(message.timestamp).toISOString(),
-                    token_metadata: stringToHex(message.metadata),
-                    signatures: signatureArrayToMichelsonMap(signatures),
-                })
-                .send()
-                .then((op) => {
-                    setProgress(Progress.WaitingForConfirmationWrap);
-                    return op.confirmation();
-                })
-                .then((confirm) => {
-                    if (!confirm.completed) {
-                        return Promise.reject("Transaction not completed");
-                    }
+    const wrapperContract = await Tezos.wallet.at(
+        chainConfig[chain].wrapperContract
+    );
 
-                    return wrapperContract.storage().then((wrapperStorage) => {
-                        if (
-                            wrapperStorage === null ||
-                            typeof wrapperStorage !== "object" ||
-                            !hasOwnProperty(wrapperStorage, "wrapped_tokens") ||
-                            !MichelsonMap.isMichelsonMap(
-                                wrapperStorage.wrapped_tokens
-                            )
-                        ) {
-                            return Promise.reject("Invalid wrapper storage");
-                        }
-
-                        const tid = parseInt(
-                            wrapperStorage.wrapped_tokens.get({
-                                token_contract: message.tokenContract,
-                                token_id: message.tokenId.toString(),
-                            })
-                        );
-
-                        if (isNaN(tid)) {
-                            return Promise.reject(
-                                "Could not retrieve wrapped token id"
-                            );
-                        }
-
-                        return tid;
-                    });
-                });
+    setProgress(Progress.WaitingForUserWrap);
+    const operation = await wrapperContract.methodsObject
+        .wrap({
+            token_contract: message.tokenContract,
+            token_id: message.tokenId.toString(),
+            lock_timestamp: new Date(message.timestamp).toISOString(),
+            token_metadata: stringToHex(message.metadata),
+            signatures: signatureArrayToMichelsonMap(signatures),
         })
-        .then((tokenId) => ({
-            tokenContract: chainConfig[chain].wrapperContract,
-            tokenId,
-            chain: chain,
-        }));
+        .send();
+
+    setProgress(Progress.WaitingForConfirmationWrap);
+    const confirmation = await operation.confirmation();
+
+    if (!confirmation.completed)
+        return Promise.reject("Transaction not completed");
+
+    const wrapperStorage = await wrapperContract.storage();
+
+    if (
+        wrapperStorage === null ||
+        typeof wrapperStorage !== "object" ||
+        !hasOwnProperty(wrapperStorage, "wrapped_tokens") ||
+        !MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_tokens)
+    )
+        return Promise.reject("Invalid wrapper storage");
+
+    const tokenId = parseInt(
+        wrapperStorage.wrapped_tokens.get({
+            token_contract: message.tokenContract,
+            token_id: message.tokenId.toString(),
+        })
+    );
+
+    if (isNaN(tokenId))
+        return Promise.reject("Could not retrieve wrapped token id");
+
+    return {
+        tokenContract: chainConfig[chain].wrapperContract,
+        tokenId,
+        chain: chain,
+    };
 }
 
 /**
@@ -209,33 +188,31 @@ export function wrapTokenTezos(
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export function burnTokenTezos(
+export async function burnTokenTezos(
     chain: Chain,
     token: LockedTokenType,
     destinationAddress: string,
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
 ): Promise<void> {
-    return Tezos.wallet
-        .at(chainConfig[chain].wrapperContract)
-        .then((wrapperContract) => {
-            setProgress(Progress.WaitingForUserBurn);
-            return wrapperContract.methodsObject
-                .burn({
-                    destination_address: destinationAddress,
-                    lock_timestamp: token.timestamp.toString(),
-                    token_contract: token.tokenContract,
-                    token_id: token.tokenId.toString(),
-                })
-                .send();
+    const wrapperContract = await Tezos.wallet.at(
+        chainConfig[chain].wrapperContract
+    );
+
+    setProgress(Progress.WaitingForUserBurn);
+    const operation = await wrapperContract.methodsObject
+        .burn({
+            destination_address: destinationAddress,
+            lock_timestamp: token.timestamp.toString(),
+            token_contract: token.tokenContract,
+            token_id: token.tokenId.toString(),
         })
-        .then((op) => {
-            setProgress(Progress.WaitingForConfirmationBurn);
-            return op.confirmation();
-        })
-        .then((confirm) => {
-            if (!confirm.completed) return Promise.reject("could not burn");
-        });
+        .send();
+
+    setProgress(Progress.WaitingForConfirmationBurn);
+    const confirmation = await operation.confirmation();
+
+    if (!confirmation.completed) return Promise.reject("Could not burn");
 }
 
 /**
@@ -247,68 +224,61 @@ export function burnTokenTezos(
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export function withdrawTokenTezos(
+export async function withdrawTokenTezos(
     chain: Chain,
     message: UnsignedMessageType,
     signatures: Signature[],
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
 ): Promise<void> {
-    return Tezos.wallet
-        .at(chainConfig[chain].lockerContract)
-        .then((lockerContract) => {
-            setProgress(Progress.WaitingForUserWithdraw);
-            return lockerContract.methodsObject
-                .withdraw({
-                    token_address: message.tokenContract,
-                    token_id: message.tokenId.toString(),
-                    locked_timestamp: message.timestamp.toString(),
-                    signatures: new MichelsonMap(),
-                })
-                .send();
+    const lockerContract = await Tezos.wallet.at(
+        chainConfig[chain].lockerContract
+    );
+
+    setProgress(Progress.WaitingForUserWithdraw);
+    const op = await lockerContract.methodsObject
+        .withdraw({
+            token_address: message.tokenContract,
+            token_id: message.tokenId.toString(),
+            locked_timestamp: message.timestamp.toString(),
+            signatures: new MichelsonMap(),
         })
-        .then((op) => {
-            setProgress(Progress.WaitingForConfirmationWithdraw);
-            return op.confirmation();
-        })
-        .then((confirm) => {
-            if (!confirm.completed) return Promise.reject("could not withdraw");
-        });
+        .send();
+
+    setProgress(Progress.WaitingForConfirmationWithdraw);
+    const confirm = await op.confirmation();
+
+    if (!confirm.completed) return Promise.reject("Could not withdraw");
 }
 
-export function getLockedTokenTezos(
+export async function getLockedTokenTezos(
     wrapped: WrappedTokenType,
     Tezos: TezosToolkit
 ): Promise<LockedTokenType> {
-    return Tezos.contract
-        .at(wrapped.tokenContract)
-        .then((wrapperContract) => wrapperContract.storage())
-        .then((wrapperStorage) => {
-            if (
-                wrapperStorage === null ||
-                typeof wrapperStorage !== "object" ||
-                !hasOwnProperty(wrapperStorage, "wrapped_id") ||
-                !MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_id)
-            ) {
-                return Promise.reject("Invalid wrapper storage.");
-            }
+    const wrapperContract = await Tezos.contract.at(wrapped.tokenContract);
+    const wrapperStorage = await wrapperContract.storage();
 
-            const r = wrapperStorage.wrapped_id.get(wrapped.tokenId.toString());
+    if (
+        wrapperStorage === null ||
+        typeof wrapperStorage !== "object" ||
+        !hasOwnProperty(wrapperStorage, "wrapped_id") ||
+        !MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_id)
+    )
+        return Promise.reject("Invalid wrapper storage.");
 
-            if (
-                r === null ||
-                typeof r !== "object" ||
-                !hasOwnProperty(r, "lock_timestamp") ||
-                !hasOwnProperty(r, "token_contract") ||
-                !hasOwnProperty(r, "token_id")
-            ) {
-                return Promise.reject("Could not retrieve wrapped token");
-            }
+    const value = wrapperStorage.wrapped_id.get(wrapped.tokenId.toString());
+    if (
+        value === null ||
+        typeof value !== "object" ||
+        !hasOwnProperty(value, "lock_timestamp") ||
+        !hasOwnProperty(value, "token_contract") ||
+        !hasOwnProperty(value, "token_id")
+    )
+        return Promise.reject("Could not retrieve wrapped token");
 
-            return {
-                tokenId: r.token_id,
-                tokenContract: r.token_contract,
-                timestamp: r.lock_timestamp,
-            };
-        });
+    return {
+        tokenId: value.token_id,
+        tokenContract: value.token_contract,
+        timestamp: value.lock_timestamp,
+    };
 }
