@@ -15,7 +15,7 @@ exports.chainConfig = (_a = {},
     },
     _a[chain_1.Chain.Hangzhounet] = {
         rpc: "https://hangzhounet.smartpy.io/",
-        lockerContract: "KT1S1W5GtQqUYXGYoLEX4NvKvCiqquKvSrjY",
+        lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
         wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
     },
     _a[chain_1.Chain.Ethereum] = {

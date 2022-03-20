@@ -120,7 +120,7 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                         ]))
                             .withContractCall(lockerContract.methodsObject.lock({
                             destination_address: destinationAddress,
-                            token_address: token.tokenContract,
+                            token_contract: token.tokenContract,
                             token_id: token.tokenId.toString(),
                         }))
                             .send()];
@@ -259,9 +259,9 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
                     setProgress(progress_1.Progress.WaitingForUserWithdraw);
                     return [4 /*yield*/, lockerContract.methodsObject
                             .withdraw({
-                            token_address: message.tokenContract,
+                            token_contract: message.tokenContract,
                             token_id: message.tokenId.toString(),
-                            locked_timestamp: message.timestamp.toString(),
+                            lock_timestamp: message.timestamp.toString(),
                             signatures: new taquito_1.MichelsonMap(),
                         })
                             .send()];
@@ -300,10 +300,11 @@ function getLockedTokenTezos(wrapped, Tezos) {
                         typeof value !== "object" ||
                         !(0, utils_1.hasOwnProperty)(value, "lock_timestamp") ||
                         !(0, utils_1.hasOwnProperty)(value, "token_contract") ||
-                        !(0, utils_1.hasOwnProperty)(value, "token_id"))
+                        !(0, utils_1.hasOwnProperty)(value, "token_id") ||
+                        isNaN(Number(value.token_id)))
                         return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
                     return [2 /*return*/, {
-                            tokenId: value.token_id,
+                            tokenId: Number(value.token_id),
                             tokenContract: value.token_contract,
                             timestamp: value.lock_timestamp,
                         }];

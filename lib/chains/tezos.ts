@@ -98,7 +98,7 @@ export async function approveAndLockTezos(
         .withContractCall(
             lockerContract.methodsObject.lock({
                 destination_address: destinationAddress,
-                token_address: token.tokenContract,
+                token_contract: token.tokenContract,
                 token_id: token.tokenId.toString(),
             })
         )
@@ -238,9 +238,9 @@ export async function withdrawTokenTezos(
     setProgress(Progress.WaitingForUserWithdraw);
     const op = await lockerContract.methodsObject
         .withdraw({
-            token_address: message.tokenContract,
+            token_contract: message.tokenContract,
             token_id: message.tokenId.toString(),
-            locked_timestamp: message.timestamp.toString(),
+            lock_timestamp: message.timestamp.toString(),
             signatures: new MichelsonMap(),
         })
         .send();
@@ -272,12 +272,13 @@ export async function getLockedTokenTezos(
         typeof value !== "object" ||
         !hasOwnProperty(value, "lock_timestamp") ||
         !hasOwnProperty(value, "token_contract") ||
-        !hasOwnProperty(value, "token_id")
+        !hasOwnProperty(value, "token_id") ||
+        isNaN(Number(value.token_id))
     )
         return Promise.reject("Could not retrieve wrapped token");
 
     return {
-        tokenId: value.token_id,
+        tokenId: Number(value.token_id),
         tokenContract: value.token_contract,
         timestamp: value.lock_timestamp,
     };
