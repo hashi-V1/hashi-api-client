@@ -31,7 +31,7 @@ function App() {
             };
             const wallet = new BeaconWallet(options);
 
-            if (typeof wallet.client.getActiveAccount() === "undefined") {
+            if (!(await wallet.client.getActiveAccount())) {
                 await wallet.requestPermissions({
                     network: {
                         type: NetworkType.HANGZHOUNET,
@@ -40,10 +40,9 @@ function App() {
             }
 
             hashi.setChainSigner(Chain.Hangzhounet, wallet);
-
             setTezAddress(await wallet.getPKH());
         })();
-    });
+    }, [tezAddress]);
 
     useEffect(() => {
         if (ethAddress) return;
@@ -85,6 +84,24 @@ function App() {
             )
             .then((t) => `(${t.tokenContract} - ${t.tokenId})`)
             .then(setWrappedText)
+            .catch(alert);
+    }, [selectedToken, destinationAddress]);
+
+    const unbridge = useCallback(() => {
+        if (typeof selectedToken === "undefined") {
+            alert("Please select a token");
+            return;
+        }
+
+        const target =
+            selectedToken.chain === Chain.Hangzhounet
+                ? Chain.Ropsten
+                : Chain.Hangzhounet;
+
+        hashi
+            .unbridge(target, selectedToken, destinationAddress, (p) =>
+                setProgress(progressConstants[p])
+            )
             .catch(alert);
     }, [selectedToken, destinationAddress]);
 
@@ -140,6 +157,14 @@ function App() {
                         ? selectedToken.name
                         : "token"}
                 </button>
+
+                <button onClick={unbridge}>
+                    Unbridge{" "}
+                    {selectedToken && selectedToken.name
+                        ? selectedToken.name
+                        : "token"}
+                </button>
+
                 <button onClick={refreshTokens}>Refresh tokens</button>
             </section>
 

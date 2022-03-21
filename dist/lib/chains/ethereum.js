@@ -206,10 +206,15 @@ function getLockedTokenEthereum(wrapped, signer) {
                     return [4 /*yield*/, wrapperContract.wrappedId(wrapped.tokenId)];
                 case 1:
                     val = _a.sent();
+                    if (val.tokenContract == null ||
+                        val.tokenContract === "" ||
+                        !ethers_1.BigNumber.isBigNumber(val.tokenId) ||
+                        !ethers_1.BigNumber.isBigNumber(val.tokenLockTimestamp))
+                        return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
                     return [2 /*return*/, {
                             tokenContract: val.tokenContract,
-                            tokenId: val.tokenId,
-                            timestamp: val.tokenLockTimestamp,
+                            tokenId: val.tokenId.toNumber(),
+                            timestamp: val.tokenLockTimestamp.toNumber(),
                         }];
             }
         });

@@ -133,7 +133,7 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                     confirmation = _a.sent();
                     if (!confirmation.completed)
                         return [2 /*return*/, Promise.reject("Transaction not completed")];
-                    return [2 /*return*/, Date.parse(confirmation.block.header.timestamp.toString()) * 1000];
+                    return [2 /*return*/, Date.parse(confirmation.block.header.timestamp.toString())];
             }
         });
     });
@@ -261,7 +261,7 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
                             .withdraw({
                             token_contract: message.tokenContract,
                             token_id: message.tokenId.toString(),
-                            lock_timestamp: message.timestamp.toString(),
+                            lock_timestamp: new Date(message.timestamp).toISOString(),
                             signatures: new taquito_1.MichelsonMap(),
                         })
                             .send()];

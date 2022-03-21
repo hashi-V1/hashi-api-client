@@ -23,7 +23,7 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
     [Chain.Hangzhounet]: {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
-        wrapperContract: "KT1Kxv27kcQ2C1ieEm87TsyK3KV2oUQ44btn",
+        wrapperContract: "KT1J8pUqUtinAkBCzZ2fuUrz4JJEefofm4k5",
     },
 
     [Chain.Ethereum]: {

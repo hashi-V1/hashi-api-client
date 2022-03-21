@@ -111,7 +111,7 @@ export async function approveAndLockTezos(
     if (!confirmation.completed)
         return Promise.reject("Transaction not completed");
 
-    return Date.parse(confirmation.block.header.timestamp.toString()) * 1000;
+    return Date.parse(confirmation.block.header.timestamp.toString());
 }
 
 /**
@@ -240,7 +240,7 @@ export async function withdrawTokenTezos(
         .withdraw({
             token_contract: message.tokenContract,
             token_id: message.tokenId.toString(),
-            lock_timestamp: message.timestamp.toString(),
+            lock_timestamp: new Date(message.timestamp).toISOString(),
             signatures: new MichelsonMap(),
         })
         .send();

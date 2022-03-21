@@ -331,7 +331,8 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        return withdrawToken(chain, message, signatures, instance, setProgress);
+        await withdrawToken(chain, message, signatures, instance, setProgress);
+        setProgress(Progress.Withdrawed);
     }
 
     async getLockedToken(wrapped: Token): Promise<LockedTokenType> {

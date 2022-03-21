@@ -1,5 +1,5 @@
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { Contract, Signer } from "ethers";
+import { BigNumber, Contract, Signer } from "ethers";
 import erc721Abi from "../abi/ethereum/ERC721.json";
 import lockerAbi from "../abi/ethereum/Locker.json";
 import wrapperAbi from "../abi/ethereum/Wrapper.json";
@@ -194,13 +194,21 @@ export async function getLockedTokenEthereum(
 
     const val: {
         tokenContract: string;
-        tokenId: number;
-        tokenLockTimestamp: number;
+        tokenId: BigNumber;
+        tokenLockTimestamp: BigNumber;
     } = await wrapperContract.wrappedId(wrapped.tokenId);
+
+    if (
+        val.tokenContract == null ||
+        val.tokenContract === "" ||
+        !BigNumber.isBigNumber(val.tokenId) ||
+        !BigNumber.isBigNumber(val.tokenLockTimestamp)
+    )
+        return Promise.reject("Could not retrieve wrapped token");
 
     return {
         tokenContract: val.tokenContract,
-        tokenId: val.tokenId,
-        timestamp: val.tokenLockTimestamp,
+        tokenId: val.tokenId.toNumber(),
+        timestamp: val.tokenLockTimestamp.toNumber(),
     };
 }

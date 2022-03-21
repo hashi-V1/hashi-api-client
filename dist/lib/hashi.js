@@ -289,20 +289,27 @@ var HashiBridge = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var setProgress, withdrawToken, instance;
             return __generator(this, function (_a) {
-                if (message.status !== proof_1.Status.Burned)
-                    return [2 /*return*/, Promise.reject(errors_1.CannotWithdrawWithStatusOtherThanBurned)];
-                setProgress = (0, utils_1.setProgressCallback)(progressCallback);
-                setProgress(progress_1.Progress.Withdrawing);
-                if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
-                    withdrawToken = tezos_1.withdrawTokenTezos;
-                else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
-                    withdrawToken = ethereum_1.withdrawTokenEthereum;
-                if (!withdrawToken)
-                    return [2 /*return*/, Promise.reject(errors_1.UnknownChain)];
-                instance = this.chainsInstances.get(chain);
-                if (typeof instance === "undefined")
-                    return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
-                return [2 /*return*/, withdrawToken(chain, message, signatures, instance, setProgress)];
+                switch (_a.label) {
+                    case 0:
+                        if (message.status !== proof_1.Status.Burned)
+                            return [2 /*return*/, Promise.reject(errors_1.CannotWithdrawWithStatusOtherThanBurned)];
+                        setProgress = (0, utils_1.setProgressCallback)(progressCallback);
+                        setProgress(progress_1.Progress.Withdrawing);
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                            withdrawToken = tezos_1.withdrawTokenTezos;
+                        else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
+                            withdrawToken = ethereum_1.withdrawTokenEthereum;
+                        if (!withdrawToken)
+                            return [2 /*return*/, Promise.reject(errors_1.UnknownChain)];
+                        instance = this.chainsInstances.get(chain);
+                        if (typeof instance === "undefined")
+                            return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
+                        return [4 /*yield*/, withdrawToken(chain, message, signatures, instance, setProgress)];
+                    case 1:
+                        _a.sent();
+                        setProgress(progress_1.Progress.Withdrawed);
+                        return [2 /*return*/];
+                }
             });
         });
     };
