@@ -1,6 +1,11 @@
 import { assert } from "chai";
 import { Progress } from "../lib/types/progress";
-import { hasOwnProperty, setProgressCallback, stringToHex } from "../lib/utils";
+import {
+    hasOwnProperty,
+    hexToString,
+    setProgressCallback,
+    stringToHex,
+} from "../lib/utils";
 
 describe("utils testing", () => {
     it("setProgressCallback", async () => {
@@ -32,8 +37,21 @@ describe("utils testing", () => {
     });
 
     it("stringToHex", () => {
-        assert.strictEqual(stringToHex("hello"), "68656c6c6f");
-        assert.strictEqual("", "", "Null ascii string should be null hex.");
+        assert.strictEqual("68656c6c6f", stringToHex("hello"));
+        assert.strictEqual(
+            "",
+            stringToHex(""),
+            "Null ascii string should be null hex."
+        );
+    });
+
+    it("hexToString", () => {
+        assert.strictEqual("hello", hexToString("68656c6c6f"));
+        assert.strictEqual(
+            "",
+            hexToString(""),
+            "Null ascii hex should be null ascii."
+        );
     });
 
     it("hasOwnProperty", () => {

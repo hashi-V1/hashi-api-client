@@ -64,8 +64,12 @@ describe("utils testing", function () {
         });
     }); });
     it("stringToHex", function () {
-        chai_1.assert.strictEqual((0, utils_1.stringToHex)("hello"), "68656c6c6f");
-        chai_1.assert.strictEqual("", "", "Null ascii string should be null hex.");
+        chai_1.assert.strictEqual("68656c6c6f", (0, utils_1.stringToHex)("hello"));
+        chai_1.assert.strictEqual("", (0, utils_1.stringToHex)(""), "Null ascii string should be null hex.");
+    });
+    it("hexToString", function () {
+        chai_1.assert.strictEqual("hello", (0, utils_1.hexToString)("68656c6c6f"));
+        chai_1.assert.strictEqual("", (0, utils_1.hexToString)(""), "Null ascii hex should be null ascii.");
     });
     it("hasOwnProperty", function () {
         var o = {

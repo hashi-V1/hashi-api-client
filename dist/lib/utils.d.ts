@@ -13,6 +13,12 @@ export declare function setProgressCallback(progressCallback?: (progress: Progre
  */
 export declare function stringToHex(input: string): string;
 /**
+ * Transforms text from hex to ascii.
+ * @param input An Hex string
+ * @returns The Ascii representation of the hex input
+ */
+export declare function hexToString(input: string): string;
+/**
  * Check whether the object obj has a property called prop.
  * @param obj Any object
  * @param prop A property

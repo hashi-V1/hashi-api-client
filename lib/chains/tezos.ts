@@ -137,11 +137,11 @@ export async function wrapTokenTezos(
 
     setProgress(Progress.WaitingForUserWrap);
     const operation = await wrapperContract.methodsObject
-        .wrap({
+        .mint({
             token_contract: message.tokenContract,
             token_id: message.tokenId.toString(),
             lock_timestamp: new Date(message.timestamp).toISOString(),
-            token_metadata: stringToHex(message.metadata),
+            metadata: stringToHex(message.metadata),
             signatures: signatureArrayToMichelsonMap(signatures),
         })
         .send();

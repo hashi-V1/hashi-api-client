@@ -159,11 +159,11 @@ function wrapTokenTezos(chain, message, signatures, Tezos, setProgress) {
                     wrapperContract = _a.sent();
                     setProgress(progress_1.Progress.WaitingForUserWrap);
                     return [4 /*yield*/, wrapperContract.methodsObject
-                            .wrap({
+                            .mint({
                             token_contract: message.tokenContract,
                             token_id: message.tokenId.toString(),
                             lock_timestamp: new Date(message.timestamp).toISOString(),
-                            token_metadata: (0, utils_1.stringToHex)(message.metadata),
+                            metadata: (0, utils_1.stringToHex)(message.metadata),
                             signatures: signatureArrayToMichelsonMap(signatures),
                         })
                             .send()];
@@ -281,34 +281,20 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
 exports.withdrawTokenTezos = withdrawTokenTezos;
 function getLockedTokenTezos(wrapped, Tezos) {
     return __awaiter(this, void 0, void 0, function () {
-        var wrapperContract, wrapperStorage, value;
+        var wrapperContract, a, value;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, Tezos.contract.at(wrapped.tokenContract)];
                 case 1:
                     wrapperContract = _a.sent();
-                    return [4 /*yield*/, wrapperContract.storage()];
+                    console.log(wrapperContract);
+                    return [4 /*yield*/, wrapperContract.views
+                            .wrappedInfos([{ token_id: wrapped.tokenId }])
+                            .read()];
                 case 2:
-                    wrapperStorage = _a.sent();
-                    if (wrapperStorage === null ||
-                        typeof wrapperStorage !== "object" ||
-                        !(0, utils_1.hasOwnProperty)(wrapperStorage, "wrapped_id") ||
-                        !taquito_1.MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_id))
-                        return [2 /*return*/, Promise.reject("Invalid wrapper storage.")];
-                    value = wrapperStorage.wrapped_id.get(wrapped.tokenId.toString());
-                    if (value === null ||
-                        typeof value !== "object" ||
-                        !(0, utils_1.hasOwnProperty)(value, "lock_timestamp") ||
-                        !(0, utils_1.hasOwnProperty)(value, "token_contract") ||
-                        !(0, utils_1.hasOwnProperty)(value, "token_id") ||
-                        isNaN(Number(value.token_id)) ||
-                        isNaN(Date.parse(value.lock_timestamp)))
-                        return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
-                    return [2 /*return*/, {
-                            tokenId: Number(value.token_id),
-                            tokenContract: value.token_contract,
-                            timestamp: Date.parse(value.lock_timestamp),
-                        }];
+                    a = _a.sent();
+                    console.log(a);
+                    return [2 /*return*/, Promise.reject("bite")];
             }
         });
     });

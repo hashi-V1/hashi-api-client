@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isMillisTimestamp = exports.isNotEmpty = exports.hasOwnProperty = exports.stringToHex = exports.setProgressCallback = void 0;
+exports.isMillisTimestamp = exports.isNotEmpty = exports.hasOwnProperty = exports.hexToString = exports.stringToHex = exports.setProgressCallback = void 0;
 var progress_1 = require("./types/progress");
 /**
  * Creates a non optional progressCallback with the parameter or if it is undefined
@@ -68,6 +68,19 @@ function stringToHex(input) {
     return ret;
 }
 exports.stringToHex = stringToHex;
+/**
+ * Transforms text from hex to ascii.
+ * @param input An Hex string
+ * @returns The Ascii representation of the hex input
+ */
+function hexToString(input) {
+    var ret = "";
+    for (var n = 0; n < input.length; n += 2) {
+        ret += String.fromCharCode(parseInt(input.substring(n, n + 2), 16));
+    }
+    return ret;
+}
+exports.hexToString = hexToString;
 /**
  * Check whether the object obj has a property called prop.
  * @param obj Any object

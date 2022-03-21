@@ -28,6 +28,19 @@ export function stringToHex(input: string): string {
 }
 
 /**
+ * Transforms text from hex to ascii.
+ * @param input An Hex string
+ * @returns The Ascii representation of the hex input
+ */
+export function hexToString(input: string): string {
+    var ret = "";
+    for (var n = 0; n < input.length; n += 2) {
+        ret += String.fromCharCode(parseInt(input.substring(n, n + 2), 16));
+    }
+    return ret;
+}
+
+/**
  * Check whether the object obj has a property called prop.
  * @param obj Any object
  * @param prop A property
