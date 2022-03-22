@@ -13,7 +13,6 @@ declare type TezosSigner = WalletProvider | Signer;
 export declare function setChainSignerTezos(chain: Chain, signer: TezosSigner): TezosToolkit;
 /**
  * Approves and locks at the same time a token on a Tezos network.
- * TODO: get timestamp from storage
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress

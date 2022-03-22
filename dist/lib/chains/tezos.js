@@ -85,7 +85,6 @@ function signatureArrayToMichelsonMap(signatures) {
 }
 /**
  * Approves and locks at the same time a token on a Tezos network.
- * TODO: get timestamp from storage
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress
@@ -93,7 +92,7 @@ function signatureArrayToMichelsonMap(signatures) {
  */
 function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
     return __awaiter(this, void 0, void 0, function () {
-        var signerAddress, lockerContract, tokenContract, operation, confirmation;
+        var signerAddress, lockerContract, tokenContract, operation, confirmation, lockerStorage, timestamp;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, Tezos.wallet.pkh()];
@@ -133,7 +132,14 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                     confirmation = _a.sent();
                     if (!confirmation.completed)
                         return [2 /*return*/, Promise.reject("Transaction not completed")];
-                    return [2 /*return*/, Date.parse(confirmation.block.header.timestamp.toString())];
+                    return [4 /*yield*/, lockerContract.storage()];
+                case 6:
+                    lockerStorage = _a.sent();
+                    timestamp = lockerStorage.lock_timestamps.get({
+                        token_contract: token.tokenContract,
+                        token_id: token.tokenId,
+                    });
+                    return [2 /*return*/, Date.parse(timestamp)];
             }
         });
     });

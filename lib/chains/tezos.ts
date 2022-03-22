@@ -63,7 +63,6 @@ function signatureArrayToMichelsonMap(signatures: Signature[]) {
 
 /**
  * Approves and locks at the same time a token on a Tezos network.
- * TODO: get timestamp from storage
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
  * @param setProgress optional callback to track the progress
@@ -112,7 +111,13 @@ export async function approveAndLockTezos(
     if (!confirmation.completed)
         return Promise.reject("Transaction not completed");
 
-    return Date.parse(confirmation.block.header.timestamp.toString());
+    const lockerStorage: any = await lockerContract.storage();
+    const timestamp = lockerStorage.lock_timestamps.get({
+        token_contract: token.tokenContract,
+        token_id: token.tokenId,
+    });
+
+    return Date.parse(timestamp);
 }
 
 /**
