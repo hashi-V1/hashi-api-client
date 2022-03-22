@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLockedTokenTezos = exports.withdrawTokenTezos = exports.burnTokenTezos = exports.wrapTokenTezos = exports.approveAndLockTezos = exports.setChainSignerTezos = void 0;
+exports.getLockedTokenFromWrappedTezos = exports.withdrawTokenTezos = exports.burnTokenTezos = exports.wrapTokenTezos = exports.approveAndLockTezos = exports.setChainSignerTezos = void 0;
 var taquito_1 = require("@taquito/taquito");
 var config_1 = require("../config");
 var progress_1 = require("../types/progress");
@@ -279,25 +279,39 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
     });
 }
 exports.withdrawTokenTezos = withdrawTokenTezos;
-function getLockedTokenTezos(wrapped, Tezos) {
+function getLockedTokenFromWrappedTezos(chain, wrappedId, Tezos) {
     return __awaiter(this, void 0, void 0, function () {
-        var wrapperContract, a, value;
+        var wrapperContract, wrapperStorage, value;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, Tezos.contract.at(wrapped.tokenContract)];
+                case 0: return [4 /*yield*/, Tezos.contract.at(config_1.chainConfig[chain].wrapperContract)];
                 case 1:
                     wrapperContract = _a.sent();
-                    console.log(wrapperContract);
-                    return [4 /*yield*/, wrapperContract.views
-                            .wrappedInfos([{ token_id: wrapped.tokenId }])
-                            .read()];
+                    return [4 /*yield*/, wrapperContract.storage()];
                 case 2:
-                    a = _a.sent();
-                    console.log(a);
-                    return [2 /*return*/, Promise.reject("bite")];
+                    wrapperStorage = _a.sent();
+                    if (!wrapperStorage ||
+                        !wrapperStorage.wrap_info ||
+                        !taquito_1.MichelsonMap.isMichelsonMap(wrapperStorage.wrap_info))
+                        return [2 /*return*/, Promise.reject("Invalid wrapper storage.")];
+                    console.log(wrapperStorage.wrap_info);
+                    wrapperStorage.wrap_info.forEach(function (v, key) { return (value = key.toNumber() === wrappedId ? v : value); });
+                    console.log(value);
+                    if (!value ||
+                        !value.token_id ||
+                        !value.lock_timestamp ||
+                        !value.token_contract ||
+                        isNaN(Number(value.token_id)) ||
+                        isNaN(Date.parse(value.lock_timestamp)))
+                        return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
+                    return [2 /*return*/, {
+                            tokenId: Number(value.token_id),
+                            tokenContract: value.token_contract,
+                            timestamp: Date.parse(value.lock_timestamp),
+                        }];
             }
         });
     });
 }
-exports.getLockedTokenTezos = getLockedTokenTezos;
+exports.getLockedTokenFromWrappedTezos = getLockedTokenFromWrappedTezos;
 //# sourceMappingURL=tezos.js.map

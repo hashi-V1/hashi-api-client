@@ -195,12 +195,12 @@ var HashiBridge = /** @class */ (function () {
                     case 0:
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
-                        return [4 /*yield*/, this.burnToken(token, destinationAddress, progressCallback)];
+                        return [4 /*yield*/, this.getLockedTokenFromWrapped(token)];
                     case 1:
-                        _b.sent();
-                        return [4 /*yield*/, this.getLockedToken(token)];
-                    case 2:
                         lockedToken = _b.sent();
+                        return [4 /*yield*/, this.burnToken(token.chain, lockedToken, destinationAddress, progressCallback)];
+                    case 2:
+                        _b.sent();
                         return [4 /*yield*/, this.proveTokenStatus(token.chain, targetChain, lockedToken, proof_1.Status.Burned, progressCallback)];
                     case 3:
                         _a = _b.sent(), signatures = _a.signatures, message = _a.message;
@@ -245,13 +245,12 @@ var HashiBridge = /** @class */ (function () {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    HashiBridge.prototype.burnToken = function (token, destinationAddress, progressCallback) {
+    HashiBridge.prototype.burnToken = function (chain, lockedToken, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var chain, setProgress, burnToken, instance, lockedToken;
+            var setProgress, burnToken, instance;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        chain = token.chain;
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
@@ -265,11 +264,8 @@ var HashiBridge = /** @class */ (function () {
                         instance = this.chainsInstances.get(chain);
                         if (typeof instance === "undefined")
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
-                        return [4 /*yield*/, this.getLockedToken(token)];
-                    case 1:
-                        lockedToken = _a.sent();
                         return [4 /*yield*/, burnToken(chain, lockedToken, destinationAddress, instance, setProgress)];
-                    case 2:
+                    case 1:
                         _a.sent();
                         setProgress(progress_1.Progress.Burned);
                         return [2 /*return*/];
@@ -313,24 +309,26 @@ var HashiBridge = /** @class */ (function () {
             });
         });
     };
-    HashiBridge.prototype.getLockedToken = function (wrapped) {
+    HashiBridge.prototype.getLockedTokenFromWrapped = function (wrapped) {
         return __awaiter(this, void 0, void 0, function () {
             var chain, getLocked, instance, locked;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         chain = wrapped.chain;
+                        if (config_1.chainConfig[chain].wrapperContract !== wrapped.tokenContract)
+                            return [2 /*return*/, Promise.reject("Token is not wrapped")];
                         if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
-                            getLocked = tezos_1.getLockedTokenTezos;
+                            getLocked = tezos_1.getLockedTokenFromWrappedTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
-                            getLocked = ethereum_1.getLockedTokenEthereum;
+                            getLocked = ethereum_1.getLockedTokenFromWrappedEthereum;
                         if (!getLocked)
                             return [2 /*return*/, Promise.reject(errors_1.UnknownChain)];
                         instance = this.chainsInstances.get(chain);
                         if (typeof instance === "undefined") {
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
                         }
-                        return [4 /*yield*/, getLocked(wrapped, instance)];
+                        return [4 /*yield*/, getLocked(chain, wrapped.tokenId, instance)];
                     case 1:
                         locked = _a.sent();
                         if (!(0, utils_1.isMillisTimestamp)(locked.timestamp))

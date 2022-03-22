@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLockedTokenEthereum = exports.withdrawTokenEthereum = exports.burnTokenEthereum = exports.wrapTokenEthereum = exports.approveAndLockEthereum = exports.setChainSignerEthereum = void 0;
+exports.getLockedTokenFromWrappedEthereum = exports.withdrawTokenEthereum = exports.burnTokenEthereum = exports.wrapTokenEthereum = exports.approveAndLockEthereum = exports.setChainSignerEthereum = void 0;
 var ethers_1 = require("ethers");
 var ERC721_json_1 = __importDefault(require("../abi/ethereum/ERC721.json"));
 var Locker_json_1 = __importDefault(require("../abi/ethereum/Locker.json"));
@@ -196,14 +196,14 @@ function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) 
     });
 }
 exports.withdrawTokenEthereum = withdrawTokenEthereum;
-function getLockedTokenEthereum(wrapped, signer) {
+function getLockedTokenFromWrappedEthereum(chain, wrappedId, signer) {
     return __awaiter(this, void 0, void 0, function () {
         var wrapperContract, val;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    wrapperContract = new ethers_1.Contract(config_1.chainConfig[wrapped.chain].wrapperContract, Wrapper_json_1.default, signer);
-                    return [4 /*yield*/, wrapperContract.wrappedId(wrapped.tokenId)];
+                    wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default, signer);
+                    return [4 /*yield*/, wrapperContract.wrappedId(wrappedId)];
                 case 1:
                     val = _a.sent();
                     if (val.tokenContract == null ||
@@ -220,5 +220,5 @@ function getLockedTokenEthereum(wrapped, signer) {
         });
     });
 }
-exports.getLockedTokenEthereum = getLockedTokenEthereum;
+exports.getLockedTokenFromWrappedEthereum = getLockedTokenFromWrappedEthereum;
 //# sourceMappingURL=ethereum.js.map

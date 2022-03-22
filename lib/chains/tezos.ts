@@ -4,6 +4,7 @@ import {
     TezosToolkit,
     WalletProvider,
 } from "@taquito/taquito";
+import { BigNumber } from "ethers";
 import { chainConfig } from "../config";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
@@ -251,28 +252,46 @@ export async function withdrawTokenTezos(
     if (!confirm.completed) return Promise.reject("Could not withdraw");
 }
 
-export async function getLockedTokenTezos(
-    wrapped: WrappedTokenType,
+export async function getLockedTokenFromWrappedTezos(
+    chain: Chain,
+    wrappedId: number,
     Tezos: TezosToolkit
 ): Promise<LockedTokenType> {
-    const wrapperContract = await Tezos.contract.at(wrapped.tokenContract);
-    const wrapperStorage = await wrapperContract.storage();
+    const wrapperContract = await Tezos.contract.at(
+        chainConfig[chain].wrapperContract
+    );
+    const wrapperStorage: {
+        wrap_info: MichelsonMap<
+            BigNumber,
+            { lock_timestamp: string; token_contract: string; token_id: string }
+        >;
+    } = await wrapperContract.storage();
 
     if (
-        wrapperStorage === null ||
-        typeof wrapperStorage !== "object" ||
-        !hasOwnProperty(wrapperStorage, "wrapped_id") ||
-        !MichelsonMap.isMichelsonMap(wrapperStorage.wrapped_id)
+        !wrapperStorage ||
+        !wrapperStorage.wrap_info ||
+        !MichelsonMap.isMichelsonMap(wrapperStorage.wrap_info)
     )
         return Promise.reject("Invalid wrapper storage.");
 
-    const value = wrapperStorage.wrapped_id.get(wrapped.tokenId.toString());
+    console.log(wrapperStorage.wrap_info);
+    let value:
+        | {
+              lock_timestamp: string;
+              token_contract: string;
+              token_id: string;
+          }
+        | undefined;
+    wrapperStorage.wrap_info.forEach(
+        (v, key) => (value = key.toNumber() === wrappedId ? v : value)
+    );
+    console.log(value);
+
     if (
-        value === null ||
-        typeof value !== "object" ||
-        !hasOwnProperty(value, "lock_timestamp") ||
-        !hasOwnProperty(value, "token_contract") ||
-        !hasOwnProperty(value, "token_id") ||
+        !value ||
+        !value.token_id ||
+        !value.lock_timestamp ||
+        !value.token_contract ||
         isNaN(Number(value.token_id)) ||
         isNaN(Date.parse(value.lock_timestamp))
     )

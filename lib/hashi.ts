@@ -2,7 +2,7 @@ import axios from "axios";
 import {
     approveAndLockEthereum,
     burnTokenEthereum,
-    getLockedTokenEthereum,
+    getLockedTokenFromWrappedEthereum,
     setChainSignerEthereum,
     withdrawTokenEthereum,
     wrapTokenEthereum,
@@ -10,12 +10,12 @@ import {
 import {
     approveAndLockTezos,
     burnTokenTezos,
-    getLockedTokenTezos,
+    getLockedTokenFromWrappedTezos,
     setChainSignerTezos,
     withdrawTokenTezos,
     wrapTokenTezos,
 } from "./chains/tezos";
-import { hashiIndexerUrl } from "./config";
+import { chainConfig, hashiIndexerUrl } from "./config";
 import { proveTokenStatus } from "./prover";
 import { Chain } from "./types/chain";
 import {
@@ -208,9 +208,14 @@ export class HashiBridge {
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        await this.burnToken(token, destinationAddress, progressCallback);
+        const lockedToken = await this.getLockedTokenFromWrapped(token);
+        await this.burnToken(
+            token.chain,
+            lockedToken,
+            destinationAddress,
+            progressCallback
+        );
 
-        const lockedToken = await this.getLockedToken(token);
         const { signatures, message } = await this.proveTokenStatus(
             token.chain,
             targetChain,
@@ -266,11 +271,11 @@ export class HashiBridge {
      * @returns an empty promise
      */
     async burnToken(
-        token: Token,
+        chain: Chain,
+        lockedToken: LockedTokenType,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
-        const chain = token.chain;
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
@@ -288,7 +293,6 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        const lockedToken = await this.getLockedToken(token);
         await burnToken(
             chain,
             lockedToken,
@@ -335,14 +339,17 @@ export class HashiBridge {
         setProgress(Progress.Withdrawed);
     }
 
-    async getLockedToken(wrapped: Token): Promise<LockedTokenType> {
+    async getLockedTokenFromWrapped(wrapped: Token): Promise<LockedTokenType> {
         const chain = wrapped.chain;
+
+        if (chainConfig[chain].wrapperContract !== wrapped.tokenContract)
+            return Promise.reject("Token is not wrapped");
 
         let getLocked;
         if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
-            getLocked = getLockedTokenTezos;
+            getLocked = getLockedTokenFromWrappedTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
-            getLocked = getLockedTokenEthereum;
+            getLocked = getLockedTokenFromWrappedEthereum;
         if (!getLocked) return Promise.reject(UnknownChain);
 
         const instance = this.chainsInstances.get(chain);
@@ -350,7 +357,7 @@ export class HashiBridge {
             return Promise.reject(NoSignerForChainError);
         }
 
-        const locked = await getLocked(wrapped, instance);
+        const locked = await getLocked(chain, wrapped.tokenId, instance);
         if (!isMillisTimestamp(locked.timestamp))
             console.log(
                 "DEBUG: Probable wrong timestamp (should be using milliseconds)"

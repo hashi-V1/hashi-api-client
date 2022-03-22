@@ -182,12 +182,13 @@ export async function withdrawTokenEthereum(
     await withdrawTx.wait();
 }
 
-export async function getLockedTokenEthereum(
-    wrapped: WrappedTokenType,
+export async function getLockedTokenFromWrappedEthereum(
+    chain: Chain,
+    wrappedId: number,
     signer: Signer
 ): Promise<LockedTokenType> {
     const wrapperContract = new Contract(
-        chainConfig[wrapped.chain].wrapperContract,
+        chainConfig[chain].wrapperContract,
         wrapperAbi,
         signer
     );
@@ -196,7 +197,7 @@ export async function getLockedTokenEthereum(
         tokenContract: string;
         tokenId: BigNumber;
         tokenLockTimestamp: BigNumber;
-    } = await wrapperContract.wrappedId(wrapped.tokenId);
+    } = await wrapperContract.wrappedId(wrappedId);
 
     if (
         val.tokenContract == null ||
