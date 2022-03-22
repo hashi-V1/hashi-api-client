@@ -16,7 +16,7 @@ exports.chainConfig = (_a = {},
     _a[chain_1.Chain.Hangzhounet] = {
         rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
-        wrapperContract: "KT1J8pUqUtinAkBCzZ2fuUrz4JJEefofm4k5",
+        wrapperContract: "KT1Gj6ePgbVFMsFQmY8tkS3tAYAKCEY8cTGx",
     },
     _a[chain_1.Chain.Ethereum] = {
         lockerContract: "not implemented",
@@ -24,7 +24,7 @@ exports.chainConfig = (_a = {},
     },
     _a[chain_1.Chain.Ropsten] = {
         lockerContract: "0x1b4622d90811f57020e96f78f1f2883020882780",
-        wrapperContract: "0x43a31963eb24ef0cf9d35e2ba463589ff6f9efc4",
+        wrapperContract: "0xc0c713b04A8603A6af387C5a2Df323380A74600f",
     },
     _a);
 /**

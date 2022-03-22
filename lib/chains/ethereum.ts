@@ -115,7 +115,6 @@ export async function wrapTokenEthereum(
 
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
@@ -123,23 +122,20 @@ export async function wrapTokenEthereum(
  * @returns an empty promise
  */
 export async function burnTokenEthereum(
-    chain: Chain,
-    token: LockedTokenType,
+    token: Token,
     destinationAddress: string,
     signer: Signer,
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     const wrapperContract = new Contract(
-        chainConfig[chain].wrapperContract,
+        chainConfig[token.chain].wrapperContract,
         wrapperAbi,
         signer
     );
 
     setProgress(Progress.WaitingForUserBurn);
     const burnTx: TransactionResponse = await wrapperContract.burn(
-        token.tokenContract,
         token.tokenId,
-        token.timestamp,
         destinationAddress
     );
 

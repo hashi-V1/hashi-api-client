@@ -207,28 +207,25 @@ function wrapTokenTezos(chain, message, signatures, Tezos, setProgress) {
 exports.wrapTokenTezos = wrapTokenTezos;
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function burnTokenTezos(chain, token, destinationAddress, Tezos, setProgress) {
+function burnTokenTezos(token, destinationAddress, Tezos, setProgress) {
     return __awaiter(this, void 0, void 0, function () {
         var wrapperContract, operation, confirmation;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, Tezos.wallet.at(config_1.chainConfig[chain].wrapperContract)];
+                case 0: return [4 /*yield*/, Tezos.wallet.at(config_1.chainConfig[token.chain].wrapperContract)];
                 case 1:
                     wrapperContract = _a.sent();
                     setProgress(progress_1.Progress.WaitingForUserBurn);
                     return [4 /*yield*/, wrapperContract.methodsObject
                             .burn({
                             destination_address: destinationAddress,
-                            lock_timestamp: new Date(token.timestamp).toISOString(),
-                            token_contract: token.tokenContract,
-                            token_id: token.tokenId.toString(),
+                            wrapped_id: token.tokenId.toString(),
                         })
                             .send()];
                 case 2:
@@ -287,31 +284,31 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
 exports.withdrawTokenTezos = withdrawTokenTezos;
 function getLockedTokenFromWrappedTezos(chain, wrappedId, Tezos) {
     return __awaiter(this, void 0, void 0, function () {
-        var wrapperContract, wrapperStorage, value;
+        var wrapperAddress, wrapperContract, value;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, Tezos.contract.at(config_1.chainConfig[chain].wrapperContract)];
+                case 0:
+                    wrapperAddress = config_1.chainConfig[chain].wrapperContract;
+                    return [4 /*yield*/, Tezos.contract.at(wrapperAddress)];
                 case 1:
                     wrapperContract = _a.sent();
-                    return [4 /*yield*/, wrapperContract.storage()];
+                    return [4 /*yield*/, wrapperContract.contractViews
+                            .getWrappedinfos(wrappedId)
+                            .executeView({
+                            source: wrapperAddress,
+                            viewCaller: wrapperAddress,
+                        })];
                 case 2:
-                    wrapperStorage = _a.sent();
-                    if (!wrapperStorage ||
-                        !wrapperStorage.wrap_info ||
-                        !taquito_1.MichelsonMap.isMichelsonMap(wrapperStorage.wrap_info))
-                        return [2 /*return*/, Promise.reject("Invalid wrapper storage.")];
-                    console.log(wrapperStorage.wrap_info);
-                    wrapperStorage.wrap_info.forEach(function (v, key) { return (value = key.toNumber() === wrappedId ? v : value); });
-                    console.log(value);
+                    value = _a.sent();
                     if (!value ||
                         !value.token_id ||
                         !value.lock_timestamp ||
                         !value.token_contract ||
-                        isNaN(Number(value.token_id)) ||
+                        isNaN(value.token_id.toNumber()) ||
                         isNaN(Date.parse(value.lock_timestamp)))
                         return [2 /*return*/, Promise.reject("Could not retrieve wrapped token")];
                     return [2 /*return*/, {
-                            tokenId: Number(value.token_id),
+                            tokenId: value.token_id.toNumber(),
                             tokenContract: value.token_contract,
                             timestamp: Date.parse(value.lock_timestamp),
                         }];

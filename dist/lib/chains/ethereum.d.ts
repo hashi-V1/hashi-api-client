@@ -31,14 +31,13 @@ export declare function approveAndLockEthereum(token: Token, destinationAddress:
 export declare function wrapTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<WrappedTokenType>;
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function burnTokenEthereum(chain: Chain, token: LockedTokenType, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function burnTokenEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
 /**
  * Withdraws a token on an Ethereum chain (sends back the initial token before the lock)
  * @param chain The initial chain of the token

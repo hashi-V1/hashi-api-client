@@ -195,12 +195,12 @@ var HashiBridge = /** @class */ (function () {
                     case 0:
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
-                        return [4 /*yield*/, this.getLockedTokenFromWrapped(token)];
+                        return [4 /*yield*/, this.burnToken(token, destinationAddress, progressCallback)];
                     case 1:
-                        lockedToken = _b.sent();
-                        return [4 /*yield*/, this.burnToken(token.chain, lockedToken, destinationAddress, progressCallback)];
-                    case 2:
                         _b.sent();
+                        return [4 /*yield*/, this.getLockedTokenFromWrapped(token)];
+                    case 2:
+                        lockedToken = _b.sent();
                         return [4 /*yield*/, this.proveTokenStatus(token.chain, targetChain, lockedToken, proof_1.Status.Burned, progressCallback)];
                     case 3:
                         _a = _b.sent(), signatures = _a.signatures, message = _a.message;
@@ -245,12 +245,13 @@ var HashiBridge = /** @class */ (function () {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    HashiBridge.prototype.burnToken = function (chain, lockedToken, destinationAddress, progressCallback) {
+    HashiBridge.prototype.burnToken = function (token, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var setProgress, burnToken, instance;
+            var chain, setProgress, burnToken, instance;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        chain = token.chain;
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
@@ -264,7 +265,7 @@ var HashiBridge = /** @class */ (function () {
                         instance = this.chainsInstances.get(chain);
                         if (typeof instance === "undefined")
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
-                        return [4 /*yield*/, burnToken(chain, lockedToken, destinationAddress, instance, setProgress)];
+                        return [4 /*yield*/, burnToken(token, destinationAddress, instance, setProgress)];
                     case 1:
                         _a.sent();
                         setProgress(progress_1.Progress.Burned);

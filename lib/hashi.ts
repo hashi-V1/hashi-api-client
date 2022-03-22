@@ -208,14 +208,9 @@ export class HashiBridge {
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        const lockedToken = await this.getLockedTokenFromWrapped(token);
-        await this.burnToken(
-            token.chain,
-            lockedToken,
-            destinationAddress,
-            progressCallback
-        );
+        await this.burnToken(token, destinationAddress, progressCallback);
 
+        const lockedToken = await this.getLockedTokenFromWrapped(token);
         const { signatures, message } = await this.proveTokenStatus(
             token.chain,
             targetChain,
@@ -271,11 +266,11 @@ export class HashiBridge {
      * @returns an empty promise
      */
     async burnToken(
-        chain: Chain,
-        lockedToken: LockedTokenType,
+        token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
     ): Promise<void> {
+        const chain = token.chain;
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
@@ -293,13 +288,7 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        await burnToken(
-            chain,
-            lockedToken,
-            destinationAddress,
-            instance,
-            setProgress
-        );
+        await burnToken(token, destinationAddress, instance, setProgress);
 
         setProgress(Progress.Burned);
     }

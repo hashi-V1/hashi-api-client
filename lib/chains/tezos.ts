@@ -187,7 +187,6 @@ export async function wrapTokenTezos(
 
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
@@ -195,23 +194,20 @@ export async function wrapTokenTezos(
  * @returns an empty promise
  */
 export async function burnTokenTezos(
-    chain: Chain,
-    token: LockedTokenType,
+    token: Token,
     destinationAddress: string,
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
 ): Promise<void> {
     const wrapperContract = await Tezos.wallet.at(
-        chainConfig[chain].wrapperContract
+        chainConfig[token.chain].wrapperContract
     );
 
     setProgress(Progress.WaitingForUserBurn);
     const operation = await wrapperContract.methodsObject
         .burn({
             destination_address: destinationAddress,
-            lock_timestamp: new Date(token.timestamp).toISOString(),
-            token_contract: token.tokenContract,
-            token_id: token.tokenId.toString(),
+            wrapped_id: token.tokenId.toString(),
         })
         .send();
 
@@ -262,48 +258,32 @@ export async function getLockedTokenFromWrappedTezos(
     wrappedId: number,
     Tezos: TezosToolkit
 ): Promise<LockedTokenType> {
-    const wrapperContract = await Tezos.contract.at(
-        chainConfig[chain].wrapperContract
-    );
-    const wrapperStorage: {
-        wrap_info: MichelsonMap<
-            BigNumber,
-            { lock_timestamp: string; token_contract: string; token_id: string }
-        >;
-    } = await wrapperContract.storage();
+    const wrapperAddress = chainConfig[chain].wrapperContract;
+    const wrapperContract = await Tezos.contract.at(wrapperAddress);
 
-    if (
-        !wrapperStorage ||
-        !wrapperStorage.wrap_info ||
-        !MichelsonMap.isMichelsonMap(wrapperStorage.wrap_info)
-    )
-        return Promise.reject("Invalid wrapper storage.");
-
-    console.log(wrapperStorage.wrap_info);
-    let value:
-        | {
-              lock_timestamp: string;
-              token_contract: string;
-              token_id: string;
-          }
-        | undefined;
-    wrapperStorage.wrap_info.forEach(
-        (v, key) => (value = key.toNumber() === wrappedId ? v : value)
-    );
-    console.log(value);
+    const value: {
+        token_contract: string;
+        token_id: BigNumber;
+        lock_timestamp: string;
+    } = await wrapperContract.contractViews
+        .getWrappedinfos(wrappedId)
+        .executeView({
+            source: wrapperAddress,
+            viewCaller: wrapperAddress,
+        });
 
     if (
         !value ||
         !value.token_id ||
         !value.lock_timestamp ||
         !value.token_contract ||
-        isNaN(Number(value.token_id)) ||
+        isNaN(value.token_id.toNumber()) ||
         isNaN(Date.parse(value.lock_timestamp))
     )
         return Promise.reject("Could not retrieve wrapped token");
 
     return {
-        tokenId: Number(value.token_id),
+        tokenId: value.token_id.toNumber(),
         tokenContract: value.token_contract,
         timestamp: Date.parse(value.lock_timestamp),
     };

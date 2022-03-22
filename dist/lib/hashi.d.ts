@@ -74,7 +74,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    burnToken(chain: Chain, lockedToken: LockedTokenType, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
+    burnToken(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
     /**
      * Withdraws a token on a specific chain (sends back the initial token before the lock)
      * @param chain The initial chain of the token

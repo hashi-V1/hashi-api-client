@@ -138,22 +138,21 @@ function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
 exports.wrapTokenEthereum = wrapTokenEthereum;
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-function burnTokenEthereum(chain, token, destinationAddress, signer, setProgress) {
+function burnTokenEthereum(token, destinationAddress, signer, setProgress) {
     return __awaiter(this, void 0, void 0, function () {
         var wrapperContract, burnTx;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default, signer);
+                    wrapperContract = new ethers_1.Contract(config_1.chainConfig[token.chain].wrapperContract, Wrapper_json_1.default, signer);
                     setProgress(progress_1.Progress.WaitingForUserBurn);
-                    return [4 /*yield*/, wrapperContract.burn(token.tokenContract, token.tokenId, token.timestamp, destinationAddress)];
+                    return [4 /*yield*/, wrapperContract.burn(token.tokenId, destinationAddress)];
                 case 1:
                     burnTx = _a.sent();
                     setProgress(progress_1.Progress.WaitingForConfirmationBurn);

@@ -32,14 +32,13 @@ export declare function approveAndLockTezos(token: Token, destinationAddress: st
 export declare function wrapTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<WrappedTokenType>;
 /**
  * Burn a wrapped token to transfer it to another chain
- * @param chain The chain where the token is currently wrapped
  * @param token The wrapped token to burn
  * @param destinationAddress The address on the target chain that will receive the token
  * @param Tezos The TezosToolkit instance from setChainSignerTezos
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function burnTokenTezos(chain: Chain, token: LockedTokenType, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function burnTokenTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
 /**
  * Withdraws a token on a Tezos chain (sends back the initial token before the lock)
  * @param chain The initial chain of the token
