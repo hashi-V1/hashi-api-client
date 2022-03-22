@@ -4,4 +4,4 @@ export * from "./lib/types/chain";
 export * from "./lib/types/progress";
 export * from "./lib/types/proof";
 export * from "./lib/types/token";
-export { stringToHex } from "./lib/utils";
+export { hexToString, isMillisTimestamp, stringToHex } from "./lib/utils";
