@@ -1,7 +1,6 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.chainConstants = exports.isChain = exports.Chain = void 0;
+exports.isChain = exports.Chain = void 0;
 /**
  * Represents a chain (a blockchain specific network).
  * Example: Ethereum-Ropsten is a different chain than Ethereum (Mainnet).
@@ -22,25 +21,4 @@ function isChain(input) {
     return Object.values(Chain).includes(input);
 }
 exports.isChain = isChain;
-/**
- * Lists constants (ChainConstantsType) of all chains defined in Chain.
- */
-exports.chainConstants = (_a = {},
-    _a[Chain.Tezos] = {
-        name: Chain.Tezos,
-        symbol: "XTZ",
-    },
-    _a[Chain.Hangzhounet] = {
-        name: Chain.Hangzhounet,
-        symbol: "XTZ",
-    },
-    _a[Chain.Ethereum] = {
-        name: Chain.Ethereum,
-        symbol: "ETH",
-    },
-    _a[Chain.Ropsten] = {
-        name: Chain.Ropsten,
-        symbol: "ETH",
-    },
-    _a);
 //# sourceMappingURL=chain.js.map

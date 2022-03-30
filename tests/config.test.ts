@@ -23,6 +23,17 @@ describe("config testing", () => {
                 `chainConfig does not contain chain ${chain}`
             );
 
+            assert.strictEqual(
+                chainConfig[chain as Chain].name,
+                chain,
+                `chain should have the same name as in Chain for ${chain}`
+            );
+
+            assert.isNotEmpty(
+                chainConfig[chain as Chain].symbol,
+                `symbol should not be empty for chain ${chain}`
+            );
+
             assert.isNotEmpty(
                 chainConfig[chain as Chain].lockerContract,
                 `lockerContract is empty in chainConfig for chain ${chain}`

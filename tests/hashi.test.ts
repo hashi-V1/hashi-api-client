@@ -1,5 +1,6 @@
 import { assert, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { chainConfig } from "../lib/config";
 import { HashiBridge } from "../lib/hashi";
 import { Chain } from "../lib/types/chain";
 import {
@@ -12,7 +13,7 @@ use(chaiAsPromised);
 
 describe("HashiBridge", () => {
     const token: Token = tokenFromAddressAndId(
-        "tzjredfrhgjkujrefd",
+        chainConfig[Chain.Ethereum].wrapperContract,
         5,
         Chain.Ethereum
     );

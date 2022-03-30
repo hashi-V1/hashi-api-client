@@ -1,9 +1,10 @@
 import { Chain } from "./types/chain";
-import { Token } from "./types/token";
 /**
  * Represents the configuration fields for a specific chain.
  */
 export declare type ChainConfigType = {
+    name: string;
+    symbol: string;
     rpc?: string;
     lockerContract: string;
     wrapperContract: string;
@@ -21,5 +22,8 @@ export declare const chainConfig: {
  * e.g. "http://localhost:3030/proof"
  */
 export declare const nodesConfig: string[];
-export declare function isTokenWrapped(token: Token, chain: Chain): boolean;
+/**
+ * Url of the hashi indexer.
+ * Used to retrieve a user's token inventory.
+ */
 export declare const hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";

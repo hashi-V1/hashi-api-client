@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
 var chai_as_promised_1 = __importDefault(require("chai-as-promised"));
+var config_1 = require("../lib/config");
 var hashi_1 = require("../lib/hashi");
 var chain_1 = require("../lib/types/chain");
 var errors_1 = require("../lib/types/errors");
@@ -48,7 +49,7 @@ var proof_1 = require("../lib/types/proof");
 var token_1 = require("../lib/types/token");
 (0, chai_1.use)(chai_as_promised_1.default);
 describe("HashiBridge", function () {
-    var token = (0, token_1.tokenFromAddressAndId)("tzjredfrhgjkujrefd", 5, chain_1.Chain.Ethereum);
+    var token = (0, token_1.tokenFromAddressAndId)(config_1.chainConfig[chain_1.Chain.Ethereum].wrapperContract, 5, chain_1.Chain.Ethereum);
     var dest = "tzERZH55TGHJHFGDS";
     var message = {
         status: proof_1.Status.Locked,

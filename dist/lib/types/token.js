@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenFromAddressAndId = exports.isToken = exports.isLockedTokenType = void 0;
+exports.isTokenWrapped = exports.tokenFromAddressAndId = exports.isToken = exports.isLockedTokenType = void 0;
+var config_1 = require("../config");
 var utils_1 = require("../utils");
 var chain_1 = require("./chain");
 /**
@@ -40,8 +41,7 @@ exports.isToken = isToken;
  * @param chain
  * @returns a Token
  */
-function tokenFromAddressAndId(tokenContract, tokenId, chain, wrapped) {
-    if (wrapped === void 0) { wrapped = false; }
+function tokenFromAddressAndId(tokenContract, tokenId, chain) {
     if (tokenContract === "") {
         throw new Error("tokenContract cannot be empty to build a token.");
     }
@@ -56,8 +56,18 @@ function tokenFromAddressAndId(tokenContract, tokenId, chain, wrapped) {
         tokenId: tokenId,
         chain: chain,
         uid: "".concat(tokenContract, "-").concat(tokenId),
-        wrapped: wrapped,
+        wrapped: isTokenWrapped(tokenContract, chain),
     };
 }
 exports.tokenFromAddressAndId = tokenFromAddressAndId;
+/**
+ * Checks whether the token's contract is a wrapper
+ * @param tokenContract The token's contract address
+ * @param chain The current chain of the token
+ * @returns a boolean
+ */
+function isTokenWrapped(tokenContract, chain) {
+    return config_1.chainConfig[chain].wrapperContract === tokenContract;
+}
+exports.isTokenWrapped = isTokenWrapped;
 //# sourceMappingURL=token.js.map

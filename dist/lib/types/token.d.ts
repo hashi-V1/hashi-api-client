@@ -44,4 +44,11 @@ export declare function isToken(input: any): input is Token;
  * @param chain
  * @returns a Token
  */
-export declare function tokenFromAddressAndId(tokenContract: string, tokenId: number, chain: Chain, wrapped?: boolean): Token;
+export declare function tokenFromAddressAndId(tokenContract: string, tokenId: number, chain: Chain): Token;
+/**
+ * Checks whether the token's contract is a wrapper
+ * @param tokenContract The token's contract address
+ * @param chain The current chain of the token
+ * @returns a boolean
+ */
+export declare function isTokenWrapped(tokenContract: string, chain: Chain): boolean;

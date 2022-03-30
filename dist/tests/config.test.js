@@ -14,6 +14,8 @@ describe("config testing", function () {
     it("chainConfig should contain valid informations", function () {
         for (var chain in chain_1.Chain) {
             chai_1.assert.isTrue((0, utils_1.hasOwnProperty)(config_1.chainConfig, chain), "chainConfig does not contain chain ".concat(chain));
+            chai_1.assert.strictEqual(config_1.chainConfig[chain].name, chain, "chain should have the same name as in Chain for ".concat(chain));
+            chai_1.assert.isNotEmpty(config_1.chainConfig[chain].symbol, "symbol should not be empty for chain ".concat(chain));
             chai_1.assert.isNotEmpty(config_1.chainConfig[chain].lockerContract, "lockerContract is empty in chainConfig for chain ".concat(chain));
             chai_1.assert.isNotEmpty(config_1.chainConfig[chain].wrapperContract, "wrapperContract is empty in chainConfig for chain ".concat(chain));
         }

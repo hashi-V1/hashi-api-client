@@ -1,3 +1,4 @@
+import { chainConfig } from "../config";
 import { isMillisTimestamp } from "../utils";
 import { Chain, isChain } from "./chain";
 
@@ -78,8 +79,7 @@ export function isToken(input: any): input is Token {
 export function tokenFromAddressAndId(
     tokenContract: string,
     tokenId: number,
-    chain: Chain,
-    wrapped: boolean = false
+    chain: Chain
 ): Token {
     if (tokenContract === "") {
         throw new Error("tokenContract cannot be empty to build a token.");
@@ -96,6 +96,16 @@ export function tokenFromAddressAndId(
         tokenId,
         chain,
         uid: `${tokenContract}-${tokenId}`,
-        wrapped,
+        wrapped: isTokenWrapped(tokenContract, chain),
     };
+}
+
+/**
+ * Checks whether the token's contract is a wrapper
+ * @param tokenContract The token's contract address
+ * @param chain The current chain of the token
+ * @returns a boolean
+ */
+export function isTokenWrapped(tokenContract: string, chain: Chain) {
+    return chainConfig[chain].wrapperContract === tokenContract;
 }
