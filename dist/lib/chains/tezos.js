@@ -137,7 +137,7 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                     lockerStorage = _a.sent();
                     timestamp = lockerStorage.lock_timestamps.get({
                         token_contract: token.tokenContract,
-                        token_id: token.tokenId,
+                        token_id: token.tokenId.toString(),
                     });
                     return [2 /*return*/, Date.parse(timestamp)];
             }

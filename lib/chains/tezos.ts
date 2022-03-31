@@ -114,7 +114,7 @@ export async function approveAndLockTezos(
     const lockerStorage: any = await lockerContract.storage();
     const timestamp = lockerStorage.lock_timestamps.get({
         token_contract: token.tokenContract,
-        token_id: token.tokenId,
+        token_id: token.tokenId.toString(),
     });
 
     return Date.parse(timestamp);
