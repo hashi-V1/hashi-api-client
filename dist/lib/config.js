@@ -41,8 +41,7 @@ exports.chainConfig = (_a = {},
  * e.g. "http://localhost:3030/proof"
  */
 exports.nodesConfig = [
-    "http://localhost:3030/proof",
-    "http://localhost:3030/proof",
+    "https://hashi-oracle.h.minet.net:9000/proof",
 ];
 /**
  * Url of the hashi indexer.
