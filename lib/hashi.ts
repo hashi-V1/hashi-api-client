@@ -15,7 +15,7 @@ import {
     withdrawTokenTezos,
     wrapTokenTezos,
 } from "./chains/tezos";
-import { chainConfig, hashiIndexerUrl } from "./config";
+import { hashiIndexerUrl } from "./config";
 import { proveTokenStatus } from "./prover";
 import { Chain } from "./types/chain";
 import {
@@ -27,7 +27,12 @@ import {
 } from "./types/errors";
 import { Progress } from "./types/progress";
 import { Signature, Status, UnsignedMessageType } from "./types/proof";
-import { LockedTokenType, Token, WrappedTokenType } from "./types/token";
+import {
+    isTokenWrapped,
+    LockedTokenType,
+    Token,
+    WrappedTokenType,
+} from "./types/token";
 import { isMillisTimestamp, setProgressCallback } from "./utils";
 
 /**
@@ -331,7 +336,7 @@ export class HashiBridge {
     async getLockedTokenFromWrapped(wrapped: Token): Promise<LockedTokenType> {
         const chain = wrapped.chain;
 
-        if (chainConfig[chain].wrapperContract !== wrapped.tokenContract)
+        if (!isTokenWrapped(wrapped.tokenContract, chain))
             return Promise.reject("Token is not wrapped");
 
         let getLocked;
