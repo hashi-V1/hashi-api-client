@@ -49,6 +49,7 @@ var chain_1 = require("./types/chain");
 var errors_1 = require("./types/errors");
 var progress_1 = require("./types/progress");
 var proof_1 = require("./types/proof");
+var token_1 = require("./types/token");
 var utils_1 = require("./utils");
 /**
  * Main class of the Hashi Protocol bridge.
@@ -317,7 +318,7 @@ var HashiBridge = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         chain = wrapped.chain;
-                        if (config_1.chainConfig[chain].wrapperContract !== wrapped.tokenContract)
+                        if (!(0, token_1.isTokenWrapped)(wrapped.tokenContract, chain))
                             return [2 /*return*/, Promise.reject("Token is not wrapped")];
                         if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
                             getLocked = tezos_1.getLockedTokenFromWrappedTezos;
