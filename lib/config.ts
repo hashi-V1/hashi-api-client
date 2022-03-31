@@ -56,8 +56,7 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
  * e.g. "http://localhost:3030/proof"
  */
 export const nodesConfig: string[] = [
-    "http://localhost:3030/proof",
-    "http://localhost:3030/proof",
+    "https://hashi-oracle.h.minet.net:9000/proof",
 ];
 
 /**
