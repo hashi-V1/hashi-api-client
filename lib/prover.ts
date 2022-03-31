@@ -6,10 +6,29 @@ import {
     isSignedMessageType,
     ProofRequestType,
     Signature,
+    SignedMessageType,
     Status,
     UnsignedMessageType,
 } from "./types/proof";
 import { LockedTokenType } from "./types/token";
+
+/**
+ * Time between retries to the same node (milliseconds)
+ */
+const RETRY_TIMEOUT = 1000;
+
+async function proveWithNode(node: string, request: ProofRequestType) {
+    const response = await axios.get(node, {
+        params: request,
+    });
+
+    if (!isSignedMessageType(response.data))
+        return Promise.reject(
+            `Prover error (node ${node}): Wrong response type (not SignedMessageType)`
+        );
+
+    return response.data;
+}
 
 /**
  * Prove a token status with the federation
@@ -39,18 +58,21 @@ export async function proveTokenStatus(
 
     const signatures = await Promise.all(
         nodesConfig.map(async (node) => {
-            const response = await axios.get(node, {
-                params: proofRequest,
-            });
-            const signedMessage = response.data;
+            let response: SignedMessageType | undefined;
 
-            if (!isSignedMessageType(signedMessage))
-                return Promise.reject(
-                    "Wrong response type (not SignedMessageType)"
-                );
+            while (!response) {
+                try {
+                    response = await proveWithNode(node, proofRequest);
+                } catch (e) {
+                    console.log(e);
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, RETRY_TIMEOUT)
+                    );
+                }
+            }
 
-            if (typeof message === "undefined") message = signedMessage;
-            return signedMessage.signature;
+            if (!message) message = response;
+            return response.signature;
         })
     );
     if (typeof message === "undefined")

@@ -56,6 +56,27 @@ var config_1 = require("./config");
 var progress_1 = require("./types/progress");
 var proof_1 = require("./types/proof");
 /**
+ * Time between retries to the same node (milliseconds)
+ */
+var RETRY_TIMEOUT = 1000;
+function proveWithNode(node, request) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, axios_1.default.get(node, {
+                        params: request,
+                    })];
+                case 1:
+                    response = _a.sent();
+                    if (!(0, proof_1.isSignedMessageType)(response.data))
+                        return [2 /*return*/, Promise.reject("Prover error (node ".concat(node, "): Wrong response type (not SignedMessageType)"))];
+                    return [2 /*return*/, response.data];
+            }
+        });
+    });
+}
+/**
  * Prove a token status with the federation
  * @param sourceChain The chain where the token went throught the status
  * @param targetChain The chain where the proof will be used
@@ -74,20 +95,32 @@ function proveTokenStatus(sourceChain, targetChain, token, status, setProgress) 
                     setProgress(progress_1.Progress.ProvingStatus);
                     proofRequest = __assign({ sourceChain: sourceChain, targetChain: targetChain, status: status }, token);
                     return [4 /*yield*/, Promise.all(config_1.nodesConfig.map(function (node) { return __awaiter(_this, void 0, void 0, function () {
-                            var response, signedMessage;
+                            var response, e_1;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, axios_1.default.get(node, {
-                                            params: proofRequest,
-                                        })];
+                                    case 0:
+                                        if (!!response) return [3 /*break*/, 6];
+                                        _a.label = 1;
                                     case 1:
+                                        _a.trys.push([1, 3, , 5]);
+                                        return [4 /*yield*/, proveWithNode(node, proofRequest)];
+                                    case 2:
                                         response = _a.sent();
-                                        signedMessage = response.data;
-                                        if (!(0, proof_1.isSignedMessageType)(signedMessage))
-                                            return [2 /*return*/, Promise.reject("Wrong response type (not SignedMessageType)")];
-                                        if (typeof message === "undefined")
-                                            message = signedMessage;
-                                        return [2 /*return*/, signedMessage.signature];
+                                        return [3 /*break*/, 5];
+                                    case 3:
+                                        e_1 = _a.sent();
+                                        console.log(e_1);
+                                        return [4 /*yield*/, new Promise(function (resolve) {
+                                                return setTimeout(resolve, RETRY_TIMEOUT);
+                                            })];
+                                    case 4:
+                                        _a.sent();
+                                        return [3 /*break*/, 5];
+                                    case 5: return [3 /*break*/, 0];
+                                    case 6:
+                                        if (!message)
+                                            message = response;
+                                        return [2 /*return*/, response.signature];
                                 }
                             });
                         }); }))];
