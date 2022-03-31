@@ -48,8 +48,8 @@ export type Token = {
     chain: Chain;
     uid: string;
     wrapped: boolean;
+    name: string;
 
-    name?: string;
     imageUrl?: string;
     description?: string;
     symbol?: string;
@@ -65,7 +65,9 @@ export function isToken(input: any): input is Token {
         !isNaN(token.tokenId) &&
         token.uid != null &&
         token.uid != "" &&
-        isChain(token.chain)
+        isChain(token.chain) &&
+        token.name != null &&
+        token.name != ""
     );
 }
 
@@ -97,6 +99,7 @@ export function tokenFromAddressAndId(
         chain,
         uid: `${tokenContract}-${tokenId}`,
         wrapped: isTokenWrapped(tokenContract, chain),
+        name: `${tokenContract}-${tokenId}`,
     };
 }
 
@@ -107,5 +110,12 @@ export function tokenFromAddressAndId(
  * @returns a boolean
  */
 export function isTokenWrapped(tokenContract: string, chain: Chain) {
-    return chainConfig[chain].wrapperContract === tokenContract;
+    // Ignore case when comparing addresses.
+    return (
+        chainConfig[chain].wrapperContract.localeCompare(
+            tokenContract,
+            undefined,
+            { sensitivity: "accent" }
+        ) === 0
+    );
 }

@@ -31,7 +31,7 @@ export declare type Token = {
     chain: Chain;
     uid: string;
     wrapped: boolean;
-    name?: string;
+    name: string;
     imageUrl?: string;
     description?: string;
     symbol?: string;

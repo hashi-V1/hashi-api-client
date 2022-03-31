@@ -31,7 +31,9 @@ function isToken(input) {
         !isNaN(token.tokenId) &&
         token.uid != null &&
         token.uid != "" &&
-        (0, chain_1.isChain)(token.chain));
+        (0, chain_1.isChain)(token.chain) &&
+        token.name != null &&
+        token.name != "");
 }
 exports.isToken = isToken;
 /**
@@ -57,6 +59,7 @@ function tokenFromAddressAndId(tokenContract, tokenId, chain) {
         chain: chain,
         uid: "".concat(tokenContract, "-").concat(tokenId),
         wrapped: isTokenWrapped(tokenContract, chain),
+        name: "".concat(tokenContract, "-").concat(tokenId),
     };
 }
 exports.tokenFromAddressAndId = tokenFromAddressAndId;
@@ -67,7 +70,8 @@ exports.tokenFromAddressAndId = tokenFromAddressAndId;
  * @returns a boolean
  */
 function isTokenWrapped(tokenContract, chain) {
-    return config_1.chainConfig[chain].wrapperContract === tokenContract;
+    // Ignore case when comparing addresses.
+    return (config_1.chainConfig[chain].wrapperContract.localeCompare(tokenContract, undefined, { sensitivity: "accent" }) === 0);
 }
 exports.isTokenWrapped = isTokenWrapped;
 //# sourceMappingURL=token.js.map
