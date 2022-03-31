@@ -147,7 +147,6 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
 exports.approveAndLockTezos = approveAndLockTezos;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
- * TODO: Signatures not recognized by contracts
  * @param chain The wrapping chain
  * @param message The unsigned message returned by the nodes
  * @param signatures The signature of the message
