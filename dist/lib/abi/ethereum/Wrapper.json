@@ -119,19 +119,9 @@
     {
         "inputs": [
             {
-                "internalType": "string",
-                "name": "_tokenContract",
-                "type": "string"
-            },
-            {
                 "internalType": "uint64",
-                "name": "_tokenId",
+                "name": "_wrappedTokenId",
                 "type": "uint64"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_tokenLockTimestamp",
-                "type": "uint256"
             },
             {
                 "internalType": "string",
@@ -450,7 +440,7 @@
                 "type": "uint64"
             }
         ],
-        "name": "wrappedId",
+        "name": "wrapInfo",
         "outputs": [
             {
                 "internalType": "string",

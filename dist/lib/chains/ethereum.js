@@ -182,7 +182,10 @@ function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) 
                 case 0:
                     lockerContract = new ethers_1.Contract(config_1.chainConfig[chain].lockerContract, Locker_json_1.default, signer);
                     setProgress(progress_1.Progress.WaitingForUserWithdraw);
-                    return [4 /*yield*/, lockerContract.withdraw(message.tokenContract, message.tokenId, message.timestamp, [], [])];
+                    return [4 /*yield*/, lockerContract.withdraw(message.tokenContract, message.tokenId, Math.floor(message.timestamp / 1000), 
+                        /*        signatures.map((signature) => signature.publicKey), //TODO: withdraw signatures should include empty metadata ("") to be consistent with wrap signatures
+                        signatures.map((signature) => signature.sig)*/
+                        [], [])];
                 case 1:
                     withdrawTx = _a.sent();
                     setProgress(progress_1.Progress.WaitingForConfirmationWithdraw);
@@ -202,7 +205,7 @@ function getLockedTokenFromWrappedEthereum(chain, wrappedId, signer) {
             switch (_a.label) {
                 case 0:
                     wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default, signer);
-                    return [4 /*yield*/, wrapperContract.wrappedId(wrappedId)];
+                    return [4 /*yield*/, wrapperContract.wrapInfo(wrappedId)];
                 case 1:
                     val = _a.sent();
                     if (val.tokenContract == null ||

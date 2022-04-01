@@ -169,7 +169,9 @@ export async function withdrawTokenEthereum(
     const withdrawTx: TransactionResponse = await lockerContract.withdraw(
         message.tokenContract,
         message.tokenId,
-        message.timestamp,
+        Math.floor(message.timestamp / 1000),
+        /*        signatures.map((signature) => signature.publicKey), //TODO: withdraw signatures should include empty metadata ("") to be consistent with wrap signatures
+        signatures.map((signature) => signature.sig)*/
         [],
         []
     );
@@ -193,7 +195,7 @@ export async function getLockedTokenFromWrappedEthereum(
         tokenContract: string;
         tokenId: BigNumber;
         tokenLockTimestamp: BigNumber;
-    } = await wrapperContract.wrappedId(wrappedId);
+    } = await wrapperContract.wrapInfo(wrappedId);
 
     if (
         val.tokenContract == null ||
