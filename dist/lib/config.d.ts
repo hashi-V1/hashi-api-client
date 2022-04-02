@@ -26,4 +26,4 @@ export declare const nodesConfig: string[];
  * Url of the hashi indexer.
  * Used to retrieve a user's token inventory.
  */
-export declare const hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";
+export declare const hashiIndexerUrl = "https://indexer.hashiprotocol.com/api";

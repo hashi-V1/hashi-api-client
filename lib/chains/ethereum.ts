@@ -170,10 +170,8 @@ export async function withdrawTokenEthereum(
         message.tokenContract,
         message.tokenId,
         Math.floor(message.timestamp / 1000),
-        /*        signatures.map((signature) => signature.publicKey), //TODO: withdraw signatures should include empty metadata ("") to be consistent with wrap signatures
-        signatures.map((signature) => signature.sig)*/
-        [],
-        []
+        signatures.map((signature) => signature.publicKey),
+        signatures.map((signature) => signature.sig)
     );
 
     setProgress(Progress.WaitingForConfirmationWithdraw);

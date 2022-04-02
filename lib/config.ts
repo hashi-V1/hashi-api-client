@@ -45,7 +45,7 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
         name: Chain.Ropsten,
         symbol: "ETH",
 
-        lockerContract: "0x1b4622d90811f57020e96f78f1f2883020882780",
+        lockerContract: "0xA32AfCc4637e957FBDc9c6682DE80Be00cb44963",
         wrapperContract: "0xc0c713b04A8603A6af387C5a2Df323380A74600f",
     },
 };
@@ -56,11 +56,11 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
  * e.g. "http://localhost:3030/proof"
  */
 export const nodesConfig: string[] = [
-    "https://hashi-oracle.h.minet.net:9000/proof",
+    "https://proxy1.validators.hashiprotocol.com:9000/proof",
 ];
 
 /**
  * Url of the hashi indexer.
  * Used to retrieve a user's token inventory.
  */
-export const hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";
+export const hashiIndexerUrl = "https://indexer.hashiprotocol.com/api";

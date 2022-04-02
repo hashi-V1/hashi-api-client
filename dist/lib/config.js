@@ -31,7 +31,7 @@ exports.chainConfig = (_a = {},
     _a[chain_1.Chain.Ropsten] = {
         name: chain_1.Chain.Ropsten,
         symbol: "ETH",
-        lockerContract: "0x1b4622d90811f57020e96f78f1f2883020882780",
+        lockerContract: "0xA32AfCc4637e957FBDc9c6682DE80Be00cb44963",
         wrapperContract: "0xc0c713b04A8603A6af387C5a2Df323380A74600f",
     },
     _a);
@@ -41,11 +41,11 @@ exports.chainConfig = (_a = {},
  * e.g. "http://localhost:3030/proof"
  */
 exports.nodesConfig = [
-    "https://hashi-oracle.h.minet.net:9000/proof",
+    "https://proxy1.validators.hashiprotocol.com:9000/proof",
 ];
 /**
  * Url of the hashi indexer.
  * Used to retrieve a user's token inventory.
  */
-exports.hashiIndexerUrl = "https://hashi-indexer.netlify.app/api";
+exports.hashiIndexerUrl = "https://indexer.hashiprotocol.com/api";
 //# sourceMappingURL=config.js.map
