@@ -18,7 +18,7 @@ exports.chainConfig = (_a = {},
     _a[chain_1.Chain.Hangzhounet] = {
         name: chain_1.Chain.Hangzhounet,
         symbol: "XTZ",
-        rpc: "https://hangzhounet.smartpy.io/",
+        rpc: "https://rpc.hangzhounet.teztnets.xyz",
         lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
         wrapperContract: "KT1Gj6ePgbVFMsFQmY8tkS3tAYAKCEY8cTGx",
     },
