@@ -114,7 +114,7 @@ function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
                 case 0:
                     wrapperContract = new ethers_1.Contract(config_1.chainConfig[chain].wrapperContract, Wrapper_json_1.default, signer);
                     setProgress(progress_1.Progress.WaitingForUserWrap);
-                    return [4 /*yield*/, wrapperContract.wrap(message.tokenContract, message.tokenId, message.timestamp, message.metadata, signatures.map(function (signature) { return signature.publicKey; }), signatures.map(function (signature) { return signature.sig; }))];
+                    return [4 /*yield*/, wrapperContract.wrap(message.tokenContract, message.tokenId, Math.floor(message.timestamp / 1000), message.metadata, signatures.map(function (signature) { return signature.publicKey; }), signatures.map(function (signature) { return signature.sig; }))];
                 case 1:
                     wrapTx = _a.sent();
                     setProgress(progress_1.Progress.WaitingForConfirmationWrap);
@@ -213,7 +213,7 @@ function getLockedTokenFromWrappedEthereum(chain, wrappedId, signer) {
                     return [2 /*return*/, {
                             tokenContract: val.tokenContract,
                             tokenId: val.tokenId.toNumber(),
-                            timestamp: val.tokenLockTimestamp.toNumber(),
+                            timestamp: val.tokenLockTimestamp.toNumber() * 1000,
                         }];
             }
         });

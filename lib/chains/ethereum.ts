@@ -89,7 +89,7 @@ export async function wrapTokenEthereum(
     const wrapTx: TransactionResponse = await wrapperContract.wrap(
         message.tokenContract,
         message.tokenId,
-        message.timestamp,
+        Math.floor(message.timestamp / 1000),
         message.metadata,
         signatures.map((signature) => signature.publicKey),
         signatures.map((signature) => signature.sig)
@@ -206,6 +206,6 @@ export async function getLockedTokenFromWrappedEthereum(
     return {
         tokenContract: val.tokenContract,
         tokenId: val.tokenId.toNumber(),
-        timestamp: val.tokenLockTimestamp.toNumber(),
+        timestamp: val.tokenLockTimestamp.toNumber() * 1000,
     };
 }
