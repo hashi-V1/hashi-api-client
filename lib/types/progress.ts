@@ -78,7 +78,7 @@ export const progressConstants: { [key in Progress]: string } = {
     [Progress.WaitingForUserWrap]:
         "Waiting for user to sign the wrap transaction",
     [Progress.WaitingForUserWithdraw]:
-        "Waiting for user to sign the wrap transaction",
+        "Waiting for user to sign the withdraw transaction",
 
     [Progress.WaitingForConfirmationWrap]:
         "Waiting for confirmation of the wrap transaction",
