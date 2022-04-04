@@ -29,7 +29,7 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
         name: Chain.Hangzhounet,
         symbol: "XTZ",
 
-        rpc: "https://rpc.hangzhounet.teztnets.xyz",
+        rpc: "https://hangzhounet.smartpy.io/",
         lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
         wrapperContract: "KT1Gj6ePgbVFMsFQmY8tkS3tAYAKCEY8cTGx",
     },
