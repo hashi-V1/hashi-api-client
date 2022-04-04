@@ -91,7 +91,10 @@ function approveAndLockEthereum(token, destinationAddress, signer, setProgress) 
                     return [4 /*yield*/, signer.provider.getBlock(confirm.blockNumber)];
                 case 5:
                     block = _a.sent();
-                    return [2 /*return*/, block.timestamp * 1000];
+                    return [2 /*return*/, {
+                            hashes: [approveTx.hash, lockTx.hash],
+                            data: block.timestamp * 1000,
+                        }];
             }
         });
     });
@@ -127,9 +130,12 @@ function wrapTokenEthereum(chain, message, signatures, signer, setProgress) {
                     if (isNaN(tokenId) || tokenId === 0)
                         return [2 /*return*/, Promise.reject("Failed to retrieve token id.")];
                     return [2 /*return*/, {
-                            tokenContract: wrapperContract.address,
-                            tokenId: tokenId,
-                            chain: chain,
+                            hashes: [wrapTx.hash],
+                            data: {
+                                tokenContract: wrapperContract.address,
+                                tokenId: tokenId,
+                                chain: chain,
+                            },
                         }];
             }
         });
@@ -159,7 +165,10 @@ function burnTokenEthereum(token, destinationAddress, signer, setProgress) {
                     return [4 /*yield*/, burnTx.wait()];
                 case 2:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            hashes: [burnTx.hash],
+                            data: undefined,
+                        }];
             }
         });
     });
@@ -189,7 +198,10 @@ function withdrawTokenEthereum(chain, message, signatures, signer, setProgress) 
                     return [4 /*yield*/, withdrawTx.wait()];
                 case 2:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            hashes: [withdrawTx.hash],
+                            data: undefined,
+                        }];
             }
         });
     });

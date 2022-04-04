@@ -4,6 +4,7 @@ import erc721Abi from "../abi/ethereum/ERC721.json";
 import lockerAbi from "../abi/ethereum/Locker.json";
 import wrapperAbi from "../abi/ethereum/Wrapper.json";
 import { chainConfig } from "../config";
+import { TransactionReturn } from "../types/bridgeTransaction";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -32,7 +33,7 @@ export async function approveAndLockEthereum(
     destinationAddress: string,
     signer: Signer,
     setProgress: (progress: Progress) => void
-): Promise<number> {
+): Promise<TransactionReturn<number>> {
     const lockerContract = new Contract(
         chainConfig[token.chain].lockerContract,
         lockerAbi,
@@ -60,7 +61,10 @@ export async function approveAndLockEthereum(
     const confirm = await lockTx.wait();
 
     const block = await signer.provider!.getBlock(confirm.blockNumber);
-    return block.timestamp * 1000;
+    return {
+        hashes: [approveTx.hash, lockTx.hash],
+        data: block.timestamp * 1000,
+    };
 }
 
 /**
@@ -78,7 +82,7 @@ export async function wrapTokenEthereum(
     signatures: Signature[],
     signer: Signer,
     setProgress: (progress: Progress) => void
-): Promise<WrappedTokenType> {
+): Promise<TransactionReturn<WrappedTokenType>> {
     const wrapperContract = new Contract(
         chainConfig[chain].wrapperContract,
         wrapperAbi,
@@ -107,9 +111,12 @@ export async function wrapTokenEthereum(
         return Promise.reject("Failed to retrieve token id.");
 
     return {
-        tokenContract: wrapperContract.address,
-        tokenId,
-        chain: chain,
+        hashes: [wrapTx.hash],
+        data: {
+            tokenContract: wrapperContract.address,
+            tokenId,
+            chain: chain,
+        },
     };
 }
 
@@ -126,7 +133,7 @@ export async function burnTokenEthereum(
     destinationAddress: string,
     signer: Signer,
     setProgress: (progress: Progress) => void
-): Promise<void> {
+): Promise<TransactionReturn<void>> {
     const wrapperContract = new Contract(
         chainConfig[token.chain].wrapperContract,
         wrapperAbi,
@@ -141,6 +148,11 @@ export async function burnTokenEthereum(
 
     setProgress(Progress.WaitingForConfirmationBurn);
     await burnTx.wait();
+
+    return {
+        hashes: [burnTx.hash],
+        data: undefined,
+    };
 }
 
 /**
@@ -158,7 +170,7 @@ export async function withdrawTokenEthereum(
     signatures: Signature[],
     signer: Signer,
     setProgress: (progress: Progress) => void
-): Promise<void> {
+): Promise<TransactionReturn<void>> {
     const lockerContract = new Contract(
         chainConfig[chain].lockerContract,
         lockerAbi,
@@ -176,6 +188,11 @@ export async function withdrawTokenEthereum(
 
     setProgress(Progress.WaitingForConfirmationWithdraw);
     await withdrawTx.wait();
+
+    return {
+        hashes: [withdrawTx.hash],
+        data: undefined,
+    };
 }
 
 export async function getLockedTokenFromWrappedEthereum(

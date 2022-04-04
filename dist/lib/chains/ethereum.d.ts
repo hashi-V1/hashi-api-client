@@ -1,4 +1,5 @@
 import { Signer } from "ethers";
+import { TransactionReturn } from "../types/bridgeTransaction";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -18,7 +19,7 @@ export declare function setChainSignerEthereum(chain: Chain, signer: Signer): Si
  * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-export declare function approveAndLockEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<number>;
+export declare function approveAndLockEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * @param chain The wrapping chain
@@ -28,7 +29,7 @@ export declare function approveAndLockEthereum(token: Token, destinationAddress:
  * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-export declare function wrapTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<WrappedTokenType>;
+export declare function wrapTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<WrappedTokenType>>;
 /**
  * Burn a wrapped token to transfer it to another chain
  * @param token The wrapped token to burn
@@ -37,7 +38,7 @@ export declare function wrapTokenEthereum(chain: Chain, message: UnsignedMessage
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function burnTokenEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function burnTokenEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<void>>;
 /**
  * Withdraws a token on an Ethereum chain (sends back the initial token before the lock)
  * @param chain The initial chain of the token
@@ -47,5 +48,5 @@ export declare function burnTokenEthereum(token: Token, destinationAddress: stri
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function withdrawTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function withdrawTokenEthereum(chain: Chain, message: UnsignedMessageType, signatures: Signature[], signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<void>>;
 export declare function getLockedTokenFromWrappedEthereum(chain: Chain, wrappedId: number, signer: Signer): Promise<LockedTokenType>;

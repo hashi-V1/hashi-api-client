@@ -139,7 +139,10 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                         token_contract: token.tokenContract,
                         token_id: token.tokenId.toString(),
                     });
-                    return [2 /*return*/, Date.parse(timestamp)];
+                    return [2 /*return*/, {
+                            hashes: [operation.opHash],
+                            data: Date.parse(timestamp),
+                        }];
             }
         });
     });
@@ -195,9 +198,12 @@ function wrapTokenTezos(chain, message, signatures, Tezos, setProgress) {
                     if (isNaN(tokenId))
                         return [2 /*return*/, Promise.reject("Could not retrieve wrapped token id")];
                     return [2 /*return*/, {
-                            tokenContract: config_1.chainConfig[chain].wrapperContract,
-                            tokenId: tokenId,
-                            chain: chain,
+                            hashes: [operation.opHash],
+                            data: {
+                                tokenContract: config_1.chainConfig[chain].wrapperContract,
+                                tokenId: tokenId,
+                                chain: chain,
+                            },
                         }];
             }
         });
@@ -235,7 +241,10 @@ function burnTokenTezos(token, destinationAddress, Tezos, setProgress) {
                     confirmation = _a.sent();
                     if (!confirmation.completed)
                         return [2 /*return*/, Promise.reject("Could not burn")];
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            hashes: [operation.opHash],
+                            data: undefined,
+                        }];
             }
         });
     });
@@ -275,7 +284,10 @@ function withdrawTokenTezos(chain, message, signatures, Tezos, setProgress) {
                     confirm = _a.sent();
                     if (!confirm.completed)
                         return [2 /*return*/, Promise.reject("Could not withdraw")];
-                    return [2 /*return*/];
+                    return [2 /*return*/, {
+                            hashes: [op.opHash],
+                            data: undefined,
+                        }];
             }
         });
     });

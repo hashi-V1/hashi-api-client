@@ -84,9 +84,9 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.approveAndLock = function (token, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var chain, setProgress, approveAndLock, instance, timestamp;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var chain, setProgress, approveAndLock, instance, _a, hashes, timestamp;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         chain = token.chain;
                         if (destinationAddress === "")
@@ -104,14 +104,17 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
                         return [4 /*yield*/, approveAndLock(token, destinationAddress, instance, setProgress)];
                     case 1:
-                        timestamp = _a.sent();
+                        _a = _b.sent(), hashes = _a.hashes, timestamp = _a.data;
                         if (!(0, utils_1.isMillisTimestamp)(timestamp))
                             console.log("DEBUG: Probable wrong timestamp (should be using milliseconds)");
                         setProgress(progress_1.Progress.ApprovedAndLocked);
                         return [2 /*return*/, {
-                                tokenContract: token.tokenContract,
-                                tokenId: token.tokenId,
-                                timestamp: timestamp,
+                                hashes: hashes,
+                                data: {
+                                    tokenContract: token.tokenContract,
+                                    tokenId: token.tokenId,
+                                    timestamp: timestamp,
+                                },
                             }];
                 }
             });
@@ -127,7 +130,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.wrapToken = function (chain, message, signatures, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var setProgress, wrapToken, instance, wrappedToken;
+            var setProgress, wrapToken, instance, ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -146,9 +149,9 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
                         return [4 /*yield*/, wrapToken(chain, message, signatures, instance, setProgress)];
                     case 1:
-                        wrappedToken = _a.sent();
+                        ret = _a.sent();
                         setProgress(progress_1.Progress.Wrapped);
-                        return [2 /*return*/, wrappedToken];
+                        return [2 /*return*/, ret];
                 }
             });
         });
@@ -163,19 +166,27 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.bridge = function (targetChain, token, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var lockedToken, _a, signatures, message;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, hashes1, lockedToken, _b, signatures, message, _c, hashes2, wrapped;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
+                        if ((0, token_1.isTokenWrapped)(token.tokenContract, token.chain))
+                            return [2 /*return*/, this.unbridge(targetChain, token, destinationAddress, progressCallback)];
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         return [4 /*yield*/, this.approveAndLock(token, destinationAddress, progressCallback)];
                     case 1:
-                        lockedToken = _b.sent();
+                        _a = _d.sent(), hashes1 = _a.hashes, lockedToken = _a.data;
                         return [4 /*yield*/, this.proveTokenStatus(token.chain, targetChain, lockedToken, proof_1.Status.Locked, progressCallback)];
                     case 2:
-                        _a = _b.sent(), signatures = _a.signatures, message = _a.message;
-                        return [2 /*return*/, this.wrapToken(targetChain, message, signatures, progressCallback)];
+                        _b = _d.sent(), signatures = _b.signatures, message = _b.message;
+                        return [4 /*yield*/, this.wrapToken(targetChain, message, signatures, progressCallback)];
+                    case 3:
+                        _c = _d.sent(), hashes2 = _c.hashes, wrapped = _c.data;
+                        return [2 /*return*/, {
+                                newToken: (0, token_1.tokenFromAddressAndId)(wrapped.tokenContract, wrapped.tokenId, wrapped.chain),
+                                hashes: hashes1.concat(hashes2),
+                            }];
                 }
             });
         });
@@ -190,7 +201,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.unbridge = function (targetChain, token, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var lockedToken, _a, signatures, message;
+            var hashes1, lockedToken, _a, signatures, message, hashes2;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -198,7 +209,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         return [4 /*yield*/, this.burnToken(token, destinationAddress, progressCallback)];
                     case 1:
-                        _b.sent();
+                        hashes1 = (_b.sent()).hashes;
                         return [4 /*yield*/, this.getLockedTokenFromWrapped(token)];
                     case 2:
                         lockedToken = _b.sent();
@@ -207,8 +218,11 @@ var HashiBridge = /** @class */ (function () {
                         _a = _b.sent(), signatures = _a.signatures, message = _a.message;
                         return [4 /*yield*/, this.withdrawToken(targetChain, message, signatures, progressCallback)];
                     case 4:
-                        _b.sent();
-                        return [2 /*return*/];
+                        hashes2 = (_b.sent()).hashes;
+                        return [2 /*return*/, {
+                                newToken: (0, token_1.tokenFromAddressAndId)(lockedToken.tokenContract, lockedToken.tokenId, targetChain),
+                                hashes: hashes1.concat(hashes2),
+                            }];
                 }
             });
         });
@@ -248,7 +262,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.burnToken = function (token, destinationAddress, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var chain, setProgress, burnToken, instance;
+            var chain, setProgress, burnToken, instance, ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -268,9 +282,9 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
                         return [4 /*yield*/, burnToken(token, destinationAddress, instance, setProgress)];
                     case 1:
-                        _a.sent();
+                        ret = _a.sent();
                         setProgress(progress_1.Progress.Burned);
-                        return [2 /*return*/];
+                        return [2 /*return*/, ret];
                 }
             });
         });
@@ -285,7 +299,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.withdrawToken = function (chain, message, signatures, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
-            var setProgress, withdrawToken, instance;
+            var setProgress, withdrawToken, instance, ret;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -304,9 +318,9 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
                         return [4 /*yield*/, withdrawToken(chain, message, signatures, instance, setProgress)];
                     case 1:
-                        _a.sent();
+                        ret = _a.sent();
                         setProgress(progress_1.Progress.Withdrawed);
-                        return [2 /*return*/];
+                        return [2 /*return*/, ret];
                 }
             });
         });

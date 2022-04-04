@@ -82,7 +82,9 @@ function App() {
             .bridge(target, selectedToken, destinationAddress, (p) =>
                 setProgress(progressConstants[p])
             )
-            .then((t) => `(${t.tokenContract} - ${t.tokenId})`)
+            .then(
+                (t) => `(${t.newToken.tokenContract} - ${t.newToken.tokenId})`
+            )
             .then(setWrappedText)
             .catch(alert);
     }, [selectedToken, destinationAddress]);

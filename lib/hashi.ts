@@ -17,6 +17,10 @@ import {
 } from "./chains/tezos";
 import { hashiIndexerUrl } from "./config";
 import { proveTokenStatus } from "./prover";
+import {
+    BridgeTransaction,
+    TransactionReturn,
+} from "./types/bridgeTransaction";
 import { Chain } from "./types/chain";
 import {
     CannotWithdrawWithStatusOtherThanBurned,
@@ -31,6 +35,7 @@ import {
     isTokenWrapped,
     LockedTokenType,
     Token,
+    tokenFromAddressAndId,
     WrappedTokenType,
 } from "./types/token";
 import { isMillisTimestamp, setProgressCallback } from "./utils";
@@ -77,7 +82,7 @@ export class HashiBridge {
         token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
-    ): Promise<LockedTokenType> {
+    ): Promise<TransactionReturn<LockedTokenType>> {
         const chain = token.chain;
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
@@ -96,7 +101,7 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        const timestamp = await approveAndLock(
+        const { hashes, data: timestamp } = await approveAndLock(
             token,
             destinationAddress,
             instance,
@@ -109,9 +114,12 @@ export class HashiBridge {
 
         setProgress(Progress.ApprovedAndLocked);
         return {
-            tokenContract: token.tokenContract,
-            tokenId: token.tokenId,
-            timestamp,
+            hashes,
+            data: {
+                tokenContract: token.tokenContract,
+                tokenId: token.tokenId,
+                timestamp: timestamp,
+            },
         };
     }
 
@@ -128,7 +136,7 @@ export class HashiBridge {
         message: UnsignedMessageType,
         signatures: Signature[],
         progressCallback?: (progress: Progress) => void
-    ): Promise<WrappedTokenType> {
+    ): Promise<TransactionReturn<WrappedTokenType>> {
         if (message.status !== Status.Locked)
             return Promise.reject(CannotWrapWithStatusOtherThanLocked);
 
@@ -146,7 +154,7 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        const wrappedToken = await wrapToken(
+        const ret = await wrapToken(
             chain,
             message,
             signatures,
@@ -155,7 +163,7 @@ export class HashiBridge {
         );
 
         setProgress(Progress.Wrapped);
-        return wrappedToken;
+        return ret;
     }
 
     /**
@@ -171,15 +179,24 @@ export class HashiBridge {
         token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
-    ): Promise<WrappedTokenType> {
+    ): Promise<BridgeTransaction> {
+        if (isTokenWrapped(token.tokenContract, token.chain))
+            return this.unbridge(
+                targetChain,
+                token,
+                destinationAddress,
+                progressCallback
+            );
+
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        const lockedToken = await this.approveAndLock(
-            token,
-            destinationAddress,
-            progressCallback
-        );
+        const { hashes: hashes1, data: lockedToken } =
+            await this.approveAndLock(
+                token,
+                destinationAddress,
+                progressCallback
+            );
         const { signatures, message } = await this.proveTokenStatus(
             token.chain,
             targetChain,
@@ -188,12 +205,21 @@ export class HashiBridge {
             progressCallback
         );
 
-        return this.wrapToken(
+        const { hashes: hashes2, data: wrapped } = await this.wrapToken(
             targetChain,
             message,
             signatures,
             progressCallback
         );
+
+        return {
+            newToken: tokenFromAddressAndId(
+                wrapped.tokenContract,
+                wrapped.tokenId,
+                wrapped.chain
+            ),
+            hashes: hashes1.concat(hashes2),
+        };
     }
 
     /**
@@ -209,11 +235,15 @@ export class HashiBridge {
         token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
-    ): Promise<void> {
+    ): Promise<BridgeTransaction> {
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
 
-        await this.burnToken(token, destinationAddress, progressCallback);
+        const { hashes: hashes1 } = await this.burnToken(
+            token,
+            destinationAddress,
+            progressCallback
+        );
 
         const lockedToken = await this.getLockedTokenFromWrapped(token);
         const { signatures, message } = await this.proveTokenStatus(
@@ -224,12 +254,21 @@ export class HashiBridge {
             progressCallback
         );
 
-        await this.withdrawToken(
+        const { hashes: hashes2 } = await this.withdrawToken(
             targetChain,
             message,
             signatures,
             progressCallback
         );
+
+        return {
+            newToken: tokenFromAddressAndId(
+                lockedToken.tokenContract,
+                lockedToken.tokenId,
+                targetChain
+            ),
+            hashes: hashes1.concat(hashes2),
+        };
     }
 
     /**
@@ -274,7 +313,7 @@ export class HashiBridge {
         token: Token,
         destinationAddress: string,
         progressCallback?: (progress: Progress) => void
-    ): Promise<void> {
+    ): Promise<TransactionReturn<void>> {
         const chain = token.chain;
         if (destinationAddress === "")
             return Promise.reject(EmptyDestinationAddressError);
@@ -293,9 +332,16 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        await burnToken(token, destinationAddress, instance, setProgress);
+        const ret = await burnToken(
+            token,
+            destinationAddress,
+            instance,
+            setProgress
+        );
 
         setProgress(Progress.Burned);
+
+        return ret;
     }
 
     /**
@@ -311,7 +357,7 @@ export class HashiBridge {
         message: UnsignedMessageType,
         signatures: Signature[],
         progressCallback?: (progress: Progress) => void
-    ): Promise<void> {
+    ): Promise<TransactionReturn<void>> {
         if (message.status !== Status.Burned)
             return Promise.reject(CannotWithdrawWithStatusOtherThanBurned);
 
@@ -329,8 +375,16 @@ export class HashiBridge {
         if (typeof instance === "undefined")
             return Promise.reject(NoSignerForChainError);
 
-        await withdrawToken(chain, message, signatures, instance, setProgress);
+        const ret = await withdrawToken(
+            chain,
+            message,
+            signatures,
+            instance,
+            setProgress
+        );
         setProgress(Progress.Withdrawed);
+
+        return ret;
     }
 
     async getLockedTokenFromWrapped(wrapped: Token): Promise<LockedTokenType> {

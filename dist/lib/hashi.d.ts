@@ -1,3 +1,4 @@
+import { BridgeTransaction, TransactionReturn } from "./types/bridgeTransaction";
 import { Chain } from "./types/chain";
 import { Progress } from "./types/progress";
 import { Signature, Status, UnsignedMessageType } from "./types/proof";
@@ -26,7 +27,7 @@ export declare class HashiBridge {
      * @param destinationAddress The address that will receive the token on the target chain
      * @param progressCallback optional callback to track the progress
      */
-    approveAndLock(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<LockedTokenType>;
+    approveAndLock(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<LockedTokenType>>;
     /**
      * Wrap a token with signatures from the federation
      * @param chain The wrapping chain
@@ -35,7 +36,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns a promise with a Wrapped token
      */
-    wrapToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<WrappedTokenType>;
+    wrapToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<WrappedTokenType>>;
     /**
      * Bridges (transfers) a token from one chain to another
      * @param targetChain The chain where the token should be after the bridge
@@ -44,7 +45,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns a promise with the wrapped token
      */
-    bridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<WrappedTokenType>;
+    bridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<BridgeTransaction>;
     /**
      * Unbridges a wrapped token (releases the initial token)
      * @param targetChain The token's initial chain
@@ -53,7 +54,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    unbridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
+    unbridge(targetChain: Chain, token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<BridgeTransaction>;
     /**
      * Collects proofs of a specific status from nodes.
      * @param sourceChain The chain where the status action took place (lock or burn)
@@ -74,7 +75,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    burnToken(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<void>;
+    burnToken(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<void>>;
     /**
      * Withdraws a token on a specific chain (sends back the initial token before the lock)
      * @param chain The initial chain of the token
@@ -83,7 +84,7 @@ export declare class HashiBridge {
      * @param progressCallback optional callback to track the progress
      * @returns an empty promise
      */
-    withdrawToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<void>;
+    withdrawToken(chain: Chain, message: UnsignedMessageType, signatures: Signature[], progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<void>>;
     getLockedTokenFromWrapped(wrapped: Token): Promise<LockedTokenType>;
     getTokensForAccount(chain: Chain, address: string): Promise<Token[]>;
 }

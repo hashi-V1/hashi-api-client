@@ -6,6 +6,7 @@ import {
 } from "@taquito/taquito";
 import { BigNumber } from "ethers";
 import { chainConfig } from "../config";
+import { TransactionReturn } from "../types/bridgeTransaction";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -73,7 +74,7 @@ export async function approveAndLockTezos(
     destinationAddress: string,
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
-): Promise<number> {
+): Promise<TransactionReturn<number>> {
     const signerAddress = await Tezos.wallet.pkh();
     const lockerContract = await Tezos.wallet.at(
         chainConfig[token.chain].lockerContract
@@ -117,7 +118,10 @@ export async function approveAndLockTezos(
         token_id: token.tokenId.toString(),
     });
 
-    return Date.parse(timestamp);
+    return {
+        hashes: [operation.opHash],
+        data: Date.parse(timestamp),
+    };
 }
 
 /**
@@ -135,7 +139,7 @@ export async function wrapTokenTezos(
     signatures: Signature[],
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
-): Promise<WrappedTokenType> {
+): Promise<TransactionReturn<WrappedTokenType>> {
     const wrapperContract = await Tezos.wallet.at(
         chainConfig[chain].wrapperContract
     );
@@ -178,9 +182,12 @@ export async function wrapTokenTezos(
         return Promise.reject("Could not retrieve wrapped token id");
 
     return {
-        tokenContract: chainConfig[chain].wrapperContract,
-        tokenId,
-        chain: chain,
+        hashes: [operation.opHash],
+        data: {
+            tokenContract: chainConfig[chain].wrapperContract,
+            tokenId,
+            chain: chain,
+        },
     };
 }
 
@@ -197,7 +204,7 @@ export async function burnTokenTezos(
     destinationAddress: string,
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
-): Promise<void> {
+): Promise<TransactionReturn<void>> {
     const wrapperContract = await Tezos.wallet.at(
         chainConfig[token.chain].wrapperContract
     );
@@ -214,6 +221,11 @@ export async function burnTokenTezos(
     const confirmation = await operation.confirmation();
 
     if (!confirmation.completed) return Promise.reject("Could not burn");
+
+    return {
+        hashes: [operation.opHash],
+        data: undefined,
+    };
 }
 
 /**
@@ -231,7 +243,7 @@ export async function withdrawTokenTezos(
     signatures: Signature[],
     Tezos: TezosToolkit,
     setProgress: (progress: Progress) => void
-): Promise<void> {
+): Promise<TransactionReturn<void>> {
     const lockerContract = await Tezos.wallet.at(
         chainConfig[chain].lockerContract
     );
@@ -250,6 +262,11 @@ export async function withdrawTokenTezos(
     const confirm = await op.confirmation();
 
     if (!confirm.completed) return Promise.reject("Could not withdraw");
+
+    return {
+        hashes: [op.opHash],
+        data: undefined,
+    };
 }
 
 export async function getLockedTokenFromWrappedTezos(

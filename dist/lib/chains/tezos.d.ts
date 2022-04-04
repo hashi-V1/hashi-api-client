@@ -1,4 +1,5 @@
 import { Signer, TezosToolkit, WalletProvider } from "@taquito/taquito";
+import { TransactionReturn } from "../types/bridgeTransaction";
 import { Chain } from "../types/chain";
 import { Progress } from "../types/progress";
 import { Signature, UnsignedMessageType } from "../types/proof";
@@ -18,7 +19,7 @@ export declare function setChainSignerTezos(chain: Chain, signer: TezosSigner): 
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-export declare function approveAndLockTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<number>;
+export declare function approveAndLockTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * @param chain The wrapping chain
@@ -28,7 +29,7 @@ export declare function approveAndLockTezos(token: Token, destinationAddress: st
  * @param setProgress optional callback to track the progress
  * @returns a wrapped token
  */
-export declare function wrapTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<WrappedTokenType>;
+export declare function wrapTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<WrappedTokenType>>;
 /**
  * Burn a wrapped token to transfer it to another chain
  * @param token The wrapped token to burn
@@ -37,7 +38,7 @@ export declare function wrapTokenTezos(chain: Chain, message: UnsignedMessageTyp
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function burnTokenTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function burnTokenTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<void>>;
 /**
  * Withdraws a token on a Tezos chain (sends back the initial token before the lock)
  * @param chain The initial chain of the token
@@ -47,6 +48,6 @@ export declare function burnTokenTezos(token: Token, destinationAddress: string,
  * @param setProgress optional callback to track the progress
  * @returns an empty promise
  */
-export declare function withdrawTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<void>;
+export declare function withdrawTokenTezos(chain: Chain, message: UnsignedMessageType, signatures: Signature[], Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<void>>;
 export declare function getLockedTokenFromWrappedTezos(chain: Chain, wrappedId: number, Tezos: TezosToolkit): Promise<LockedTokenType>;
 export {};
