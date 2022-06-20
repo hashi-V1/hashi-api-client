@@ -68,7 +68,7 @@ var HashiBridge = /** @class */ (function () {
      */
     HashiBridge.prototype.setChainSigner = function (chain, signer) {
         var setter;
-        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
             setter = tezos_1.setChainSignerTezos;
         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
             setter = ethereum_1.setChainSignerEthereum;
@@ -93,7 +93,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
                         setProgress(progress_1.Progress.ApprovingAndLocking);
-                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
                             approveAndLock = tezos_1.approveAndLockTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
                             approveAndLock = ethereum_1.approveAndLockEthereum;
@@ -138,7 +138,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.CannotWrapWithStatusOtherThanLocked)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
                         setProgress(progress_1.Progress.Wrapping);
-                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
                             wrapToken = tezos_1.wrapTokenTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
                             wrapToken = ethereum_1.wrapTokenEthereum;
@@ -271,7 +271,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
                         setProgress(progress_1.Progress.Burning);
-                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
                             burnToken = tezos_1.burnTokenTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
                             burnToken = ethereum_1.burnTokenEthereum;
@@ -307,7 +307,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, Promise.reject(errors_1.CannotWithdrawWithStatusOtherThanBurned)];
                         setProgress = (0, utils_1.setProgressCallback)(progressCallback);
                         setProgress(progress_1.Progress.Withdrawing);
-                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
                             withdrawToken = tezos_1.withdrawTokenTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
                             withdrawToken = ethereum_1.withdrawTokenEthereum;
@@ -334,7 +334,7 @@ var HashiBridge = /** @class */ (function () {
                         chain = wrapped.chain;
                         if (!(0, token_1.isTokenWrapped)(wrapped.tokenContract, chain))
                             return [2 /*return*/, Promise.reject("Token is not wrapped")];
-                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Hangzhounet)
+                        if (chain === chain_1.Chain.Tezos || chain === chain_1.Chain.Ithacanet)
                             getLocked = tezos_1.getLockedTokenFromWrappedTezos;
                         else if (chain === chain_1.Chain.Ethereum || chain === chain_1.Chain.Ropsten)
                             getLocked = ethereum_1.getLockedTokenFromWrappedEthereum;

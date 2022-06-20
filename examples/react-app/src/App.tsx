@@ -27,19 +27,19 @@ function App() {
         (async () => {
             const options = {
                 name: "Hashi Example app",
-                preferredNetwork: NetworkType.HANGZHOUNET,
+                preferredNetwork: NetworkType.ITHACANET,
             };
             const wallet = new BeaconWallet(options);
 
             if (!(await wallet.client.getActiveAccount())) {
                 await wallet.requestPermissions({
                     network: {
-                        type: NetworkType.HANGZHOUNET,
+                        type: NetworkType.ITHACANET,
                     },
                 });
             }
 
-            hashi.setChainSigner(Chain.Hangzhounet, wallet);
+            hashi.setChainSigner(Chain.Ithacanet, wallet);
             setTezAddress(await wallet.getPKH());
         })();
     }, [tezAddress]);
@@ -74,9 +74,9 @@ function App() {
         }
 
         const target =
-            selectedToken.chain === Chain.Hangzhounet
+            selectedToken.chain === Chain.Ithacanet
                 ? Chain.Ropsten
-                : Chain.Hangzhounet;
+                : Chain.Ithacanet;
 
         hashi
             .bridge(target, selectedToken, destinationAddress, (p) =>
@@ -96,9 +96,9 @@ function App() {
         }
 
         const target =
-            selectedToken.chain === Chain.Hangzhounet
+            selectedToken.chain === Chain.Ithacanet
                 ? Chain.Ropsten
-                : Chain.Hangzhounet;
+                : Chain.Ithacanet;
 
         hashi
             .unbridge(target, selectedToken, destinationAddress, (p) =>
@@ -112,7 +112,7 @@ function App() {
 
         if (tezAddress) {
             tokens = tokens.concat(
-                await hashi.getTokensForAccount(Chain.Hangzhounet, tezAddress)
+                await hashi.getTokensForAccount(Chain.Ithacanet, tezAddress)
             );
         }
 

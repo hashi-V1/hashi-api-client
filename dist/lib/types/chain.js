@@ -8,7 +8,7 @@ exports.isChain = exports.Chain = void 0;
 var Chain;
 (function (Chain) {
     Chain["Tezos"] = "Tezos";
-    Chain["Hangzhounet"] = "Hangzhounet";
+    Chain["Ithacanet"] = "Ithacanet";
     Chain["Ethereum"] = "Ethereum";
     Chain["Ropsten"] = "Ropsten";
 })(Chain = exports.Chain || (exports.Chain = {}));

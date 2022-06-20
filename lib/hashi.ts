@@ -63,7 +63,7 @@ export class HashiBridge {
      */
     setChainSigner(chain: Chain, signer: any) {
         let setter;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             setter = setChainSignerTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             setter = setChainSignerEthereum;
@@ -91,7 +91,7 @@ export class HashiBridge {
         setProgress(Progress.ApprovingAndLocking);
 
         let approveAndLock;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             approveAndLock = approveAndLockTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             approveAndLock = approveAndLockEthereum;
@@ -144,7 +144,7 @@ export class HashiBridge {
         setProgress(Progress.Wrapping);
 
         let wrapToken;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             wrapToken = wrapTokenTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             wrapToken = wrapTokenEthereum;
@@ -322,7 +322,7 @@ export class HashiBridge {
         setProgress(Progress.Burning);
 
         let burnToken;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             burnToken = burnTokenTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             burnToken = burnTokenEthereum;
@@ -365,7 +365,7 @@ export class HashiBridge {
         setProgress(Progress.Withdrawing);
 
         let withdrawToken;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             withdrawToken = withdrawTokenTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             withdrawToken = withdrawTokenEthereum;
@@ -394,7 +394,7 @@ export class HashiBridge {
             return Promise.reject("Token is not wrapped");
 
         let getLocked;
-        if (chain === Chain.Tezos || chain === Chain.Hangzhounet)
+        if (chain === Chain.Tezos || chain === Chain.Ithacanet)
             getLocked = getLockedTokenFromWrappedTezos;
         else if (chain === Chain.Ethereum || chain === Chain.Ropsten)
             getLocked = getLockedTokenFromWrappedEthereum;

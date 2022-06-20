@@ -15,12 +15,12 @@ exports.chainConfig = (_a = {},
         lockerContract: "not implemented",
         wrapperContract: "not implemented",
     },
-    _a[chain_1.Chain.Hangzhounet] = {
-        name: chain_1.Chain.Hangzhounet,
+    _a[chain_1.Chain.Ithacanet] = {
+        name: chain_1.Chain.Ithacanet,
         symbol: "XTZ",
-        rpc: "https://hangzhounet.smartpy.io/",
-        lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
-        wrapperContract: "KT1Gj6ePgbVFMsFQmY8tkS3tAYAKCEY8cTGx",
+        rpc: "https://ithacanet.smartpy.io/",
+        lockerContract: "KT1N2EwbM9dRPTXhA3DgZe4ukPKXzS99jnfu",
+        wrapperContract: "KT1MJPtWTscdpNtNtg4DvqHDNoKwCoERQEty",
     },
     _a[chain_1.Chain.Ethereum] = {
         name: chain_1.Chain.Ethereum,

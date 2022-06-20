@@ -4,7 +4,7 @@
  */
 export declare enum Chain {
     Tezos = "Tezos",
-    Hangzhounet = "Hangzhounet",
+    Ithacanet = "Ithacanet",
     Ethereum = "Ethereum",
     Ropsten = "Ropsten"
 }

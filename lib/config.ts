@@ -25,13 +25,13 @@ export const chainConfig: { [key in Chain]: ChainConfigType } = {
         lockerContract: "not implemented",
         wrapperContract: "not implemented",
     },
-    [Chain.Hangzhounet]: {
-        name: Chain.Hangzhounet,
+    [Chain.Ithacanet]: {
+        name: Chain.Ithacanet,
         symbol: "XTZ",
 
-        rpc: "https://hangzhounet.smartpy.io/",
-        lockerContract: "KT1CLQYiQtTQdfrPaMKvwCa2VSboF8ih1T9R",
-        wrapperContract: "KT1Gj6ePgbVFMsFQmY8tkS3tAYAKCEY8cTGx",
+        rpc: "https://ithacanet.smartpy.io/",
+        lockerContract: "KT1N2EwbM9dRPTXhA3DgZe4ukPKXzS99jnfu",
+        wrapperContract: "KT1MJPtWTscdpNtNtg4DvqHDNoKwCoERQEty",
     },
 
     [Chain.Ethereum]: {
