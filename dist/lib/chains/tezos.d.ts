@@ -16,10 +16,11 @@ export declare function setChainSignerTezos(chain: Chain, signer: TezosSigner): 
  * Approves and locks at the same time a token on a Tezos network.
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param destinationChain The target Chain
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-export declare function approveAndLockTezos(token: Token, destinationAddress: string, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
+export declare function approveAndLockTezos(token: Token, destinationAddress: string, destinationChain: Chain, Tezos: TezosToolkit, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * @param chain The wrapping chain

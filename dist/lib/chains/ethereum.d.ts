@@ -15,11 +15,12 @@ export declare function setChainSignerEthereum(chain: Chain, signer: Signer): Si
  * Approves and locks at the same time a token on an Ethereum network.
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param destinationChain The target Chain
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-export declare function approveAndLockEthereum(token: Token, destinationAddress: string, signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
+export declare function approveAndLockEthereum(token: Token, destinationAddress: string, destinationChain: Chain, signer: Signer, setProgress: (progress: Progress) => void): Promise<TransactionReturn<number>>;
 /**
  * Wraps a token on a specific chain with proofs from the federation.
  * @param chain The wrapping chain

@@ -81,6 +81,7 @@ export class HashiBridge {
     async approveAndLock(
         token: Token,
         destinationAddress: string,
+        destinationChain: Chain,
         progressCallback?: (progress: Progress) => void
     ): Promise<TransactionReturn<LockedTokenType>> {
         const chain = token.chain;
@@ -104,6 +105,7 @@ export class HashiBridge {
         const { hashes, data: timestamp } = await approveAndLock(
             token,
             destinationAddress,
+            destinationChain,
             instance,
             setProgress
         );
@@ -195,6 +197,7 @@ export class HashiBridge {
             await this.approveAndLock(
                 token,
                 destinationAddress,
+                targetChain,
                 progressCallback
             );
         const { signatures, message } = await this.proveTokenStatus(

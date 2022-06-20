@@ -60,11 +60,12 @@ exports.setChainSignerEthereum = setChainSignerEthereum;
  * Approves and locks at the same time a token on an Ethereum network.
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param destinationChain The target Chain
  * @param signer The ethers.js signer created by setChainSignerEthereum
  * @param setProgress optional callback to track the progress
  * @returns a promise with the token's lock timestamp
  */
-function approveAndLockEthereum(token, destinationAddress, signer, setProgress) {
+function approveAndLockEthereum(token, destinationAddress, destinationChain, signer, setProgress) {
     return __awaiter(this, void 0, void 0, function () {
         var lockerContract, tokenContract, approveTx, lockTx, confirm, block;
         return __generator(this, function (_a) {

@@ -27,7 +27,7 @@ export declare class HashiBridge {
      * @param destinationAddress The address that will receive the token on the target chain
      * @param progressCallback optional callback to track the progress
      */
-    approveAndLock(token: Token, destinationAddress: string, progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<LockedTokenType>>;
+    approveAndLock(token: Token, destinationAddress: string, destinationChain: Chain, progressCallback?: (progress: Progress) => void): Promise<TransactionReturn<LockedTokenType>>;
     /**
      * Wrap a token with signatures from the federation
      * @param chain The wrapping chain

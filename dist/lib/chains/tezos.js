@@ -87,10 +87,11 @@ function signatureArrayToMichelsonMap(signatures) {
  * Approves and locks at the same time a token on a Tezos network.
  * @param token The token that will be locked
  * @param destinationAddress The addres on the target chain that will be receiving the token
+ * @param destinationChain The target Chain
  * @param setProgress optional callback to track the progress
  * @param Tezos The TezosToolkit instance corresponding to that chain
  */
-function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
+function approveAndLockTezos(token, destinationAddress, destinationChain, Tezos, setProgress) {
     return __awaiter(this, void 0, void 0, function () {
         var signerAddress, lockerContract, tokenContract, operation, confirmation, lockerStorage, timestamp;
         return __generator(this, function (_a) {
@@ -119,6 +120,7 @@ function approveAndLockTezos(token, destinationAddress, Tezos, setProgress) {
                         ]))
                             .withContractCall(lockerContract.methodsObject.lock({
                             destination_address: destinationAddress,
+                            destination_chain: config_1.chainConfig[destinationChain].id,
                             token_contract: token.tokenContract,
                             token_id: token.tokenId.toString(),
                         }))

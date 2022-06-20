@@ -35,7 +35,7 @@ describe("HashiBridge", () => {
         const hashi = new HashiBridge();
 
         await assert.isRejected(
-            hashi.approveAndLock(token, "", progress),
+            hashi.approveAndLock(token, "", Chain.Ethereum, progress),
             EmptyDestinationAddressError
         );
 
@@ -59,7 +59,7 @@ describe("HashiBridge", () => {
         const bridge = new HashiBridge();
 
         await assert.isRejected(
-            bridge.approveAndLock(token, dest, progress),
+            bridge.approveAndLock(token, dest, Chain.Ethereum, progress),
             NoSignerForChainError
         );
 

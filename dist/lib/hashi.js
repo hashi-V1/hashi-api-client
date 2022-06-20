@@ -82,7 +82,7 @@ var HashiBridge = /** @class */ (function () {
      * @param destinationAddress The address that will receive the token on the target chain
      * @param progressCallback optional callback to track the progress
      */
-    HashiBridge.prototype.approveAndLock = function (token, destinationAddress, progressCallback) {
+    HashiBridge.prototype.approveAndLock = function (token, destinationAddress, destinationChain, progressCallback) {
         return __awaiter(this, void 0, void 0, function () {
             var chain, setProgress, approveAndLock, instance, _a, hashes, timestamp;
             return __generator(this, function (_b) {
@@ -102,7 +102,7 @@ var HashiBridge = /** @class */ (function () {
                         instance = this.chainsInstances.get(chain);
                         if (typeof instance === "undefined")
                             return [2 /*return*/, Promise.reject(errors_1.NoSignerForChainError)];
-                        return [4 /*yield*/, approveAndLock(token, destinationAddress, instance, setProgress)];
+                        return [4 /*yield*/, approveAndLock(token, destinationAddress, destinationChain, instance, setProgress)];
                     case 1:
                         _a = _b.sent(), hashes = _a.hashes, timestamp = _a.data;
                         if (!(0, utils_1.isMillisTimestamp)(timestamp))
@@ -174,7 +174,7 @@ var HashiBridge = /** @class */ (function () {
                             return [2 /*return*/, this.unbridge(targetChain, token, destinationAddress, progressCallback)];
                         if (destinationAddress === "")
                             return [2 /*return*/, Promise.reject(errors_1.EmptyDestinationAddressError)];
-                        return [4 /*yield*/, this.approveAndLock(token, destinationAddress, progressCallback)];
+                        return [4 /*yield*/, this.approveAndLock(token, destinationAddress, targetChain, progressCallback)];
                     case 1:
                         _a = _d.sent(), hashes1 = _a.hashes, lockedToken = _a.data;
                         return [4 /*yield*/, this.proveTokenStatus(token.chain, targetChain, lockedToken, proof_1.Status.Locked, progressCallback)];

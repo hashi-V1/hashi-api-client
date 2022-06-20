@@ -66,7 +66,7 @@ describe("HashiBridge", function () {
             switch (_a.label) {
                 case 0:
                     hashi = new hashi_1.HashiBridge();
-                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.approveAndLock(token, "", progress), errors_1.EmptyDestinationAddressError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(hashi.approveAndLock(token, "", chain_1.Chain.Ethereum, progress), errors_1.EmptyDestinationAddressError)];
                 case 1:
                     _a.sent();
                     return [4 /*yield*/, chai_1.assert.isRejected(hashi.bridge(chain_1.Chain.Ethereum, token, "", progress), errors_1.EmptyDestinationAddressError)];
@@ -88,7 +88,7 @@ describe("HashiBridge", function () {
             switch (_a.label) {
                 case 0:
                     bridge = new hashi_1.HashiBridge();
-                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.approveAndLock(token, dest, progress), errors_1.NoSignerForChainError)];
+                    return [4 /*yield*/, chai_1.assert.isRejected(bridge.approveAndLock(token, dest, chain_1.Chain.Ethereum, progress), errors_1.NoSignerForChainError)];
                 case 1:
                     _a.sent();
                     message.status = proof_1.Status.Locked;

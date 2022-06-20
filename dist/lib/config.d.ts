@@ -5,6 +5,7 @@ import { Chain } from "./types/chain";
 export declare type ChainConfigType = {
     name: string;
     symbol: string;
+    id: number;
     rpc?: string;
     lockerContract: string;
     wrapperContract: string;
