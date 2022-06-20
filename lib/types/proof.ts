@@ -71,7 +71,8 @@ export function isSignature(input: any): input is Signature {
  */
 export type UnsignedMessageType = LockedTokenType & {
     status: Status;
-    destination: string;
+    destinationAddress: string;
+    destinationChainId: number;
     metadata: string;
 };
 
@@ -86,8 +87,9 @@ export function isUnsignedMessageType(
     const m = input as UnsignedMessageType;
     return (
         isLockedTokenType(m) &&
-        m.destination != null &&
-        m.destination != "" &&
+        m.destinationAddress != null &&
+        m.destinationAddress != "" &&
+        !Number.isNaN(m.destinationChainId) &&
         m.metadata != null &&
         isStatus(m.status)
     );

@@ -22,7 +22,8 @@ describe("HashiBridge", () => {
 
     const message: UnsignedMessageType = {
         status: Status.Locked,
-        destination: dest,
+        destinationAddress: dest,
+        destinationChainId: 0,
         metadata: "",
         tokenContract: "tzjredfrhgjkujrefd",
         tokenId: 5,

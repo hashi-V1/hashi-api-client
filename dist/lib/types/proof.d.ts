@@ -46,7 +46,8 @@ export declare function isSignature(input: any): input is Signature;
  */
 export declare type UnsignedMessageType = LockedTokenType & {
     status: Status;
-    destination: string;
+    destinationAddress: string;
+    destinationChainId: number;
     metadata: string;
 };
 /**

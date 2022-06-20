@@ -53,7 +53,8 @@ describe("HashiBridge", function () {
     var dest = "tzERZH55TGHJHFGDS";
     var message = {
         status: proof_1.Status.Locked,
-        destination: dest,
+        destinationAddress: dest,
+        destinationChainId: 0,
         metadata: "",
         tokenContract: "tzjredfrhgjkujrefd",
         tokenId: 5,

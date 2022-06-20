@@ -55,8 +55,9 @@ exports.isSignature = isSignature;
 function isUnsignedMessageType(input) {
     var m = input;
     return ((0, token_1.isLockedTokenType)(m) &&
-        m.destination != null &&
-        m.destination != "" &&
+        m.destinationAddress != null &&
+        m.destinationAddress != "" &&
+        !Number.isNaN(m.destinationChainId) &&
         m.metadata != null &&
         isStatus(m.status));
 }
